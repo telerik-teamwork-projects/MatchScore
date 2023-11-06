@@ -1,13 +1,11 @@
 import "./register.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { useContext, useState } from "react";
-// import {AuthContext} from "../../context/autContext";
-// import {AuthErrorMessage} from "../../components/errorMessages/authErrorMessages";
+import { useState } from "react";
+import { register } from "../../services/authService";
+import { AuthErrorMessage } from "../../components/errorMessages/authErrorMessages";
 
 export const Register = () => {
     const navigate = useNavigate();
-
-    // const { register } = useContext(AuthContext);
 
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
@@ -22,16 +20,16 @@ export const Register = () => {
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    // const onSubmit = async (e) => {
-    //     e.preventDefault();
+    const onRegister = async (e) => {
+        e.preventDefault();
 
-    //     try {
-    //         await register({username, email, password, password2});
-    //         navigate("/login");
-    //     } catch (error) {
-    //         setError(error.response.data.detail);
-    //     }
-    // };
+        try {
+            await register({ username, email, password, password2 });
+            navigate("/login");
+        } catch (error) {
+            setError(error.response.data.detail);
+        }
+    };
 
     return (
         <>
@@ -45,7 +43,10 @@ export const Register = () => {
                         </span>
                     </div>
                     <div className="registerRight">
-                        <form className="registerBox">
+                        <form
+                            className="registerBox"
+                            onSubmit={(e) => onRegister(e)}
+                        >
                             <input
                                 placeholder="Username"
                                 className="registerInput"
@@ -89,7 +90,7 @@ export const Register = () => {
                                 required
                                 autoComplete="text"
                             />
-                            {/* <AuthErrorMessage message={error} /> */}
+                            <AuthErrorMessage message={error} />
 
                             <button className="registerButton">Sign Up</button>
                             <Link className="linkLogin" to={"/login"}>

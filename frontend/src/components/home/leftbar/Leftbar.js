@@ -1,9 +1,4 @@
 import "./leftbar.scss";
-import HomeIcon from "@mui/icons-material/Home";
-import ChatIcon from "@mui/icons-material/Chat";
-import VideocamIcon from "@mui/icons-material/Videocam";
-import GroupsIcon from "@mui/icons-material/Groups";
-import EventNoteIcon from "@mui/icons-material/EventNote";
 
 export const Leftbar = () => {
     return (

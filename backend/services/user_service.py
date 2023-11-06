@@ -11,11 +11,11 @@ def register(user_data: User):
     sql_params = (username, email, password)
 
     registered_user_id = insert_query(sql, sql_params)
+    
+    user = get_user_by_id(registered_user_id)
 
     response_data = User(
-        id=registered_user_id,
-        username=username,
-        email=email
+        **user
     )
     
     return response_data

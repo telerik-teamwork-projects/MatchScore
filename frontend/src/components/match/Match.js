@@ -21,7 +21,10 @@ export const Match = () => {
                             </span>
                             <div className="matchTeam">
                                 <div className="teamInfo">
-                                    <img src="/images/teams/manchester-city.png" />
+                                    <img
+                                        src="/images/teams/manchester-city.png"
+                                        alt="team1"
+                                    />
                                     <span className="Team1">
                                         Machester City
                                     </span>
@@ -30,7 +33,10 @@ export const Match = () => {
                             </div>
                             <div className="matchTeam">
                                 <div className="teamInfo">
-                                    <img src="/images/teams/liverpool.png" />
+                                    <img
+                                        src="/images/teams/liverpool.png"
+                                        alt="team2"
+                                    />
                                     <span>Liverpool</span>
                                 </div>
                                 <span className="teamScore">0</span>
@@ -61,7 +67,10 @@ export const Match = () => {
                             </span>
                             <div className="matchTeam">
                                 <div className="teamInfo">
-                                    <img src="/images/teams/manchester-city.png" />
+                                    <img
+                                        src="/images/teams/manchester-city.png"
+                                        alt="team1"
+                                    />
                                     <span className="Team1">
                                         Machester City
                                     </span>
@@ -70,7 +79,10 @@ export const Match = () => {
                             </div>
                             <div className="matchTeam">
                                 <div className="teamInfo">
-                                    <img src="/images/teams/liverpool.png" />
+                                    <img
+                                        src="/images/teams/liverpool.png"
+                                        alt="team2"
+                                    />
                                     <span>Liverpool</span>
                                 </div>
                                 <span className="teamScore">0</span>
