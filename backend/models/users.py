@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import Optional
 
 class UserBase(BaseModel):
     username: str
@@ -13,7 +13,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    player_profile_id: int
+    player_id: Optional[int]
 
 
 class PlayerProfile(BaseModel):
