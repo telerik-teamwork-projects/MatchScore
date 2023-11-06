@@ -9,30 +9,31 @@ export const Leftbar = () => {
     return (
         <div className="leftbar">
             <div className="leftbarWrapper">
+                <h3>Tournaments</h3>
                 <ul className="leftbarList">
                     <li className="leftbarListItem">
-                        <HomeIcon className="icon" />
-                        <span className="leftbarListItemText">Home</span>
-                    </li>
-                    <li className="leftbarListItem">
-                        <ChatIcon className="icon" />
-                        <span className="leftbarListItemText">Chat</span>
-                    </li>
-                    <li className="leftbarListItem">
-                        <VideocamIcon className="icon" />
-                        <span className="leftbarListItemText">Videos</span>
-                    </li>
-                    <li className="leftbarListItem">
-                        <GroupsIcon className="icon" />
-                        <span className="leftbarListItemText">Teams</span>
-                    </li>
-                    <li className="leftbarListItem">
-                        <EventNoteIcon className="icon" />
-                        <span className="leftbarListItemText">Schedule</span>
+                        <div className="leftbarListItemContainer">
+                            <span>Champions League</span>
+                            <span>All stars</span>
+                            <span>Grand Prix</span>
+                        </div>
                     </li>
                 </ul>
-                <button className="leftbarButton">Show More</button>
-                <hr className="leftbarHr" />
+
+                <h3>Sports</h3>
+                <ul className="leftbarList">
+                    <li className="leftbarListItem">
+                        <div className="leftbarListItemContainer">
+                            <span>Football</span>
+                            <span>Basketball</span>
+                            <span>Volleyball</span>
+                            <span>Baseball</span>
+                            <span>Tennis</span>
+                            <span>Box</span>
+                            <span>America Football</span>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     );

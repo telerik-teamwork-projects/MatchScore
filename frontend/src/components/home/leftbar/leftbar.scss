@@ -1,59 +1,36 @@
 .leftbar {
-    flex: 3.5;
+    flex: 2.5;
     height: calc(100vh - 50px);
-    overflow-y: scroll;
     position: sticky;
     top: 50px;
 
     .leftbarWrapper {
         padding: 20px;
 
+        h3 {
+            color: limegreen;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
         .leftbarList {
-            padding: 0;
-            margin: 0;
-            list-style: none;
+            display: flex;
+            flex-direction: column;
 
             .leftbarListItem {
                 display: flex;
                 align-items: center;
                 margin-bottom: 20px;
 
-                .icon {
-                    margin-right: 5px;
+                .leftbarListItemContainer {
+                    display: flex;
+                    flex-direction: column;
+
+                    span {
+                        padding: 8px;
+                    }
                 }
             }
         }
-
-        .leftbarButton {
-            width: 150px;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: 500;
-        }
-    }
-    .leftbarHr {
-        margin: 20px 0;
-    }
-
-    .leftbarFriendTitle {
-        margin-bottom: 20px;
-    }
-
-    .leftbarFriendList {
-        padding: 0;
-        margin: 0;
-        list-style: none;
     }
 }
-// ::-webkit-scrollbar {
-//     width: 5px;
-// }
-
-// ::-webkit-scrollbar-track {
-//     background-color: #f1f1f1;
-// }
-
-// ::-webkit-scrollbar-thumb {
-//     background-color: rgb(179, 179, 179);
-// }
