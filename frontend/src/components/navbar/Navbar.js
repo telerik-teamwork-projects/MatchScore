@@ -1,8 +1,12 @@
+import { useContext } from "react";
 import "./navbar.scss";
 
 import { Link } from "react-router-dom";
+import { AuthContext } from "../contexts/authContext";
 
 export const Navbar = () => {
+    const { token, user } = useContext(AuthContext);
+
     return (
         <div className="navbar">
             <div className="wrapper">
@@ -12,9 +16,15 @@ export const Navbar = () => {
                     </Link>
                 </div>
                 <div className="right">
-                    <Link className="link" to="/login">
-                        Login
-                    </Link>
+                    {token ? (
+                        <Link className="link" to={`/profile/${user.id}`}>
+                            Profile
+                        </Link>
+                    ) : (
+                        <Link className="link" to="/login">
+                            Login
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>

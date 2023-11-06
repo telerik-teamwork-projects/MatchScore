@@ -1,6 +1,7 @@
 from database.database import read_query, insert_query
-from models.users import User
+from models.users import User, UserLoginResponse
 from common.hashing import hash_password
+from common.authorization import create_token
 
 def register(user_data: User):
     username = user_data.username
@@ -17,8 +18,19 @@ def register(user_data: User):
     response_data = User(
         **user
     )
-    
+
     return response_data
+
+
+def login(
+    user: User
+):
+    token = create_token(user)
+
+    return UserLoginResponse(
+        token=token, user=user
+    )
+
 
 def get_user_by_username(username):
     sql = "SELECT * FROM users WHERE username = ?"
@@ -46,6 +58,7 @@ def get_user_by_email(email):
             "id": result[0][0],
             "username": result[0][1],
             "email": result[0][2],
+            "password": result[0][3],
             "player_id": result[0][4]
         }
         return user

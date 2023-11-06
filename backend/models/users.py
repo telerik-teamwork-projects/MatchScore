@@ -9,12 +9,18 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     password2: str
-    
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
 
 class User(UserBase):
     id: int
     player_id: Optional[int]
 
+class UserLoginResponse(BaseModel):
+    token: str
+    user: User
 
 class PlayerProfile(BaseModel):
     id: int

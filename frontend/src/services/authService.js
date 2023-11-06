@@ -19,10 +19,10 @@ export const register = async (userData) => {
     }
 };
 
-export const login = async ({ userData }) => {
+export const login = async (userData) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/login`,
+            `${USER_BASE_PATH}/users/login`,
             JSON.stringify(userData),
             {
                 headers: {
