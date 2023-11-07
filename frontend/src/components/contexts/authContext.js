@@ -16,10 +16,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const userLogout = () => {
+        setAuth(null);
+    };
+
     const userContextData = {
         user: auth?.user,
         token: auth?.token,
         userLogin,
+        userLogout
     };
 
     return (

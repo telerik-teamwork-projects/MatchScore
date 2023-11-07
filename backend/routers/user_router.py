@@ -25,7 +25,7 @@ def user_register(user_data: UserCreate):
 @router.post('/login')
 def user_login(user_data: UserLogin):
     user = user_service.get_user_by_email(user_data.email)
-    print(user)
+
     if not user:
         raise exceptions.Unauthorized("Email does not exist")
 

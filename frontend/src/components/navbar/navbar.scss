@@ -2,20 +2,33 @@
     height: 100px;
     background-color: lightgray;
 
-    .wrapper {
+    .navbarWrapper {
         padding: 10px 30px;
         display: flex;
         justify-content: space-between;
         align-items: center;
 
-        .left {
+        .navbarLeft {
             img {
                 width: 120px;
                 height: 120 px;
             }
         }
+
+        .navbarRight {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .link {
             font-size: 24px;
+        }
+
+        .navbarBtn {
+            font-size: 22px;
+            border: none;
+            background-color: lightgray;
         }
     }
 }

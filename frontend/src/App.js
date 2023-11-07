@@ -8,16 +8,23 @@ import { Profile } from "./pages/profile/Profile";
 
 import { AuthProvider } from "./components/contexts/authContext";
 import { HOME, LOGIN, PROFILE, REGISTER } from "./routes/routes";
+import { AuthRouteGuard } from "./routeGuards/authRouteGuard";
+import { NoAuthRouteGuard } from "./routeGuards/noAuthRouteGuard";
 
 function App() {
     return (
         <AuthProvider>
             <Layout>
                 <Routes>
+                    <Route element={<NoAuthRouteGuard />}>
+                        <Route path={LOGIN} element={<Login />} />
+                        <Route path={REGISTER} element={<Register />} />
+                    </Route>
+
                     <Route path={HOME} element={<Home />} />
-                    <Route path={LOGIN} element={<Login />} />
-                    <Route path={REGISTER} element={<Register />} />
-                    <Route path={PROFILE} element={<Profile />} />
+                    <Route element={<AuthRouteGuard />}>
+                        <Route path={PROFILE} element={<Profile />} />
+                    </Route>
                 </Routes>
             </Layout>
         </AuthProvider>

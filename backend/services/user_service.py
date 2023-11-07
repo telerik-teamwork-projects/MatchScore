@@ -2,19 +2,21 @@ from database.database import read_query, insert_query
 from models.users import User, UserLoginResponse
 from common.hashing import hash_password
 from common.authorization import create_token
+from models.enums import Role
 
 def register(user_data: User):
     username = user_data.username
     email = user_data.email
     password = hash_password(user_data.password)
+    role = Role.USER
 
-    sql = "INSERT INTO users(username, email, password) values (?, ?, ?)"
-    sql_params = (username, email, password)
 
+    sql = "INSERT INTO users(username, email, password, role) values (?, ?, ?, ?)"
+    sql_params = (username, email, password, role.value)
     registered_user_id = insert_query(sql, sql_params)
     
     user = get_user_by_id(registered_user_id)
-
+    print(user)
     response_data = User(
         **user
     )
@@ -42,6 +44,7 @@ def get_user_by_username(username):
             "id": result[0][0],
             "username": result[0][1],
             "email": result[0][2],
+            "role": result[0][3],
             "player_id": result[0][4]
         }
         return user
@@ -59,7 +62,8 @@ def get_user_by_email(email):
             "username": result[0][1],
             "email": result[0][2],
             "password": result[0][3],
-            "player_id": result[0][4]
+            "role": result[0][4],
+            "player_id": result[0][5]
         }
         return user
 
@@ -74,7 +78,8 @@ def get_user_by_id(user_id):
             "id": result[0][0],
             "username": result[0][1],
             "email": result[0][2],
-            "player_id": result[0][4],
+            "role": result[0][4],
+            "player_id": result[0][5],
         }
         return user
     

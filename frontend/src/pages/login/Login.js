@@ -28,7 +28,7 @@ export const Login = () => {
         } catch (error) {
             formData.email = "";
             formData.password = "";
-            setError(error.response.data.error);
+            setError(error.response.data.detail);
         }
     };
 

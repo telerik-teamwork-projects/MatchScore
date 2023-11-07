@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from models.enums import Role
 
 class UserBase(BaseModel):
     username: str
@@ -16,6 +17,7 @@ class UserLogin(BaseModel):
 
 class User(UserBase):
     id: int
+    role: Role = Role.USER
     player_id: Optional[int]
 
 class UserLoginResponse(BaseModel):
