@@ -34,6 +34,28 @@ def login(
     )
 
 
+def get_users(username):
+    if username:
+        sql = "SELECT * FROM users WHERE username LIKE ?"
+        sql_params = ("%" + username + "%",)
+    else:
+        sql = "SELECT * FROM users"
+        sql_params = ()
+
+    result = read_query(sql, sql_params)
+
+    user_data = []
+    for row in result:
+        user = User(
+            id = row[0],
+            username =  row[1],
+            email = row[2],
+            role = row[4],
+            player_id= row[5]
+        )
+        user_data.append(user)
+    return user_data
+
 def get_user_by_username(username):
     sql = "SELECT * FROM users WHERE username = ?"
     sql_params = (username,)
@@ -44,8 +66,8 @@ def get_user_by_username(username):
             "id": result[0][0],
             "username": result[0][1],
             "email": result[0][2],
-            "role": result[0][3],
-            "player_id": result[0][4]
+            "role": result[0][4],
+            "player_id": result[0][5]
         }
         return user
 
@@ -74,13 +96,13 @@ def get_user_by_id(user_id):
 
     result = read_query(sql, sql_params)
     if result:
-        user = {
-            "id": result[0][0],
-            "username": result[0][1],
-            "email": result[0][2],
-            "role": result[0][4],
-            "player_id": result[0][5],
-        }
+        user = User (
+            id = result[0][0],
+            username = result[0][1],
+            email = result[0][2],
+            role =  result[0][4],
+            player_id = result[0][5]
+        )
         return user
     
 def passwords_match(pass1: str, pass2:str):

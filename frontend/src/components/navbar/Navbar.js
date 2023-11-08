@@ -1,15 +1,28 @@
-import { useContext, useState } from "react";
 import "./navbar.scss";
+
+import { useContext, useState } from "react";
 import { LogoutConfirmation } from "../logout/LogoutConfirmation";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/authContext";
 import { LOGIN } from "../../routes/routes";
+import { Search } from "@mui/icons-material";
+import { getUsers } from "../../services/authService";
+import { UserSearchModal } from "../userSearch/UserSearchModal";
 
 export const Navbar = () => {
     const { token, user, userLogout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [logoutWindow, setLogoutWindow] = useState(null);
+    const [showUsersSearch, setShowUsersSearch] = useState(false);
+    const [userSearchResults, setUserSearchResults] = useState(null);
+
+    const [searchQ, setSearchQ] = useState({
+        search: "",
+    });
+
+    const onChange = (e) =>
+        setSearchQ({ ...searchQ, [e.target.name]: e.target.value });
 
     const onLogout = async () => {
         setLogoutWindow(true);
@@ -25,6 +38,18 @@ export const Navbar = () => {
         setLogoutWindow(false);
     };
 
+    const onSearch = async (e) => {
+        e.preventDefault();
+        setShowUsersSearch(true);
+
+        try {
+            const userData = await getUsers(searchQ);
+            setUserSearchResults(userData);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div className="navbar">
             <div className="navbarWrapper">
@@ -33,28 +58,57 @@ export const Navbar = () => {
                         <img src="/images/matchscore.png" alt="logo" />
                     </Link>
                 </div>
+                <div className="navbarCenter">
+                    <form onSubmit={(e) => onSearch(e)} className="searchbar">
+                        <Search className="searchIcon" />
+                        <input
+                            placeholder="Search for users, tournaments and more ..."
+                            className="searchInput"
+                            type="text"
+                            name="search"
+                            value={searchQ.search}
+                            onChange={(e) => onChange(e)}
+                        />
+                    </form>
+                </div>
                 <div className="navbarRight">
-                    {token ? (
-                        <>
-                            <Link className="link" to={`/profile/${user.id}`}>
-                                Profile
+                    <div className="navbarRightInfo">
+                        {token ? (
+                            <>
+                                <Link
+                                    className="navbarRightLink"
+                                    to={`/profile/${user.id}`}
+                                >
+                                    Profile
+                                </Link>
+                                <Link
+                                    className="navbarRightLink"
+                                    onClick={onLogout}
+                                >
+                                    Logout
+                                </Link>
+                                {logoutWindow && (
+                                    <LogoutConfirmation
+                                        isOpen={logoutWindow}
+                                        onConfirm={confirmLogout}
+                                        onCancel={cancelLogout}
+                                    />
+                                )}
+                                {showUsersSearch && userSearchResults && (
+                                    <UserSearchModal
+                                        users={userSearchResults}
+                                        onClose={() =>
+                                            setShowUsersSearch(false)
+                                        }
+                                    />
+                                )}
+                            </>
+                        ) : (
+                            <Link className="navbarRightLink" to="/login">
+                                Login
                             </Link>
-                            <Link className="link" onClick={onLogout}>
-                                Logout
-                            </Link>
-                            {logoutWindow && (
-                                <LogoutConfirmation
-                                    isOpen={logoutWindow}
-                                    onConfirm={confirmLogout}
-                                    onCancel={cancelLogout}
-                                />
-                            )}
-                        </>
-                    ) : (
-                        <Link className="link" to="/login">
-                            Login
-                        </Link>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

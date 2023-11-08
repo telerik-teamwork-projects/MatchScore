@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from common import exceptions, hashing
 from models.users import User, UserCreate, UserLogin
 from services import user_service
+from typing import List
 
 
 router = APIRouter()
@@ -39,3 +40,27 @@ def user_login(user_data: UserLogin):
         return user_service.login(user)
     except Exception:
         raise exceptions.InternalServerError("Login failed")
+    
+@router.get('/{user_id}', response_model=User)
+def user_get(
+    user_id:int
+):  
+    try:
+        target_user = user_service.get_user_by_id(user_id)
+    except Exception:
+        raise exceptions.InternalServerError("Loading profile failed")
+    
+    if not target_user:
+        raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
+
+    return target_user
+
+@router.get('/', response_model=List[User])
+def users_get(
+    search
+):
+    print(search)
+    try:
+        return user_service.get_users(search)
+    except Exception:
+        raise exceptions.InternalServerError("Loading users failed")

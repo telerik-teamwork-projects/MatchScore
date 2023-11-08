@@ -35,3 +35,32 @@ export const login = async (userData) => {
         throw error;
     }
 };
+
+export const getUser = async (userId, token) => {
+    try {
+        const response = await axios.get(
+            `${USER_BASE_PATH}/users/${userId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getUsers = async (searchQ) => {
+    try {
+        const response = await axios.get(`${USER_BASE_PATH}/users/`, {
+            params: searchQ,
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
