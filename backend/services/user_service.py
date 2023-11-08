@@ -4,6 +4,7 @@ from common.hashing import hash_password
 from common.authorization import create_token
 from models.enums import Role
 
+
 def register(user_data: User):
     username = user_data.username
     email = user_data.email
@@ -14,7 +15,7 @@ def register(user_data: User):
     sql = "INSERT INTO users(username, email, password, role) values (?, ?, ?, ?)"
     sql_params = (username, email, password, role.value)
     registered_user_id = insert_query(sql, sql_params)
-    
+
     user = get_user_by_id(registered_user_id)
     print(user)
     response_data = User(
@@ -25,7 +26,7 @@ def register(user_data: User):
 
 
 def login(
-    user: User
+        user: User
 ):
     token = create_token(user)
 
@@ -104,6 +105,7 @@ def get_user_by_id(user_id):
             player_id = result[0][5]
         )
         return user
-    
-def passwords_match(pass1: str, pass2:str):
+
+
+def passwords_match(pass1: str, pass2: str):
     return pass1 == pass2

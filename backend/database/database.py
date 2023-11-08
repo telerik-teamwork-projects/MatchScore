@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def get_connection() -> Connection:
     return connect(
         user=os.environ['db_user'],
@@ -12,7 +13,7 @@ def get_connection() -> Connection:
         host=os.environ['db_host'],
         port=int(os.environ['db_port']),
         database=os.environ['db_name'],
-)
+    )
 
 
 def read_query(sql: str, sql_params=()):
