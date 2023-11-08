@@ -3,8 +3,8 @@ from common import exceptions, hashing
 from models.users import User, UserCreate, UserLogin
 from services import user_service
 
-
 router = APIRouter()
+
 
 @router.post("/", response_model=User)
 def user_register(user_data: UserCreate):
@@ -25,17 +25,16 @@ def user_register(user_data: UserCreate):
 @router.post('/login')
 def user_login(user_data: UserLogin):
     user = user_service.get_user_by_email(user_data.email)
-    print(user)
     if not user:
         raise exceptions.Unauthorized("Email does not exist")
 
     if not hashing.verify_password_hash(
-        user_data.password.encode('utf-8'),
-        user.get("password").encode('utf-8')
+            user_data.password.encode('utf-8'),
+            user.get("password").encode('utf-8')
     ):
         raise exceptions.Unauthorized("Password is invalid")
 
-    try: 
+    try:
         return user_service.login(user)
     except Exception:
         raise exceptions.InternalServerError("Login failed")
