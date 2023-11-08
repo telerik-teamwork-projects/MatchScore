@@ -24,7 +24,7 @@ export const Navbar = () => {
     const onChange = (e) =>
         setSearchQ({ ...searchQ, [e.target.name]: e.target.value });
 
-    const onLogout = async () => {
+    const onLogout = () => {
         setLogoutWindow(true);
     };
 
@@ -55,7 +55,7 @@ export const Navbar = () => {
             <div className="navbarWrapper">
                 <div className="navbarLeft">
                     <Link to="/">
-                        <img src="/images/matchscore.png" alt="logo" />
+                        <img src="/images/logo/matchscore.png" alt="logo" />
                     </Link>
                 </div>
                 <div className="navbarCenter">

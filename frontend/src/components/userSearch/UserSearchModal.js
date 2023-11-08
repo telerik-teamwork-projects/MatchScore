@@ -22,7 +22,7 @@ export const UserSearchModal = ({ users, onClose }) => {
                                             />
                                         ) : (
                                             <img
-                                                src="/images/teams/liverpool.png"
+                                                src="/images/avatar/default.jpg"
                                                 alt={user.username}
                                                 className="modalUserImage"
                                             />

@@ -15,8 +15,22 @@
         padding: 40px;
         width: 40%;
         max-width: 800px;
+        max-height: 80vh;
         border-radius: 10px;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        overflow: auto;
+        &::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #cccccc;
+            border-radius: 10px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #fff;
+        }
 
         h2 {
             text-align: center;

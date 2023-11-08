@@ -50,7 +50,7 @@ export const update = async (formData, userId) => {
             formDataToSend,
             {
                 headers: {
-                    "Content-Type": "multipart/form-data"
+                    "Content-Type": "multipart/form-data",
                 },
             }
         );
@@ -60,6 +60,16 @@ export const update = async (formData, userId) => {
     }
 };
 
+export const deleteUser = async (userId) => {
+    try {
+        const response = await axios.delete(
+            `${USER_BASE_PATH}/users/${userId}`
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
 
 export const getUser = async (userId, token) => {
     try {

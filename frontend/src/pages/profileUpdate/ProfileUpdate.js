@@ -1,6 +1,6 @@
 import "./profileUpdate.scss";
 import { AuthErrorMessage } from "../../components/errorMessages/authErrorMessages";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../contexts/authContext";
 import { getUser } from "../../services/authService";
@@ -8,6 +8,7 @@ import { getUser } from "../../services/authService";
 export const ProfileUpdate = () => {
     const navigate = useNavigate();
 
+    const { userId } = useParams();
     const { userUpdate, user } = useContext(AuthContext);
 
     const [error, setError] = useState("");
@@ -15,6 +16,7 @@ export const ProfileUpdate = () => {
         username: "",
         email: "",
         bio: "",
+        role: "",
         profile_img: null,
         cover_img: null,
     });
@@ -22,7 +24,7 @@ export const ProfileUpdate = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userData = await getUser(user.id);
+                const userData = await getUser(userId);
                 setFormData({
                     username: userData.username || "",
                     email: userData.email || "",
@@ -36,13 +38,13 @@ export const ProfileUpdate = () => {
             }
         };
         fetchData();
-    }, [user.id]);
+    }, [userId]);
 
     const { username, email, bio, role } = formData;
 
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        
+
     const handleProfilePictureChange = (e) => {
         setFormData({ ...formData, profile_img: e.target.files[0] || null });
     };
@@ -55,8 +57,8 @@ export const ProfileUpdate = () => {
         e.preventDefault();
 
         try {
-            await userUpdate(formData, user?.id);
-            navigate(`/profile/${user?.id}`);
+            await userUpdate(formData, userId);
+            navigate(`/profile/${userId}`);
         } catch (error) {
             setError(error.response.data.detail);
         }
@@ -108,7 +110,7 @@ export const ProfileUpdate = () => {
                                 onChange={(e) => onChange(e)}
                                 autoComplete="text"
                             />
-                            {user.role === "admin" && (
+                            {user?.role === "admin" && (
                                 <input
                                     placeholder="Role"
                                     className="profileUpdateInput"

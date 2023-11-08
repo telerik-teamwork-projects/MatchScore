@@ -72,8 +72,8 @@ def users_get(
 @router.put("/{user_id}", response_model=User)
 def users_update(
     user_id : int,
-    username: str = Form(...),
-    email: str = Form(...),
+    username: str = Form(None),
+    email: str = Form(None),
     bio: str = Form(None),
     profile_img: Union[UploadFile, str] = File(None),
     cover_img: Union[UploadFile, str] = File(None),
@@ -82,11 +82,11 @@ def users_update(
     if not target_user:
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
 
-    if email:
+    if email and email != target_user.email:
         if user_service.get_user_by_email(email):
             raise exceptions.BadRequest("Email already exists")
     
-    if username:
+    if username and username != target_user.username:
         if user_service.get_user_by_username(username):
             raise exceptions.BadRequest("Username already exists")
 
@@ -105,3 +105,20 @@ def users_update(
         )
     except Exception:
         raise exceptions.InternalServerError("Updating user failed")
+    
+
+@router.delete("/{user_id}")
+def user_delete(
+    user_id: int
+):
+    
+    target_user = user_service.get_user_by_id(user_id)
+    if not target_user:
+        raise exceptions.NotFound(f"User with id {user_id} doesn't exist")    
+
+    try:
+        return user_service.user_delete(
+            target_user
+        )
+    except Exception:
+        raise exceptions.InternalServerError("Deleting user failed")

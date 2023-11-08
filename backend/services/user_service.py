@@ -1,11 +1,12 @@
 from database.database import read_query, insert_query, update_query
 
-from models.users import User, UserLoginResponse, UserUpdate
+from models.users import User, UserLoginResponse
 from models.enums import Role
 
 from common.hashing import hash_password
 from common.authorization import create_token
 from common.utils import save_image
+from common.responses import RequestOK
 
 
 def register(user_data: User):
@@ -64,6 +65,16 @@ def update(
     update_query(sql, sql_params)
 
     return get_user_by_id(target_user.id)
+
+def user_delete(
+    target_user: User
+):
+    sql = "DELETE FROM users WHERE id = ?"
+    sql_params = (target_user.id,)
+
+    update_query(sql, sql_params)
+
+    return RequestOK(f"Succefully deleted user: {target_user.username}")
 
 
 def get_users(username):
