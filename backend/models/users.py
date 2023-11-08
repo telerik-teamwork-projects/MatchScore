@@ -8,7 +8,6 @@ from models.enums import Role
 class UserBase(BaseModel):
     username: str
     email: str
-    role: Role
 
 
 class UserCreate(UserBase):
@@ -24,7 +23,25 @@ class UserLogin(BaseModel):
 class User(UserBase):
     id: int
     role: Role = Role.USER
+    bio: Optional[str] = None
+    profile_img: Optional[str] = None
+    cover_img: Optional[str] = None
     player_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+    
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[Role] = None
+    bio: Optional[str] = None
+    profile_img: Optional[str] = None
+    cover_img: Optional[str] = None
+    # player_id: Optional[int]
+    class Config:
+        from_attributes = True
 
 
 class UserLoginResponse(BaseModel):

@@ -36,6 +36,31 @@ export const login = async (userData) => {
     }
 };
 
+export const update = async (formData, userId) => {
+    try {
+        const formDataToSend = new FormData();
+        formDataToSend.append("username", formData.username);
+        formDataToSend.append("email", formData.email);
+        formDataToSend.append("bio", formData.bio);
+        formDataToSend.append("profile_img", formData.profile_img);
+        formDataToSend.append("cover_img", formData.cover_img);
+
+        const response = await axios.put(
+            `${USER_BASE_PATH}/users/${userId}`,
+            formDataToSend,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
 export const getUser = async (userId, token) => {
     try {
         const response = await axios.get(

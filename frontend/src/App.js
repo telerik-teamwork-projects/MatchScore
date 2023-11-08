@@ -1,13 +1,16 @@
 import { Routes, Route } from "react-router-dom";
 
 import { Home } from "./pages/home/Home";
-import { Layout } from "./components/layout/Layout";
 import { Login } from "./pages/login/Login";
 import { Register } from "./pages/register/Register";
 import { Profile } from "./pages/profile/Profile";
+import { ProfileUpdate } from "./pages/profileUpdate/ProfileUpdate";
 
-import { AuthProvider } from "./components/contexts/authContext";
+import { Layout } from "./components/layout/Layout";
+import { AuthProvider } from "./contexts/authContext";
+
 import { HOME, LOGIN, PROFILE, REGISTER } from "./routes/routes";
+
 import { AuthRouteGuard } from "./routeGuards/authRouteGuard";
 import { NoAuthRouteGuard } from "./routeGuards/noAuthRouteGuard";
 
@@ -23,7 +26,8 @@ function App() {
 
                     <Route path={HOME} element={<Home />} />
                     <Route element={<AuthRouteGuard />}>
-                        <Route path={PROFILE} element={<Profile />} />
+                        <Route path={`${PROFILE}/:userId`} element={<Profile />} />
+                        <Route path={`${PROFILE}/:userId/update`} element={<ProfileUpdate/>}/>
                     </Route>
                 </Routes>
             </Layout>

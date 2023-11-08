@@ -1,8 +1,11 @@
-from database.database import read_query, insert_query
-from models.users import User, UserLoginResponse
+from database.database import read_query, insert_query, update_query
+
+from models.users import User, UserLoginResponse, UserUpdate
+from models.enums import Role
+
 from common.hashing import hash_password
 from common.authorization import create_token
-from models.enums import Role
+from common.utils import save_image
 
 
 def register(user_data: User):
@@ -17,7 +20,7 @@ def register(user_data: User):
     registered_user_id = insert_query(sql, sql_params)
 
     user = get_user_by_id(registered_user_id)
-    print(user)
+
     response_data = User(
         **user
     )
@@ -35,6 +38,34 @@ def login(
     )
 
 
+def update(
+    target_user: User,
+    username: str,
+    email: str,
+    bio: str,
+    profile_image_path: str,
+    cover_image_path: str,
+):
+
+    sql = """
+        UPDATE users
+        SET username = ?, email = ?, bio = ?, profile_img = ?, cover_img = ?
+        WHERE id = ?
+    """
+    sql_params = (
+        username,
+        email,
+        bio,
+        profile_image_path,
+        cover_image_path,
+        target_user.id
+    )
+
+    update_query(sql, sql_params)
+
+    return get_user_by_id(target_user.id)
+
+
 def get_users(username):
     if username:
         sql = "SELECT * FROM users WHERE username LIKE ?"
@@ -48,11 +79,14 @@ def get_users(username):
     user_data = []
     for row in result:
         user = User(
-            id = row[0],
-            username =  row[1],
+             id = row[0],
+            username = row[1],
             email = row[2],
-            role = row[4],
-            player_id= row[5]
+            role =  row[4],
+            bio = row[5],
+            profile_img = row[6],
+            cover_img = row[7],
+            player_id = row[8],
         )
         user_data.append(user)
     return user_data
@@ -68,7 +102,10 @@ def get_user_by_username(username):
             "username": result[0][1],
             "email": result[0][2],
             "role": result[0][4],
-            "player_id": result[0][5]
+            "bio": result[0][5],
+            "profile_img": result[0][6],
+            "cover_img": result[0][7],
+            "player_id": result[0][8]
         }
         return user
 
@@ -86,7 +123,10 @@ def get_user_by_email(email):
             "email": result[0][2],
             "password": result[0][3],
             "role": result[0][4],
-            "player_id": result[0][5]
+            "bio": result[0][5],
+            "profile_img": result[0][6],
+            "cover_img": result[0][7],
+            "player_id": result[0][8]
         }
         return user
 
@@ -102,10 +142,32 @@ def get_user_by_id(user_id):
             username = result[0][1],
             email = result[0][2],
             role =  result[0][4],
-            player_id = result[0][5]
+            bio = result[0][5],
+            profile_img = result[0][6],
+            cover_img = result[0][7],
+            player_id = result[0][8],
         )
         return user
 
 
 def passwords_match(pass1: str, pass2: str):
     return pass1 == pass2
+
+
+def handle_profile_image(profile_image):
+    if isinstance(profile_image, str):
+        profile_image_path = profile_image
+    else:
+        profile_image_path = save_image(profile_image, "profile_pics") 
+
+    return profile_image_path
+
+
+def handle_cover_image(cover_image):
+    if isinstance(cover_image, str):
+        cover_image_path = cover_image
+    else:
+        cover_image_path = save_image(cover_image, "cover_pics")
+
+    return cover_image_path
+    

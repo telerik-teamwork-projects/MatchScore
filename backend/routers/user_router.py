@@ -1,14 +1,16 @@
-from fastapi import APIRouter
-from common import exceptions, hashing
-from models.users import User, UserCreate, UserLogin
+from fastapi import APIRouter, UploadFile, Form, File
+from common import exceptions, hashing, utils
+from models.users import User, UserCreate, UserLogin, UserUpdate
 from services import user_service
-from typing import List
+from typing import List, Union
 
 router = APIRouter()
 
 
 @router.post("/", response_model=User)
-def user_register(user_data: UserCreate):
+def user_register(
+    user_data: UserCreate
+):
     if user_service.get_user_by_username(user_data.username):
         raise exceptions.BadRequest("Username already exists")
 
@@ -24,7 +26,9 @@ def user_register(user_data: UserCreate):
 
 
 @router.post('/login')
-def user_login(user_data: UserLogin):
+def user_login(
+    user_data: UserLogin
+):
     user = user_service.get_user_by_email(user_data.email)
 
     if not user:
@@ -43,7 +47,7 @@ def user_login(user_data: UserLogin):
     
 @router.get('/{user_id}', response_model=User)
 def user_get(
-    user_id:int
+    user_id: int
 ):  
     try:
         target_user = user_service.get_user_by_id(user_id)
@@ -57,10 +61,47 @@ def user_get(
 
 @router.get('/', response_model=List[User])
 def users_get(
-    search
+    search: str
 ):
-    print(search)
     try:
         return user_service.get_users(search)
     except Exception:
         raise exceptions.InternalServerError("Loading users failed")
+
+
+@router.put("/{user_id}", response_model=User)
+def users_update(
+    user_id : int,
+    username: str = Form(...),
+    email: str = Form(...),
+    bio: str = Form(None),
+    profile_img: Union[UploadFile, str] = File(None),
+    cover_img: Union[UploadFile, str] = File(None),
+):
+    target_user = user_service.get_user_by_id(user_id)
+    if not target_user:
+        raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
+
+    if email:
+        if user_service.get_user_by_email(email):
+            raise exceptions.BadRequest("Email already exists")
+    
+    if username:
+        if user_service.get_user_by_username(username):
+            raise exceptions.BadRequest("Username already exists")
+
+
+    profile_image_path = user_service.handle_profile_image(profile_img)
+    cover_image_path = user_service.handle_cover_image(cover_img)
+
+    try:
+        return user_service.update(
+            target_user, 
+            username,
+            email,
+            bio,
+            profile_image_path,
+            cover_image_path,
+        )
+    except Exception:
+        raise exceptions.InternalServerError("Updating user failed")

@@ -3,7 +3,7 @@ import "./navbar.scss";
 import { useContext, useState } from "react";
 import { LogoutConfirmation } from "../logout/LogoutConfirmation";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../contexts/authContext";
+import { AuthContext } from "../../contexts/authContext";
 import { LOGIN } from "../../routes/routes";
 import { Search } from "@mui/icons-material";
 import { getUsers } from "../../services/authService";

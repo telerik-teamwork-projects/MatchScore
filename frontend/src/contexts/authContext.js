@@ -1,7 +1,6 @@
 import { createContext } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import * as authService from "../../services/authService";
-
+import * as authService from "../services/authService";
 export const AuthContext = createContext("auth", null);
 
 export const AuthProvider = ({ children }) => {
@@ -16,6 +15,14 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const userUpdate = async (formData, user_id) => {
+        try {
+            return await authService.update(formData, user_id);
+        } catch (error) {
+            throw error;
+        }
+    };
+
     const userLogout = () => {
         setAuth(null);
     };
@@ -23,6 +30,7 @@ export const AuthProvider = ({ children }) => {
     const userContextData = {
         user: auth?.user,
         token: auth?.token,
+        userUpdate,
         userLogin,
         userLogout
     };

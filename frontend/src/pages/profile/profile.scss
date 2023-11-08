@@ -28,6 +28,48 @@
             }
         }
 
+        .profileBtns {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            .profileEditBtn {
+                display: inline-block;
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.2s ease-in-out;
+                text-align: center;
+            }
+
+            .profileEditBtn:hover {
+                background-color: #0056b3;
+            }
+
+            .profileDeleteBtn {
+                display: inline-block;
+                background-color: #9b0000;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.2s ease-in-out;
+                text-align: center;
+            }
+
+            .profileDeleteBtn:hover {
+                background-color: #6b0000;
+            }
+
+        }
+
         .profileInfo {
             display: flex;
             flex-direction: column;

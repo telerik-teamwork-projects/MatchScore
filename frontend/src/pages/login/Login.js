@@ -1,7 +1,7 @@
 import "./login.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
-import { AuthContext } from "../../components/contexts/authContext";
+import { AuthContext } from "../../contexts/authContext";
 import { AuthErrorMessage } from "../../components/errorMessages/authErrorMessages";
 import { HOME } from "../../routes/routes";
 
