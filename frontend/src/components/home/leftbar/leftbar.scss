@@ -5,31 +5,24 @@
     top: 50px;
 
     .leftbarWrapper {
+        display: flex;
+        flex-direction: column;
         padding: 20px;
 
-        h3 {
+        a {
+            display: flex;
+            justify-content: center;
             color: limegreen;
             text-transform: uppercase;
-            text-align: center;
         }
 
-        .leftbarList {
+        .leftbarListItem {
             display: flex;
             flex-direction: column;
+            margin-bottom: 20px;
 
-            .leftbarListItem {
-                display: flex;
-                align-items: center;
-                margin-bottom: 20px;
-
-                .leftbarListItemContainer {
-                    display: flex;
-                    flex-direction: column;
-
-                    span {
-                        padding: 8px;
-                    }
-                }
+            span {
+                padding: 8px;
             }
         }
     }

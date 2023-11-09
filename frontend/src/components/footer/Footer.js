@@ -39,7 +39,7 @@ export const Footer = () => {
                 </div>
                 <div className="bottom">
                     <span className="logo">
-                        <img src="/images/matchscore.png" alt="logo" />
+                        <img src="/images/logo/matchscore.png" alt="logo" />
                     </span>
                     <span className="copyright">
                         © Sporting Tournament 2023. All Rights Reserved

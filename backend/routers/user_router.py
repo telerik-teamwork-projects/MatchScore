@@ -1,6 +1,6 @@
-from fastapi import APIRouter, UploadFile, Form, File
-from common import exceptions, hashing, utils
-from models.users import User, UserCreate, UserLogin, UserUpdate
+from fastapi import APIRouter, UploadFile, Form, File, Depends
+from common import exceptions, hashing, authorization
+from models.users import User, UserCreate, UserLogin
 from services import user_service
 from typing import List, Union
 
@@ -77,10 +77,14 @@ def users_update(
     bio: str = Form(None),
     profile_img: Union[UploadFile, str] = File(None),
     cover_img: Union[UploadFile, str] = File(None),
+    current_user: User = Depends(authorization.get_current_user)
 ):
     target_user = user_service.get_user_by_id(user_id)
     if not target_user:
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
+
+    if current_user.id != user_id or current_user.role != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
 
     if email and email != target_user.email:
         if user_service.get_user_by_email(email):
@@ -109,12 +113,16 @@ def users_update(
 
 @router.delete("/{user_id}")
 def user_delete(
-    user_id: int
+    user_id: int,
+    current_user: User = Depends(authorization.get_current_user)
 ):
     
     target_user = user_service.get_user_by_id(user_id)
     if not target_user:
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")    
+
+    if current_user.id != user_id or current_user.role != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
 
     try:
         return user_service.user_delete(

@@ -10,8 +10,6 @@ from fastapi.security import OAuth2PasswordBearer
 
 from dotenv import load_dotenv
 
-from services import user_service
-
 load_dotenv()
 
 _JWT_SECRET = os.environ['secret']
@@ -37,11 +35,15 @@ def create_token(user: User) -> str:
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, _JWT_SECRET, algorithms=[_JWT_ALGORITHM])
+        user_id = payload.get("id")
+        username = payload.get("username")
         email = payload.get("email")
+        role = payload.get("role")
+        player_id = payload.get("player_id")
         iat = payload.get("iat")
         exp = payload.get("exp")
 
-        if not all([email, iat, exp]):
+        if not all([user_id, username, email, role,  iat, exp]):
             raise exceptions.Unauthorized("Invalid token payload")
 
     except ExpiredSignatureError:
@@ -49,6 +51,5 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
     except PyJWTError:
         raise exceptions.Unauthorized("Could not validate credentials")
-    user_db = user_service.get_user_by_email(email)
-    user = User(id=user_db["id"], username=user_db["username"], email=email, role=user_db["role"])
-    return user
+    
+    return User(id=user_id, username=username, email=email, role=role, player_id=player_id)

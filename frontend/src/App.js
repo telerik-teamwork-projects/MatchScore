@@ -9,10 +9,11 @@ import { ProfileUpdate } from "./pages/profileUpdate/ProfileUpdate";
 import { Layout } from "./components/layout/Layout";
 import { AuthProvider } from "./contexts/authContext";
 
-import { HOME, LOGIN, PROFILE, REGISTER } from "./routes/routes";
+import { HOME, LOGIN, PROFILE, REGISTER, TOURNAMENTS } from "./routes/routes";
 
 import { AuthRouteGuard } from "./routeGuards/authRouteGuard";
 import { NoAuthRouteGuard } from "./routeGuards/noAuthRouteGuard";
+import { Tournament } from "./pages/tournaments/Tournament";
 
 function App() {
     return (
@@ -25,9 +26,17 @@ function App() {
                     </Route>
 
                     <Route path={HOME} element={<Home />} />
+                    <Route path={TOURNAMENTS} element={<Tournament />} />
+                    
                     <Route element={<AuthRouteGuard />}>
-                        <Route path={`${PROFILE}/:userId`} element={<Profile />} />
-                        <Route path={`${PROFILE}/:userId/update`} element={<ProfileUpdate/>}/>
+                        <Route
+                            path={`${PROFILE}/:userId`}
+                            element={<Profile />}
+                        />
+                        <Route
+                            path={`${PROFILE}/:userId/update`}
+                            element={<ProfileUpdate />}
+                        />
                     </Route>
                 </Routes>
             </Layout>
