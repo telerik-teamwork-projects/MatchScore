@@ -18,3 +18,12 @@ export const create = async (tournamentData, token) => {
         throw error;
     }
 };
+
+export const getAll = async () => {
+    try {
+        const response = await axios.get(`${USER_BASE_PATH}/tournaments/`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

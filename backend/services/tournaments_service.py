@@ -1,10 +1,9 @@
-from models import tournaments, users
+from models import tournaments
 
-from database.database import insert_query
+from database.database import insert_query, read_query
 
 def create(
     tournament_data: tournaments.TournamentCreate, 
-    current_user: users.User
 ):
     sql = """
         INSERT INTO tournaments (format, title, match_format, rounds, third_place, status, start_date, end_date)
@@ -37,3 +36,27 @@ def create(
     )
 
     return response_data
+
+
+def get_all():
+    sql = "SELECT * from tournaments"
+    sql_params = ()
+
+    result = read_query(sql, sql_params)
+
+    tournaments_data = []
+    for row in result:
+        tournament = tournaments.Tournament(
+            id=row[0],
+            format=row[1], 
+            title = row[2],
+            match_format = row[3],
+            rounds =  row[4],
+            third_place = row[5],
+            status = row[6],
+            start_date = str(row[7]),
+            end_date = str(row[8])
+        )
+        tournaments_data.append(tournament)
+
+    return tournaments_data

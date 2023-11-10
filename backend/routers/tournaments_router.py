@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-
+from typing import List
 from models import tournaments, users
 
 from common.authorization import get_current_user
@@ -18,8 +18,14 @@ def create_tournament(
     if current_user.role.value not in ("admin", "director"):
         raise Unauthorized("You are not authorized")
     
-    # try:
-
-    return tournaments_service.create(tournament_data, current_user)
-    # except Exception:
-        # raise InternalServerError("Creating tournament failed")
+    try:
+        return tournaments_service.create(tournament_data, current_user)
+    except Exception:
+        raise InternalServerError("Creating tournament failed")
+    
+@router.get("/", response_model=List[tournaments.Tournament])
+def get_tournaments():
+    try:
+        return tournaments_service.get_all()
+    except Exception:
+        raise InternalServerError("Retrieving tournaments failed")
