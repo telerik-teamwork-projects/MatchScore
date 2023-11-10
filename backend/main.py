@@ -4,12 +4,15 @@ import uvicorn
 
 from starlette.staticfiles import StaticFiles
 
-from routers.user_router import router as user_router
+from routers.users_router import router as users_router
 from routers.matches_router import router as matches_router
+from routers.tournaments_router import router as tournaments_router
 
 app = FastAPI()
-app.include_router(user_router, prefix='/users')
+app.include_router(users_router, prefix='/users')
 app.include_router(matches_router, prefix='/matches')
+app.include_router(tournaments_router, prefix='/tournaments')
+
 
 app.add_middleware(
     CORSMiddleware,

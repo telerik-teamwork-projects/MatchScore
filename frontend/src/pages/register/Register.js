@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { register } from "../../services/authService";
 import { AuthErrorMessage } from "../../components/errorMessages/authErrorMessages";
+import { LOGIN } from "../../routes/routes";
 
 export const Register = () => {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ export const Register = () => {
 
         try {
             await register({ username, email, password, password2 });
-            navigate("/login");
+            navigate(LOGIN);
         } catch (error) {
             setError(error.response.data.detail);
         }

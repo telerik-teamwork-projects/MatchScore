@@ -2,9 +2,6 @@ from pydantic import BaseModel
 from typing import Optional
 from models.enums import Role
 
-from models.enums import Role
-
-
 class UserBase(BaseModel):
     username: str
     email: str
@@ -28,18 +25,6 @@ class User(UserBase):
     cover_img: Optional[str] = None
     player_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
-    
-
-class UserUpdate(BaseModel):
-    username: Optional[str] = None
-    email: Optional[str] = None
-    role: Optional[Role] = None
-    bio: Optional[str] = None
-    profile_img: Optional[str] = None
-    cover_img: Optional[str] = None
-    # player_id: Optional[int]
     class Config:
         from_attributes = True
 

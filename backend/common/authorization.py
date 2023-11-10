@@ -25,10 +25,14 @@ def create_token(user: User) -> str:
     expiration_time = current_time + timedelta(days=1)
 
     payload = {
+        "id": user.get("id"),
+        "username": user.get("username"),
         "email": user.get("email"),
+        "role": user.get("role"),
         "iat": current_time,
         "exp": expiration_time
     }
+
     return jwt.encode(payload, _JWT_SECRET, algorithm=_JWT_ALGORITHM)
 
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
 from common import exceptions, hashing, authorization
 from models.users import User, UserCreate, UserLogin
-from services import user_service
+from services import users_service
 from typing import List, Union
 
 router = APIRouter()
@@ -11,16 +11,16 @@ router = APIRouter()
 def user_register(
     user_data: UserCreate
 ):
-    if user_service.get_user_by_username(user_data.username):
+    if users_service.get_user_by_username(user_data.username):
         raise exceptions.BadRequest("Username already exists")
 
-    if user_service.get_user_by_email(user_data.email):
+    if users_service.get_user_by_email(user_data.email):
         raise exceptions.BadRequest("Email already exists")
 
-    if not user_service.passwords_match(user_data.password, user_data.password2):
+    if not users_service.passwords_match(user_data.password, user_data.password2):
         raise exceptions.BadRequest("Passwords do not match")
     try:
-        return user_service.register(user_data)
+        return users_service.register(user_data)
     except Exception:
         raise exceptions.InternalServerError("Registration failed")
 
@@ -29,7 +29,7 @@ def user_register(
 def user_login(
     user_data: UserLogin
 ):
-    user = user_service.get_user_by_email(user_data.email)
+    user = users_service.get_user_by_email(user_data.email)
 
     if not user:
         raise exceptions.Unauthorized("Email does not exist")
@@ -41,7 +41,7 @@ def user_login(
         raise exceptions.Unauthorized("Password is invalid")
 
     try:
-        return user_service.login(user)
+        return users_service.login(user)
     except Exception:
         raise exceptions.InternalServerError("Login failed")
     
@@ -50,7 +50,7 @@ def user_get(
     user_id: int
 ):  
     try:
-        target_user = user_service.get_user_by_id(user_id)
+        target_user = users_service.get_user_by_id(user_id)
     except Exception:
         raise exceptions.InternalServerError("Loading profile failed")
     
@@ -64,7 +64,7 @@ def users_get(
     search: str
 ):
     try:
-        return user_service.get_users(search)
+        return users_service.get_users(search)
     except Exception:
         raise exceptions.InternalServerError("Loading users failed")
 
@@ -79,7 +79,7 @@ def users_update(
     cover_img: Union[UploadFile, str] = File(None),
     current_user: User = Depends(authorization.get_current_user)
 ):
-    target_user = user_service.get_user_by_id(user_id)
+    target_user = users_service.get_user_by_id(user_id)
     if not target_user:
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
 
@@ -87,19 +87,19 @@ def users_update(
         raise exceptions.Unauthorized("You are not authorized")
 
     if email and email != target_user.email:
-        if user_service.get_user_by_email(email):
+        if users_service.get_user_by_email(email):
             raise exceptions.BadRequest("Email already exists")
     
     if username and username != target_user.username:
-        if user_service.get_user_by_username(username):
+        if users_service.get_user_by_username(username):
             raise exceptions.BadRequest("Username already exists")
 
 
-    profile_image_path = user_service.handle_profile_image(profile_img)
-    cover_image_path = user_service.handle_cover_image(cover_img)
+    profile_image_path = users_service.handle_profile_image(profile_img)
+    cover_image_path = users_service.handle_cover_image(cover_img)
 
     try:
-        return user_service.update(
+        return users_service.update(
             target_user, 
             username,
             email,
@@ -117,7 +117,7 @@ def user_delete(
     current_user: User = Depends(authorization.get_current_user)
 ):
     
-    target_user = user_service.get_user_by_id(user_id)
+    target_user = users_service.get_user_by_id(user_id)
     if not target_user:
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")    
 
@@ -125,7 +125,7 @@ def user_delete(
         raise exceptions.Unauthorized("You are not authorized")
 
     try:
-        return user_service.user_delete(
+        return users_service.user_delete(
             target_user
         )
     except Exception:

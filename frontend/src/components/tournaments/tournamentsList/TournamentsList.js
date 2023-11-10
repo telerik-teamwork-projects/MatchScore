@@ -5,7 +5,7 @@ import { MoreVert } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 // import { USER_BASE_PATH } from "../../../routes/paths";
 
-export const TournamentsList = ({ user, token }) => {
+export const TournamentsList = ({ user, tournaments }) => {
     return (
         <div className="tournamentList">
             <div className="tournamentWrapper">
