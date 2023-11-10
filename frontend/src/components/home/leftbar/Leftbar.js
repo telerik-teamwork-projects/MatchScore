@@ -1,23 +1,14 @@
 import "./leftbar.scss";
 
-import { useContext } from "react";
-import { AuthContext } from "../../../contexts/authContext";
 import { Link } from "react-router-dom";
 
 import { TOURNAMENTS } from "../../../routes/routes";
 
 export const Leftbar = () => {
-    const { user, token } = useContext(AuthContext);
-
     return (
         <div className="leftbar">
             <div className="leftbarWrapper">
-                <Link
-                    className="link"
-                    to={TOURNAMENTS}
-                    user={user}
-                    token={token}
-                >
+                <Link className="link" to={TOURNAMENTS}>
                     Tournaments
                 </Link>
                 <ul className="leftbarList">

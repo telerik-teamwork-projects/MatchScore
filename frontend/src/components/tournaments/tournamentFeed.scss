@@ -3,5 +3,15 @@
 
     .tournamentFeedWrapper {
         padding: 20px;
+
+        .tournamentHr {
+            border: 1px solid #ccc;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .tournamentTitleMain {
+            display: flex;
+            justify-content: center;
+        }
     }
 }

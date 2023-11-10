@@ -1,0 +1,76 @@
+.tournamentList {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 0 16px -8px rgba(0, 0, 0, 0.68);
+    margin: 30px 0;
+
+    .tournamentWrapper {
+        padding: 10px;
+        background-color: #f1f1f1;
+
+        .tournamentTop {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .tournamentTopLeft {
+                display: flex;
+                align-items: center;
+                margin-left: 8px;
+                margin-top: 8px;
+
+                .tournamentProfileImg {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                }
+
+                .tournamentUsernameDateContainer {
+                    display: flex;
+                    flex-direction: column;
+                    margin-left: 10px;
+
+                    .tournamentUsername {
+                        font-size: 20px;
+                        font-weight: 500;
+                    }
+
+                    .tournamentDate {
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+
+        .tournamentCenter {
+            margin: 4px 0;
+
+            .tournamentTitle {
+                margin-bottom: 0px;
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+            .tournamentDetails {
+                margin-top: 4px;
+
+                .tournamentOrgLoc {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+
+                    .tournamentDetail {
+                        font-size: 14px;
+                        margin-bottom: 4px;
+                    }
+                }
+                .tournamentStatusDate {
+                    display: flex;
+                    flex-direction: column;
+                    margin-top: 8px;
+                }
+            }
+        }
+    }
+}
