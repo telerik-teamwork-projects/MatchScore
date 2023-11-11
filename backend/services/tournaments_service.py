@@ -9,8 +9,8 @@ def create(
     current_user: User
 ):
     sql = """
-        INSERT INTO tournaments (format, title, match_format, rounds, third_place, status, start_date, end_date, owner_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO tournaments (format, title, match_format, rounds, third_place, status, location, start_date, end_date, owner_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """
 
     sql_params = (
@@ -20,6 +20,7 @@ def create(
         tournament_data.rounds,
         tournament_data.third_place,
         tournament_data.status.value,
+        tournament_data.location,
         tournament_data.start_date,
         tournament_data.end_date,
         current_user.id
@@ -36,6 +37,7 @@ def create(
         rounds =  tournament_data.rounds,
         third_place = tournament_data.third_place,
         status = tournament_data.status,
+        location = tournament_data.location,
         start_date = tournament_data.start_date,
         end_date = tournament_data.end_date,
         owner=owner
@@ -56,7 +58,7 @@ def get_all():
     result = read_query(sql, sql_params)
     tournaments_data = []
     for row in result:
-        owner = Owner(id=row[9], username=row[10], profile_img=row[11])
+        owner = Owner(id=row[10], username=row[11], profile_img=row[12])
         tournament = tournaments.Tournament(
             id=row[0],
             format=row[1], 
@@ -65,8 +67,9 @@ def get_all():
             rounds =  row[4],
             third_place = row[5],
             status = row[6],
-            start_date = str(row[7]),
-            end_date = str(row[8]),
+            location = row[7],
+            start_date = str(row[8]),
+            end_date = str(row[9]),
             owner = owner
         )
         tournaments_data.append(tournament)

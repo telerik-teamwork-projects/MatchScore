@@ -41,14 +41,11 @@ export const TournamentsList = ({ user, tournaments }) => {
                             </div>
                         </div>
                         <div className="tournamentCenter">
-                            <h2 className="tournamentTitle">
+                            <h3 className="tournamentTitle">
                                 {tournament.title}
-                            </h2>
+                            </h3>
                             <div className="tournamentDetails">
-                                <div className="tournamentOrgLoc">
-                                    <span className="tournamentDetail">
-                                        Organization: {tournament.organization}
-                                    </span>
+                                <div className="tournamentLoc">
                                     <span className="tournamentDetail">
                                         Location: {tournament.location}
                                     </span>

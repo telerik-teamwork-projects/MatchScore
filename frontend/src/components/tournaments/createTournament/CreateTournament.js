@@ -3,7 +3,6 @@ import { useState } from "react";
 
 import { create } from "../../../services/tournamentService";
 import { AuthErrorMessage } from "../../errorMessages/authErrorMessages";
-import { TOURNAMENTS } from "../../../routes/routes";
 
 export const CreateTournament = ({ user, token, setTournaments }) => {
     const [error, setError] = useState("");
@@ -14,6 +13,7 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
         rounds: "",
         third_place: false,
         status: "",
+        location: "",
         start_date: "",
         end_date: "",
     });
@@ -39,6 +39,7 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
                 rounds: "",
                 third_place: false,
                 status: "",
+                location: "",
                 start_date: "",
                 end_date: "",
             });
@@ -75,6 +76,16 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
                                 name="rounds"
                                 value={formData.rounds}
                                 onChange={(e) => onChange(e)}
+                            />
+
+                            <input
+                                className="createInput"
+                                placeholder="Location"
+                                type="text"
+                                name="location"
+                                value={formData.location}
+                                onChange={(e) => onChange(e)}
+                                autoComplete="text"
                             />
 
                             <select

@@ -10,6 +10,7 @@ class TournamentCreate(BaseModel):
     rounds: int
     third_place: bool
     status: TournamentStatus = TournamentStatus.OPEN
+    location: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     owner_id: int
@@ -22,6 +23,7 @@ class TournamentUpdate(BaseModel):
     rounds: Optional[int] = None
     third_place: Optional[bool] = None
     status: TournamentStatus = TournamentStatus.OPEN
+    location: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
 
@@ -40,6 +42,7 @@ class Tournament(BaseModel):
     rounds: int
     third_place: bool
     status: TournamentStatus = TournamentStatus.OPEN
+    location: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     owner: Owner

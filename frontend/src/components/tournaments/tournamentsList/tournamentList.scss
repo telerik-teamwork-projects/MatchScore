@@ -33,7 +33,7 @@
 
                     .tournamentUsername {
                         font-size: 20px;
-                        font-weight: 500;
+                        font-weight: 700;
                     }
 
                     .tournamentDate {
@@ -44,27 +44,24 @@
         }
 
         .tournamentCenter {
-            margin: 4px 0;
-
             .tournamentTitle {
-                margin-bottom: 0px;
-                font-size: 24px;
+                margin: 5px 0;
                 font-weight: 600;
             }
 
             .tournamentDetails {
                 margin-top: 4px;
 
-                .tournamentOrgLoc {
+                .tournamentLoc {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
 
                     .tournamentDetail {
                         font-size: 14px;
                         margin-bottom: 4px;
                     }
                 }
+                
                 .tournamentStatusDate {
                     display: flex;
                     flex-direction: column;
