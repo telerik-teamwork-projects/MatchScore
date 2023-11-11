@@ -15,7 +15,6 @@ def register(user_data: User):
     password = hash_password(user_data.password)
     role = Role.USER
 
-
     sql = "INSERT INTO users(username, email, password, role) values (?, ?, ?, ?)"
     sql_params = (username, email, password, role.value)
     registered_user_id = insert_query(sql, sql_params)
@@ -40,14 +39,13 @@ def login(
 
 
 def update(
-    target_user: User,
-    username: str,
-    email: str,
-    bio: str,
-    profile_image_path: str,
-    cover_image_path: str,
+        target_user: User,
+        username: str,
+        email: str,
+        bio: str,
+        profile_image_path: str,
+        cover_image_path: str,
 ):
-
     sql = """
         UPDATE users
         SET username = ?, email = ?, bio = ?, profile_img = ?, cover_img = ?
@@ -66,15 +64,16 @@ def update(
 
     return get_user_by_id(target_user.id)
 
+
 def user_delete(
-    target_user: User
+        target_user: User
 ):
     sql = "DELETE FROM users WHERE id = ?"
     sql_params = (target_user.id,)
 
     update_query(sql, sql_params)
 
-    return RequestOK(f"Succefully deleted user: {target_user.username}")
+    return RequestOK(f"Successfully deleted user: {target_user.username}")
 
 
 def get_users(username):
@@ -90,17 +89,18 @@ def get_users(username):
     user_data = []
     for row in result:
         user = User(
-             id = row[0],
-            username = row[1],
-            email = row[2],
-            role =  row[4],
-            bio = row[5],
-            profile_img = row[6],
-            cover_img = row[7],
-            player_id = row[8],
+            id=row[0],
+            username=row[1],
+            email=row[2],
+            role=row[4],
+            bio=row[5],
+            profile_img=row[6],
+            cover_img=row[7],
+            player_id=row[8],
         )
         user_data.append(user)
     return user_data
+
 
 def get_user_by_username(username):
     sql = "SELECT * FROM users WHERE username = ?"
@@ -148,15 +148,15 @@ def get_user_by_id(user_id):
 
     result = read_query(sql, sql_params)
     if result:
-        user = User (
-            id = result[0][0],
-            username = result[0][1],
-            email = result[0][2],
-            role =  result[0][4],
-            bio = result[0][5],
-            profile_img = result[0][6],
-            cover_img = result[0][7],
-            player_id = result[0][8],
+        user = User(
+            id=result[0][0],
+            username=result[0][1],
+            email=result[0][2],
+            role=result[0][4],
+            bio=result[0][5],
+            profile_img=result[0][6],
+            cover_img=result[0][7],
+            player_id=result[0][8],
         )
         return user
 
@@ -169,7 +169,7 @@ def handle_profile_image(profile_image):
     if isinstance(profile_image, str):
         profile_image_path = profile_image
     else:
-        profile_image_path = save_image(profile_image, "profile_pics") 
+        profile_image_path = save_image(profile_image, "profile_pics")
 
     return profile_image_path
 
@@ -181,4 +181,3 @@ def handle_cover_image(cover_image):
         cover_image_path = save_image(cover_image, "cover_pics")
 
     return cover_image_path
-    
