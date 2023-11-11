@@ -23,6 +23,7 @@ def create_tournament(
     except Exception:
         raise InternalServerError("Creating tournament failed")
     
+    
 @router.get("/", response_model=List[tournaments.Tournament])
 def get_tournaments():
     try:

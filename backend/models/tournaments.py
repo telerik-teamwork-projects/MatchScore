@@ -12,6 +12,7 @@ class TournamentCreate(BaseModel):
     status: TournamentStatus = TournamentStatus.OPEN
     start_date: Optional[str] = None
     end_date: Optional[str] = None
+    owner_id: int
 
 
 class TournamentUpdate(BaseModel):
@@ -25,6 +26,21 @@ class TournamentUpdate(BaseModel):
     end_date: Optional[str] = None
 
 
-class Tournament(TournamentCreate):
-    id: int 
+class Owner(BaseModel):
+    id: int
+    username: str
+    profile_img: str
+
+
+class Tournament(BaseModel):
+    id: int
+    format: TournamentFormat = TournamentFormat.KNOCKOUT
+    title: str
+    match_format: MatchFormat = MatchFormat.TIME
+    rounds: int
+    third_place: bool
+    status: TournamentStatus = TournamentStatus.OPEN
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    owner: Owner
     

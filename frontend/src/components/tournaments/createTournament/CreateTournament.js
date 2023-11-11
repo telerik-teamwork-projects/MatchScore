@@ -2,13 +2,10 @@ import "./createTournament.scss";
 import { useState } from "react";
 
 import { create } from "../../../services/tournamentService";
-import { useNavigate } from "react-router-dom";
 import { AuthErrorMessage } from "../../errorMessages/authErrorMessages";
 import { TOURNAMENTS } from "../../../routes/routes";
 
 export const CreateTournament = ({ user, token, setTournaments }) => {
-    const navigate = useNavigate();
-
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
         format: "",
@@ -28,9 +25,23 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
         e.preventDefault();
 
         try {
-            const result = await create(formData, token);
+            const formDataWithUserId = {
+                ...formData,
+                owner_id: user?.id,
+            };
+
+            const result = await create(formDataWithUserId, token);
             setTournaments((prevTournaments) => [result, ...prevTournaments]);
-            navigate(TOURNAMENTS);
+            setFormData({
+                format: "",
+                title: "",
+                match_format: "",
+                rounds: "",
+                third_place: false,
+                status: "",
+                start_date: "",
+                end_date: "",
+            });
         } catch (error) {
             setError(error.response.data.detail);
         }
