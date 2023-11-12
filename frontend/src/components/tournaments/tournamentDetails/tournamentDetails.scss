@@ -1,0 +1,112 @@
+.tournamentDetails {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+
+    .tournamentTitle {
+        text-align: center;
+    }
+
+    .tournamentDesc {
+        font-size: 1.2em;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    .tournamentData {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 30px;
+
+        p {
+            margin: 3px;
+        }
+
+        .tournamentOwner {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            .link {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+
+            .link:hover {
+                color: #555;
+            }
+        }
+
+        .tournamentStatus {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+
+        .tournamentFormat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+
+        .tournamentMatchFormat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+
+        .tournamentRounds {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+
+        .tournamentThirdPlace {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+        .tournamentLocation {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+        .tournamentDates {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+    }
+}

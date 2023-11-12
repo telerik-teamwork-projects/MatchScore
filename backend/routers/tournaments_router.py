@@ -30,3 +30,11 @@ def get_tournaments():
         return tournaments_service.get_all()
     except Exception:
         raise InternalServerError("Retrieving tournaments failed")
+    
+
+@router.get("/{tournament_id}", response_model=tournaments.Tournament)
+def get_tournament(tournament_id):
+    try:
+        return tournaments_service.get_one(tournament_id)
+    except Exception:
+        raise InternalServerError("Retrieving tournament details failed")

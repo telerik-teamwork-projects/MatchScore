@@ -9,13 +9,14 @@ def create(
     current_user: User
 ):
     sql = """
-        INSERT INTO tournaments (format, title, match_format, rounds, third_place, status, location, start_date, end_date, owner_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO tournaments (format, title, description, match_format, rounds, third_place, status, location, start_date, end_date, owner_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """
 
     sql_params = (
         tournament_data.format.value,
         tournament_data.title,
+        tournament_data.description,
         tournament_data.match_format.value,
         tournament_data.rounds,
         tournament_data.third_place,
@@ -33,6 +34,7 @@ def create(
         id=created_tournament_id,
         format=tournament_data.format, 
         title = tournament_data.title,
+        description = tournament_data.description,
         match_format = tournament_data.match_format,
         rounds =  tournament_data.rounds,
         third_place = tournament_data.third_place,
@@ -58,23 +60,56 @@ def get_all():
     result = read_query(sql, sql_params)
     tournaments_data = []
     for row in result:
-        owner = Owner(id=row[10], username=row[11], profile_img=row[12])
+        owner = Owner(id=row[11], username=row[12], profile_img=row[13])
         tournament = tournaments.Tournament(
             id=row[0],
             format=row[1], 
             title = row[2],
-            match_format = row[3],
-            rounds =  row[4],
-            third_place = row[5],
-            status = row[6],
-            location = row[7],
-            start_date = str(row[8]),
-            end_date = str(row[9]),
+            description= row[3],
+            match_format = row[4],
+            rounds =  row[5],
+            third_place = row[6],
+            status = row[7],
+            location = row[8],
+            start_date = str(row[9]),
+            end_date = str(row[10]),
             owner = owner
         )
         tournaments_data.append(tournament)
 
     return tournaments_data
+
+def get_one(tournament_id):
+    sql = """
+            SELECT t.*, u.username, u.profile_img
+            FROM tournaments t
+            JOIN users u ON t.owner_id = u.id
+            WHERE t.id = ?
+        """
+    
+    sql_params = (tournament_id,)
+
+    result = read_query(sql, sql_params)
+
+    if result:
+        result = result[0]
+        owner = Owner(id=result[11], username=result[12], profile_img=result[13])
+        tournament = tournaments.Tournament(
+            id=result[0],
+            format=result[1], 
+            title = result[2],
+            description = result[3],
+            match_format = result[4],
+            rounds =  result[5],
+            third_place = result[6],
+            status = result[7],
+            location = result[8],
+            start_date = str(result[9]),
+            end_date = str(result[10]),
+            owner = owner
+        )
+
+        return tournament
 
 
 def get_owner_data_by_id(owner_id):

@@ -6,6 +6,7 @@ from models.enums import TournamentStatus, TournamentFormat, MatchFormat
 class TournamentCreate(BaseModel):
     format: TournamentFormat = TournamentFormat.KNOCKOUT
     title: str
+    description: str
     match_format: MatchFormat = MatchFormat.TIME
     rounds: int
     third_place: bool
@@ -19,6 +20,7 @@ class TournamentCreate(BaseModel):
 class TournamentUpdate(BaseModel):
     format: Optional[str] = None
     title: Optional[str] = None
+    description: Optional[str] = None
     match_format: Optional[str] = None
     rounds: Optional[int] = None
     third_place: Optional[bool] = None
@@ -38,6 +40,7 @@ class Tournament(BaseModel):
     id: int
     format: TournamentFormat = TournamentFormat.KNOCKOUT
     title: str
+    description: Optional[str]
     match_format: MatchFormat = MatchFormat.TIME
     rounds: int
     third_place: bool

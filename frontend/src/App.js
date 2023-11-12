@@ -14,6 +14,7 @@ import { HOME, LOGIN, PROFILE, REGISTER, TOURNAMENTS } from "./routes/routes";
 import { AuthRouteGuard } from "./routeGuards/authRouteGuard";
 import { NoAuthRouteGuard } from "./routeGuards/noAuthRouteGuard";
 import { Tournament } from "./pages/tournaments/Tournament";
+import { TournamentDetails } from "./components/tournaments/tournamentDetails/TournamentDetails";
 
 function App() {
     return (
@@ -27,7 +28,11 @@ function App() {
 
                     <Route path={HOME} element={<Home />} />
                     <Route path={TOURNAMENTS} element={<Tournament />} />
-                    
+                    <Route
+                        path={`${TOURNAMENTS}/:tournamentId`}
+                        element={<TournamentDetails />}
+                    />
+
                     <Route element={<AuthRouteGuard />}>
                         <Route
                             path={`${PROFILE}/:userId`}

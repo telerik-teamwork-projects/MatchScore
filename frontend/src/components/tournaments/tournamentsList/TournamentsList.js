@@ -1,6 +1,6 @@
 import "./tournamentList.scss";
 
-import { PROFILE } from "../../../routes/routes";
+import { PROFILE, TOURNAMENTS } from "../../../routes/routes";
 import { MoreVert } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { USER_BASE_PATH } from "../../../routes/paths";
@@ -41,9 +41,11 @@ export const TournamentsList = ({ user, tournaments }) => {
                             </div>
                         </div>
                         <div className="tournamentCenter">
-                            <h3 className="tournamentTitle">
-                                {tournament.title}
-                            </h3>
+                            <Link className="tournamentLink" to={`${TOURNAMENTS}/${tournament.id}`}>
+                                <h3 className="tournamentTitle">
+                                    {tournament.title}
+                                </h3>
+                            </Link>
                             <div className="tournamentDetails">
                                 <div className="tournamentLoc">
                                     <span className="tournamentDetail">

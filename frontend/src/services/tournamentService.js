@@ -27,3 +27,14 @@ export const getAll = async () => {
         throw error;
     }
 };
+
+export const getOne = async (tournamentId) => {
+    try {
+        const response = await axios.get(
+            `${USER_BASE_PATH}/tournaments/${tournamentId}`
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
