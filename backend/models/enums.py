@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Role(Enum):
     USER = "user"
     ADMIN = "admin"
@@ -23,3 +24,11 @@ class MatchFormat(Enum):
 
     def __str__(self):
         return str(self.value).capitalize() + ' limited'
+
+
+class TournamentFormat(Enum):
+    KNOCKOUT = "knockout"
+    LEAGUE = "league"
+
+    def __str__(self):
+        return str(self.value).capitalize()

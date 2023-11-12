@@ -3,8 +3,11 @@ import uuid
 from fastapi import UploadFile
 from typing import Union
 
-from models.enums import Role
+from models.enums import Role, TournamentFormat
 from models.users import User
+from services import tournaments_service
+
+UPLOAD_DIR = "media"
 
 
 def is_admin(user: User):
@@ -21,8 +24,6 @@ def is_director(user: User):
     return False
 
 
-
-UPLOAD_DIR = "media"
 def save_image(upload_file: Union[UploadFile, str], folder: str):
     if upload_file is None:
         return ""
@@ -39,3 +40,10 @@ def save_image(upload_file: Union[UploadFile, str], folder: str):
         image_file.write(upload_file.file.read())
 
     return f"/{directory_name}/{filename}"
+
+
+def is_knockout(id: int):
+    if TournamentFormat.KNOCKOUT.value == tournaments_service.get_format(id):
+        return True
+
+    return False

@@ -128,3 +128,7 @@ def get_owner_data_by_id(owner_id):
         )
         return user
         
+
+def get_format(id: int):
+    data = read_query('SELECT format FROM  tournaments WHERE id = ?', (id,))
+    return data[0][0]
