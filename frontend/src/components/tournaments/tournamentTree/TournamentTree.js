@@ -1,6 +1,6 @@
 import "./tournamentTree.scss";
 
-export const TournamentTree = ({ tournament }) => {
+export const TournamentTree = ({tournament}) => {
     return (
         <div id="bracket">
             <div className="container">

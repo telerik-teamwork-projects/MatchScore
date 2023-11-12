@@ -6,7 +6,7 @@
 
     .tournamentWrapper {
         padding: 10px;
-        background-color: #f1f1f1;
+        background-color: #ffffff;
 
         .tournamentTop {
             display: flex;
@@ -14,36 +14,34 @@
             justify-content: space-between;
 
             .tournamentTopLeft {
-                display: flex;
-                align-items: center;
                 margin-left: 8px;
                 margin-top: 8px;
 
-                .tournamentProfileImg {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                }
-
-                .tournamentUsernameDateContainer {
+                .tournamnetTopLeftLink {
                     display: flex;
-                    flex-direction: column;
-                    margin-left: 10px;
+                    align-items: center;
+                    text-decoration: none;
+                    color: inherit;
 
-                    .tournamentUsername {
-                        font-size: 20px;
-                        font-weight: 700;
+                    .tournamentProfileImg {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        object-fit: cover;
                     }
 
-                    .tournamentDate {
-                        font-size: 12px;
+                    .tournamentUsername {
+                        margin-left: 8px;
+                        font-size: 18px;
+                        font-weight: 600;
                     }
                 }
             }
         }
 
         .tournamentCenter {
+            background-color: #ffffff;
+
             .tournamentLink {
                 text-decoration: none;
                 color: inherit;
@@ -51,31 +49,70 @@
                 &:hover {
                     color: #676767;
                 }
+
+                .tournamentTitle {
+                    text-align: center;
+                    margin: 0 0 10px 0;
+                }
             }
 
-            .tournamentTitle {
-                margin: 5px 0;
-                font-weight: 600;
+            .tournamentLoc {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
+                }
             }
 
-            .tournamentDetails {
-                margin-top: 4px;
+            .tournamentStatus {
+                display: flex;
+                align-items: center;
+                gap: 5px;
 
-                .tournamentLoc {
-                    display: flex;
-                    align-items: center;
-
-                    .tournamentDetail {
-                        font-size: 14px;
-                        margin-bottom: 4px;
-                    }
+                p {
+                    margin: 0;
                 }
 
-                .tournamentStatusDate {
-                    display: flex;
-                    flex-direction: column;
-                    margin-top: 8px;
+                span {
+                    font-weight: 700;
                 }
+            }
+
+            .tournamentDate {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                p {
+                    margin: 0;
+                }
+
+                span {
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .tournamentBottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+
+            .tournamentJoinBtn {
+                background-color: limegreen;
+                border: 1px solid limegreen;
+                border-radius: 8px;
+                color: white;
+                padding: 8px 12px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .tournamentJoinBtn:hover {
+                background-color: green;
             }
         }
     }

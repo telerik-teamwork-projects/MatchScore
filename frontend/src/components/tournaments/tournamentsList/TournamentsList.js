@@ -4,8 +4,24 @@ import { PROFILE, TOURNAMENTS } from "../../../routes/routes";
 import { MoreVert } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { USER_BASE_PATH } from "../../../routes/paths";
+import { useState } from "react";
+import { RequestModal } from "../../requestModal/RequestModal";
 
 export const TournamentsList = ({ user, tournaments }) => {
+    const [requestWindow, setRequestWindow] = useState(false);
+
+    const openRequestModal = () => {
+        setRequestWindow(true);
+    };
+
+    const closeRequestModal = () => {
+        setRequestWindow(false);
+    };
+
+    const handleRequestSubmit = (formData) => {
+        closeRequestModal();
+    };
+
     return (
         <>
             {tournaments?.map((tournament) => (
@@ -13,7 +29,10 @@ export const TournamentsList = ({ user, tournaments }) => {
                     <div className="tournamentWrapper">
                         <div className="tournamentTop">
                             <div className="tournamentTopLeft">
-                                <Link to={`${PROFILE}/${tournament.owner.id}`}>
+                                <Link
+                                    to={`${PROFILE}/${tournament.owner.id}`}
+                                    className="tournamnetTopLeftLink"
+                                >
                                     {tournament.owner.profile_img ? (
                                         <img
                                             className="tournamentProfileImg"
@@ -27,12 +46,10 @@ export const TournamentsList = ({ user, tournaments }) => {
                                             alt=""
                                         />
                                     )}
-                                </Link>
-                                <div className="tournamentUsernameDateContainer">
                                     <span className="tournamentUsername">
                                         {tournament.owner.username}
                                     </span>
-                                </div>
+                                </Link>
                             </div>
                             <div className="tournamentTopRight">
                                 {user?.id === tournament.owner.id && (
@@ -41,32 +58,48 @@ export const TournamentsList = ({ user, tournaments }) => {
                             </div>
                         </div>
                         <div className="tournamentCenter">
-                            <Link className="tournamentLink" to={`${TOURNAMENTS}/${tournament.id}`}>
-                                <h3 className="tournamentTitle">
+                            <Link
+                                className="tournamentLink"
+                                to={`${TOURNAMENTS}/${tournament.id}`}
+                            >
+                                <h2 className="tournamentTitle">
                                     {tournament.title}
-                                </h3>
+                                </h2>
                             </Link>
-                            <div className="tournamentDetails">
-                                <div className="tournamentLoc">
-                                    <span className="tournamentDetail">
-                                        Location: {tournament.location}
-                                    </span>
-                                </div>
-                                <div className="tournamentStatusDate">
-                                    <span className="tournamentDetail">
-                                        Status: {tournament.status}
-                                    </span>
-                                    <span className="tournamentDetail">
-                                        Date:{" "}
-                                        {tournament.start_date.slice(0, 10)} -{" "}
-                                        {tournament.end_date.slice(0, 10)}
-                                    </span>
-                                </div>
+                            <div className="tournamentLoc">
+                                <p>Location:</p>
+                                <span>{tournament.location}</span>
                             </div>
+                            <div className="tournamentStatus">
+                                <p>Status:</p>
+                                <span>{tournament.status}</span>
+                            </div>
+                            <div className="tournamentDate">
+                                <p>Date:</p>
+                                <span>
+                                    {tournament.start_date.slice(0, 10)} -{" "}
+                                    {tournament.end_date.slice(0, 10)}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="tournamentBottom">
+                            <button
+                                className="tournamentJoinBtn"
+                                onClick={() => openRequestModal()}
+                            >
+                                Request Join
+                            </button>
                         </div>
                     </div>
                 </div>
             ))}
+            {requestWindow && (
+                <RequestModal
+                    isOpen={requestWindow}
+                    onClose={closeRequestModal}
+                    onSubmit={handleRequestSubmit}
+                />
+            )}
         </>
     );
 };
