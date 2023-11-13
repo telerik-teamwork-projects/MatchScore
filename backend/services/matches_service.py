@@ -20,16 +20,14 @@ def create(match: Match):
             for p in match.participants:
                 cursor.execute('SELECT * FROM players WHERE full_name = ?', (p.full_name,))
                 player = cursor.fetchone()
-                if player:
-                    cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                                   (player[0], generated_id))
-                    participants.append(player)
-                else:
+                if player is None:
                     cursor.execute('INSERT INTO players(full_name) VALUES(?)', (p.full_name,))
                     player_id = cursor.lastrowid
-                    cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                                   (player_id, generated_id))
-                    participants.append((player_id, p.full_name))
+                else:
+                    player_id = player[0]
+                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                               (player_id, generated_id))
+                participants.append((player_id, p.full_name))
                 score.append((generated_id, p.full_name, 0, 0))
             conn.commit()
             inserted_row = list(inserted_row)
@@ -50,7 +48,7 @@ def exists(id: int):
     return any(read_query('SELECT 1 FROM matches WHERE id = ?', (id,)))
 
 
-def find_match_participants(id: int, match_update: List[MatchPlayerUpdate], prev=False):
+def find_match_participants(id: int, match_update: List[MatchPlayerUpdate] | List[MatchScoreUpdate], prev=False):
     participants = []
     for item in match_update:
         if prev:
@@ -69,31 +67,60 @@ def find_match_participants(id: int, match_update: List[MatchPlayerUpdate], prev
         return participants
 
 
-def update_simple_score(match: MatchBase, participants: List[MatchScoreUpdate], tournament_id: int | None):
+def update_score(match: MatchBase, participants: List[MatchScoreUpdate]):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
             participants_updated = []
             score_updated = []
+            # manage score
             for p in participants:
                 cursor.execute('''UPDATE players_matches SET score = ? WHERE match_id = ? AND player_id = ?''',
                                (p.score, match.id, p.player_id))
-                participants_updated.append((p.player_id, p.player))
-                score_updated.append((match.id, p.player, p.score))
-            if tournament_id is not None:
-                pass
-                # manage winner in case of tournament
+            # manage points
+            cursor.execute('''SELECT pm.player_id, pm.score, pm.points, p.full_name 
+                                    FROM players_matches pm, players p 
+                                    WHERE pm.match_id = ? AND p.id = pm.player_id 
+                                    ORDER BY score DESC''', (match.id,))
+            data = list(cursor)
+            if len(data) == 2:
+                if data[0][1] == data[1][1]:
+                    cursor.execute('''UPDATE players_matches SET points = 1 WHERE match_id = ?''', (match.id,))
+                    score_updated.extend([(match.id, data[0][3], data[0][1], 1), (match.id, data[1][3], data[0][1], 1)])
+                else:
+                    cursor.execute('''UPDATE players_matches SET points = 2 WHERE match_id = ? AND player_id = ?''',
+                                   (match.id, data[0][0]))
+                    cursor.execute('''UPDATE players_matches SET points = 0 WHERE match_id = ? AND player_id = ?''',
+                                   (match.id, data[1][0]))
+                    score_updated.extend([(match.id, data[0][3], data[0][1], 2), (match.id, data[1][3], data[1][1], 0)])
+                participants_updated.extend([(data[0][0], data[0][3]), (data[1][0], data[1][3])])
+            elif len(data) > 2:
+                if data[0][1] == data[1][1] == data[2][1]:
+                    cursor.execute('''UPDATE players_matches SET points = 1 WHERE match_id = ? AND player_id in ?''',
+                                   (match.id, (data[0][0], data[1][0], data[2][0])))
+                elif data[0][1] == data[1][1]:
+                    cursor.execute('''UPDATE players_matches SET points = 3 WHERE match_id = ? AND player_id in ?''',
+                                   (match.id, (data[0][0], data[1][0])))
+                    cursor.execute('''UPDATE players_matches SET points = 1 WHERE match_id = ? AND player_id = ?''',
+                                   (match.id, data[2][0]))
+                elif data[1][1] == data[2][1]:
+                    cursor.execute('''UPDATE players_matches SET points = 3 WHERE match_id = ? AND player_id = ?''',
+                                   (match.id, data[0][0]))
+                    cursor.execute('''UPDATE players_matches SET points = 2 WHERE match_id = ? AND player_id in ?''',
+                                   (match.id, (data[1][0], data[2][0])))
+                cursor.execute('''UPDATE players_matches SET points = 0 WHERE match_id = ? 
+                                                                        AND player_id not in ?''',
+                               (match.id, (data[0][0], data[1][0], data[2][0])))
+                for p in data:
+                    participants_updated.append([p[0], p[3]])
+                    score_updated.append([match.id, p[3], p[1], p[2]])
             conn.commit()
-            return MatchResponse.from_query_result(match.id, match.date, match.format, match.tournament_id,
-                                                   participants_updated, score_updated)
+            return MatchResponse.from_query_result(match.id, match.date, match.format, participants_updated,
+                                                   score_updated)
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)
             raise InternalServerError("Something went wrong")
-
-
-def update_league_score(match: MatchBase, participants: List[MatchScoreUpdate]):
-    pass
 
 
 def update_date(match: MatchBase, match_date: MatchDateUpdate):
@@ -118,18 +145,16 @@ def update_players(match: MatchBase, players_update: List[MatchPlayerUpdate]):
                 _, _, score, points = next(row for row in data if row[0] == p.player_id)
                 cursor.execute('SELECT * FROM players WHERE full_name = ?', (p.player,))
                 player = cursor.fetchone()
-                if player:
-                    cursor.execute('INSERT INTO players_matches VALUES(?,?,?,?)', (player[0], match.id, score, points))
-                    participants.append(player)
-                else:
+                if player is None:
                     cursor.execute('INSERT INTO players(full_name) VALUES(?)', (p.player,))
                     player_id = cursor.lastrowid
-                    cursor.execute('INSERT INTO players_matches VALUES(?,?,?,?)', (player_id, match.id, score, points))
-                    participants.append((player_id, p.player))
+                else:
+                    player_id = player[0]
+                cursor.execute('INSERT INTO players_matches VALUES(?,?,?,?)', (player_id, match.id, score, points))
+                participants.append((player_id, p.player))
                 scores.append((match.id, p.player, score))
             conn.commit()
-            return MatchResponse.from_query_result(match.id, match.date, match.format, match.tournament_id,
-                                                   participants, scores)
+            return MatchResponse.from_query_result(match.id, match.date, match.format, participants, scores)
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)
