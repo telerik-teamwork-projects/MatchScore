@@ -1,5 +1,5 @@
 import "./profileUpdate.scss";
-import { AuthErrorMessage } from "../../components/errorMessages/authErrorMessages";
+import { ErrorMessage } from "../../components/responseMessages/errorMessages/ErrorMessages";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../contexts/authContext";
@@ -145,7 +145,7 @@ export const ProfileUpdate = () => {
                                     }}
                                 />
                             </label>
-                            <AuthErrorMessage message={error} />
+                            <ErrorMessage message={error} />
 
                             <button className="profileUpdateButton">
                                 Update

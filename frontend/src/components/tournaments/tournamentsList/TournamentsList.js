@@ -7,19 +7,18 @@ import { USER_BASE_PATH } from "../../../routes/paths";
 import { useState } from "react";
 import { RequestModal } from "../../requestModal/RequestModal";
 
-export const TournamentsList = ({ user, tournaments }) => {
+export const TournamentsList = ({ user, token, tournaments }) => {
     const [requestWindow, setRequestWindow] = useState(false);
+    const [selectedTournament, setSelectedTournament] = useState(null);
 
-    const openRequestModal = () => {
+    const openRequestModal = (tournament) => {
+        setSelectedTournament(tournament);
         setRequestWindow(true);
     };
 
     const closeRequestModal = () => {
+        setSelectedTournament(null);
         setRequestWindow(false);
-    };
-
-    const handleRequestSubmit = (formData) => {
-        closeRequestModal();
     };
 
     return (
@@ -85,7 +84,7 @@ export const TournamentsList = ({ user, tournaments }) => {
                         <div className="tournamentBottom">
                             <button
                                 className="tournamentJoinBtn"
-                                onClick={() => openRequestModal()}
+                                onClick={() => openRequestModal(tournament)}
                             >
                                 Request Join
                             </button>
@@ -95,9 +94,11 @@ export const TournamentsList = ({ user, tournaments }) => {
             ))}
             {requestWindow && (
                 <RequestModal
+                    userId={user?.id}
+                    tournamentId={selectedTournament.id}
+                    token={token}
                     isOpen={requestWindow}
                     onClose={closeRequestModal}
-                    onSubmit={handleRequestSubmit}
                 />
             )}
         </>

@@ -24,3 +24,8 @@ class Forbidden(HTTPException):
 class InternalServerError(HTTPException):
     def __init__(self, detail=""):
         super().__init__(status_code=500, detail=detail)
+
+
+class IntegrityError(HTTPException):
+    def __init__(self, detail=''):
+        super().__init__(status_code=400, detail=detail)

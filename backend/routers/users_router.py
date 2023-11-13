@@ -1,15 +1,16 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
 from common import exceptions, hashing, authorization
-from models.users import User, UserCreate, UserLogin
+from models import users
 from services import users_service
 from typing import List, Union
+from mariadb import IntegrityError
 
 router = APIRouter()
 
 
-@router.post("/", response_model=User)
+@router.post("/", response_model=users.User)
 def user_register(
-    user_data: UserCreate
+    user_data: users.UserCreate
 ):
     if users_service.get_user_by_username(user_data.username):
         raise exceptions.BadRequest("Username already exists")
@@ -27,7 +28,7 @@ def user_register(
 
 @router.post('/login')
 def user_login(
-    user_data: UserLogin
+    user_data: users.UserLogin
 ):
     user = users_service.get_user_by_email(user_data.email)
 
@@ -45,7 +46,7 @@ def user_login(
     except Exception:
         raise exceptions.InternalServerError("Login failed")
     
-@router.get('/{user_id}', response_model=User)
+@router.get('/{user_id}', response_model=users.User)
 def user_get(
     user_id: int
 ):  
@@ -59,7 +60,7 @@ def user_get(
 
     return target_user
 
-@router.get('/', response_model=List[User])
+@router.get('/', response_model=List[users.User])
 def users_get(
     search: str
 ):
@@ -69,7 +70,7 @@ def users_get(
         raise exceptions.InternalServerError("Loading users failed")
 
 
-@router.put("/{user_id}", response_model=User)
+@router.put("/{user_id}", response_model=users.User)
 def users_update(
     user_id : int,
     username: str = Form(None),
@@ -77,7 +78,7 @@ def users_update(
     bio: str = Form(None),
     profile_img: Union[UploadFile, str] = File(None),
     cover_img: Union[UploadFile, str] = File(None),
-    current_user: User = Depends(authorization.get_current_user)
+    current_user: users.User = Depends(authorization.get_current_user)
 ):
     target_user = users_service.get_user_by_id(user_id)
     if not target_user:
@@ -114,7 +115,7 @@ def users_update(
 @router.delete("/{user_id}")
 def user_delete(
     user_id: int,
-    current_user: User = Depends(authorization.get_current_user)
+    current_user: users.User = Depends(authorization.get_current_user)
 ):
     
     target_user = users_service.get_user_by_id(user_id)
@@ -130,3 +131,21 @@ def user_delete(
         )
     except Exception:
         raise exceptions.InternalServerError("Deleting user failed")
+    
+
+@router.post("/{user_id}/join-request/{tournament_id}")
+def send_join_request(
+    user_id: int, 
+    tournament_id: int, 
+    player_data: users.PlayerCreate, 
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if user_id != current_user.id:
+        raise exceptions.Unauthorized("You are not authorized")
+
+    try:
+        return users_service.create_join_request(user_id, tournament_id, player_data)
+    except IntegrityError:
+        raise exceptions.IntegrityError("Join request already sent")
+    except Exception:
+        raise exceptions.InternalServerError("Sending join request failed")
