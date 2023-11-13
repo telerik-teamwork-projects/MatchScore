@@ -3,9 +3,9 @@ from typing import List
 from models import tournaments, users, requests
 
 from common.authorization import get_current_user
-from common.exceptions import Unauthorized, InternalServerError, NotFound
+from common.exceptions import Unauthorized, InternalServerError, NotFound, BadRequest
 
-from services import tournaments_service
+from services import tournaments_service, users_service
 
 router = APIRouter()
 
@@ -26,10 +26,10 @@ def create_tournament(
     
 @router.get("/", response_model=List[tournaments.Tournament])
 def get_tournaments():
-    # try:
-    return tournaments_service.get_all()
-    # except Exception:
-        # raise InternalServerError("Retrieving tournaments failed")
+    try:
+        return tournaments_service.get_all()
+    except Exception:
+        raise InternalServerError("Retrieving tournaments failed")
     
 
 @router.get("/{tournament_id}", response_model=tournaments.Tournament)
@@ -46,15 +46,29 @@ def get_tournament_requests(
 ):
     if not tournaments_service.get_tournament_by_id(tournament_id):
         raise NotFound("Tournament not found")
-    # try:
-    return tournaments_service.get_tournament_requests(tournament_id)
-    # except Exception:
-        # raise InternalServerError("Retrieving requests failed")
+    try:
+        return tournaments_service.get_tournament_requests(tournament_id)
+    except Exception:
+        raise InternalServerError("Retrieving requests failed")
 
-@router.post("/{tournament_id}/add/{user_id}")
-def add_player(
+@router.post("/{tournament_id}/accept/{user_id}")
+def accept_user(
     tournament_id: int,
     user_id: int,
     current_user: users.User = Depends(get_current_user)
 ):
-    pass
+    tournament = tournaments_service.get_one(tournament_id)
+    if not tournament:
+        raise NotFound("Tournament not found")
+    
+    user = users_service.get_user_by_id(user_id)
+    if not user:
+        raise NotFound("User not found")
+
+    if not tournament.owner.id == current_user.id or current_user.role.value != "admin":
+        raise Unauthorized("You are not authorized")
+    
+    if tournaments_service.is_user_accepted(tournament_id, user_id):
+        raise BadRequest("User already in tournament")
+    
+    tournaments_service.accept_user(tournament_id, user_id)

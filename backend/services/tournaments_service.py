@@ -115,7 +115,7 @@ def get_one(tournament_id):
 
 def get_tournament_requests(tournament_id: int):
     sql = """
-            SELECT id, user_id, full_name, country, sports_club, status 
+            SELECT id, user_id, tournament_id, full_name, country, sports_club, status 
             FROM tournament_requests
             WHERE tournament_id = ?
         """
@@ -126,14 +126,28 @@ def get_tournament_requests(tournament_id: int):
     for request_tuple in result:
         request_dict = {
             "id": request_tuple[0],
-            "full_name": request_tuple[2],
-            "country": request_tuple[3],
-            "sports_club": request_tuple[4],
-            "status": TournamentRequest(request_tuple[5]),
+            "user_id": request_tuple[1],
+            "tournament_id": request_tuple[2],
+            "full_name": request_tuple[3],
+            "country": request_tuple[4],
+            "sports_club": request_tuple[5],
+            "status": TournamentRequest(request_tuple[6]),
         }
         requests_list.append(request_dict)
 
     return requests_list
+
+
+def accept_user(tournament_id:int, user_id:int):
+    sql = """
+        INSERT INTO players_tournaments (tournament_id, player_id)
+        VALUES (?, ?)
+    """
+    sql_params = (tournament_id, user_id)
+    result = insert_query(sql, sql_params)
+    print(result)
+    return {"message": f"User {user_id} accepted into tournament {tournament_id}"}
+
 
 
 def get_owner_data_by_id(owner_id):
@@ -161,5 +175,29 @@ def get_format(id: int):
 def get_tournament_by_id(tournament_id):
     sql = "SELECT * FROM tournaments WHERE id = ?"
     sql_params = (tournament_id,)
+
+    result = read_query(sql, sql_params)
+
+    if result:
+        result = result[0]
+        tournament = tournaments.TournamentWithoutOwner(
+            id=result[0],
+            format=result[1], 
+            title=result[2],
+            description=result[3],
+            match_format=result[4],
+            rounds=result[5],
+            third_place=result[6],
+            status=result[7],
+            location=result[8],
+            start_date=str(result[9]),
+            end_date=str(result[10]),
+        )
+
+        return tournament
+
+def is_user_accepted(tournament_id: int, user_id: int):
+    sql = "SELECT * FROM players_tournaments WHERE tournament_id = ? AND player_id = ?"
+    sql_params = (tournament_id, user_id)
 
     return len(read_query(sql, sql_params)) > 0

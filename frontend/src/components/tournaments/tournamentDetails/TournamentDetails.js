@@ -11,7 +11,7 @@ import { getRequests } from "../../../services/tournamentService";
 
 export const TournamentDetails = () => {
     const { tournamentId } = useParams();
-    const { token } = useContext(AuthContext);
+    const { token, user } = useContext(AuthContext);
     const [tournament, setTournament] = useState(null);
 
     const [requestModalOpen, setRequestModalOpen] = useState(false);
@@ -95,15 +95,17 @@ export const TournamentDetails = () => {
                         {tournament?.end_date.slice(0, 10)}
                     </span>
                 </div>
-                <div className="requestsBtns">
-                    <button
-                        className="openRequestsbtn"
-                        type="button"
-                        onClick={(e) => onRequests(e)}
-                    >
-                        Show Requests
-                    </button>
-                </div>
+                {user?.id === tournament?.owner.id && (
+                    <div className="requestsBtns">
+                        <button
+                            className="openRequestsbtn"
+                            type="button"
+                            onClick={(e) => onRequests(e)}
+                        >
+                            Show Requests
+                        </button>
+                    </div>
+                )}
             </div>
             <div>
                 <TournamentTree tournament={tournament} />
@@ -112,6 +114,7 @@ export const TournamentDetails = () => {
                 <TournamentRequest
                     requests={requestsResult}
                     onClose={closeRequestModal}
+                    token={token}
                 />
             )}
         </div>

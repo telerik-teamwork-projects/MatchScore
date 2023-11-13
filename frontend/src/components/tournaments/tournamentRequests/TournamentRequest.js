@@ -1,6 +1,26 @@
 import "./tournamentRequest.scss";
+import { PROFILE } from "../../../routes/routes";
+import { Link } from "react-router-dom";
+import { acceptRequest } from "../../../services/tournamentService";
+import { useState } from "react";
+import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
+import { SuccessMessage } from "../../responseMessages/successMessages/SuccessMessages";
 
-export const TournamentRequest = ({ requests, onClose }) => {
+export const TournamentRequest = ({ requests, onClose, token }) => {
+    const [success, setSuccess] = useState(null);
+    const [error, setError] = useState(null);
+
+    const onAccept = async (userId, tournamentId) => {
+        try {
+            await acceptRequest(userId, tournamentId, token);
+            setError(null);
+            setSuccess("User accepted");
+        } catch (error) {
+            setError(error.response.data.detail);
+            setSuccess(null);
+        }
+    };
+
     return (
         <div className="tournamentRequests">
             <div className="tournamentRequestsWrapper">
@@ -9,7 +29,13 @@ export const TournamentRequest = ({ requests, onClose }) => {
                     {requests.map((request) => (
                         <li key={request.id}>
                             <div>
-                                <strong>Full Name:</strong> {request.full_name}
+                                <strong>Full Name:</strong>{" "}
+                                <Link
+                                    className="link"
+                                    to={`${PROFILE}/${request.user_id}`}
+                                >
+                                    {request.full_name}
+                                </Link>
                             </div>
                             <div>
                                 <strong>Country:</strong>{" "}
@@ -24,7 +50,15 @@ export const TournamentRequest = ({ requests, onClose }) => {
                             </div>
                             <hr />
                             <div className="requestBtns">
-                                <button className="requestAccept">
+                                <button
+                                    className="requestAccept"
+                                    onClick={() => {
+                                        onAccept(
+                                            request.user_id,
+                                            request.tournament_id
+                                        );
+                                    }}
+                                >
                                     Accept
                                 </button>
                                 <button className="requestReject">
@@ -34,6 +68,11 @@ export const TournamentRequest = ({ requests, onClose }) => {
                         </li>
                     ))}
                 </ul>
+                {error ? (
+                    <ErrorMessage message={error} />
+                ) : (
+                    <SuccessMessage message={success} />
+                )}
                 <div className="modalBtn">
                     <button onClick={onClose}>Close</button>
                 </div>

@@ -34,16 +34,20 @@ export const TournamentFeed = () => {
     return (
         <div className="tournamentFeed">
             <div className="tournamentFeedWrapper">
-                <div className="tournamentTop">
-                    <button
-                        className="createTournamentBtn"
-                        type="button"
-                        onClick={openCreateModal}
-                    >
-                        Create Tournament
-                    </button>
-                </div>
-                <hr className="tournamentHr" />
+                {(user?.role === "admin" || user?.role === "director") && (
+                    <>
+                        <div className="tournamentTop">
+                            <button
+                                className="createTournamentBtn"
+                                type="button"
+                                onClick={openCreateModal}
+                            >
+                                Create Tournament
+                            </button>
+                        </div>
+                        <hr className="tournamentHr" />
+                    </>
+                )}
                 <h1 className="tournamentTitleMain">Tournaments</h1>
                 <TournamentsList
                     user={user}
