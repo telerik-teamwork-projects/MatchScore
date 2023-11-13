@@ -25,6 +25,8 @@
             padding: 8px;
             margin-top: 4px;
             margin-bottom: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
             box-sizing: border-box;
         }
 
@@ -57,7 +59,7 @@
                 border-radius: 5px;
                 cursor: pointer;
                 font-size: 16px;
-                
+
                 &:hover {
                     background: #a00202;
                 }

@@ -38,3 +38,19 @@ export const getOne = async (tournamentId) => {
         throw error;
     }
 };
+
+export const getRequests = async (tournamentId, token) => {
+    try {
+        const response = await axios.get(
+            `${USER_BASE_PATH}/tournaments/${tournamentId}/requests`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

@@ -3,6 +3,7 @@ from models import tournaments
 from database.database import insert_query, read_query
 from models.users import User
 from models.tournaments import Owner
+from models.enums import TournamentRequest
 
 def create(
     tournament_data: tournaments.TournamentCreate,
@@ -58,6 +59,7 @@ def get_all():
     sql_params = ()
 
     result = read_query(sql, sql_params)
+
     tournaments_data = []
     for row in result:
         owner = Owner(id=row[11], username=row[12], profile_img=row[13])
@@ -111,6 +113,28 @@ def get_one(tournament_id):
 
         return tournament
 
+def get_tournament_requests(tournament_id: int):
+    sql = """
+            SELECT id, user_id, full_name, country, sports_club, status 
+            FROM tournament_requests
+            WHERE tournament_id = ?
+        """
+    sql_params = (tournament_id,)
+    
+    result = read_query(sql, sql_params)
+    requests_list = []
+    for request_tuple in result:
+        request_dict = {
+            "id": request_tuple[0],
+            "full_name": request_tuple[2],
+            "country": request_tuple[3],
+            "sports_club": request_tuple[4],
+            "status": TournamentRequest(request_tuple[5]),
+        }
+        requests_list.append(request_dict)
+
+    return requests_list
+
 
 def get_owner_data_by_id(owner_id):
     sql = """
@@ -132,3 +156,10 @@ def get_owner_data_by_id(owner_id):
 def get_format(id: int):
     data = read_query('SELECT format FROM  tournaments WHERE id = ?', (id,))
     return data[0][0]
+
+
+def get_tournament_by_id(tournament_id):
+    sql = "SELECT * FROM tournaments WHERE id = ?"
+    sql_params = (tournament_id,)
+
+    return len(read_query(sql, sql_params)) > 0

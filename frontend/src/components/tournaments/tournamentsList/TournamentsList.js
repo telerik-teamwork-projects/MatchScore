@@ -97,7 +97,6 @@ export const TournamentsList = ({ user, token, tournaments }) => {
                     userId={user?.id}
                     tournamentId={selectedTournament.id}
                     token={token}
-                    isOpen={requestWindow}
                     onClose={closeRequestModal}
                 />
             )}

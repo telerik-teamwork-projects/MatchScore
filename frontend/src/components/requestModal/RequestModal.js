@@ -4,13 +4,7 @@ import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 import { sendJoinRequest } from "../../services/authService";
 
-export const RequestModal = ({
-    userId,
-    tournamentId,
-    token,
-    isOpen,
-    onClose,
-}) => {
+export const RequestModal = ({ userId, tournamentId, token, onClose }) => {
     const [error, setError] = useState(null);
     const [successMsg, setSuccessMsg] = useState(null);
     const [formData, setFormData] = useState({
@@ -36,15 +30,12 @@ export const RequestModal = ({
             formData.sports_club = "";
             setError(null);
             setSuccessMsg(result);
-            console.log(error);
         } catch (error) {
             formData.full_name = "";
             formData.country = "";
             formData.sports_club = "";
             setSuccessMsg(null);
             setError(error.response.data.detail);
-            console.log(error);
-            console.log(successMsg);
         }
     };
 
@@ -59,6 +50,7 @@ export const RequestModal = ({
                         placeholder="Full Name"
                         value={formData.full_name}
                         onChange={handleChange}
+                        autoComplete="text"
                     />
                     <input
                         type="text"
@@ -66,6 +58,7 @@ export const RequestModal = ({
                         placeholder="Country"
                         value={formData.country}
                         onChange={handleChange}
+                        autoComplete="text"
                     />
                     <input
                         type="text"
@@ -73,6 +66,7 @@ export const RequestModal = ({
                         placeholder="Sports Club"
                         value={formData.sports_club}
                         onChange={handleChange}
+                        autoComplete="text"
                     />
 
                     {error && <ErrorMessage message={error} />}

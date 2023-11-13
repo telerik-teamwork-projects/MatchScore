@@ -1,14 +1,20 @@
-import "./createTournament.scss";
+import "./createTournamentModal.scss";
 import { useState } from "react";
 
 import { create } from "../../../services/tournamentService";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 
-export const CreateTournament = ({ user, token, setTournaments }) => {
+export const CreateTournamentModal = ({
+    user,
+    token,
+    setTournaments,
+    onClose,
+}) => {
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
         format: "",
         title: "",
+        description: "",
         match_format: "",
         rounds: "",
         third_place: false,
@@ -32,31 +38,21 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
 
             const result = await create(formDataWithUserId, token);
             setTournaments((prevTournaments) => [result, ...prevTournaments]);
-            setFormData({
-                format: "",
-                title: "",
-                match_format: "",
-                rounds: "",
-                third_place: false,
-                status: "",
-                location: "",
-                start_date: "",
-                end_date: "",
-            });
+            onClose();
         } catch (error) {
             setError(error.response.data.detail);
         }
     };
 
     return (
-        <>
+        <div className="createModal">
             {(user?.role === "admin" || user?.role === "director") && (
                 <form
-                    className="createContainer"
+                    className="createFormContainer"
                     method="post"
                     onSubmit={(e) => onSubmit(e)}
                 >
-                    <div className="createWrapper">
+                    <div className="createFormWrapper">
                         <div className="createTop">
                             <h1>Create Tournament</h1>
 
@@ -69,6 +65,7 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
                                 onChange={(e) => onChange(e)}
                                 autoComplete="text"
                             />
+
                             <input
                                 className="createInput"
                                 placeholder="Rounds"
@@ -86,6 +83,14 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
                                 value={formData.location}
                                 onChange={(e) => onChange(e)}
                                 autoComplete="text"
+                            />
+
+                            <textarea
+                                className="createInput"
+                                placeholder="Short Description"
+                                name="description"
+                                value={formData.description}
+                                onChange={(e) => onChange(e)}
                             />
 
                             <select
@@ -178,10 +183,17 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
                         <hr className="createHr" />
                         <div className="createBottom">
                             <button className="createButton">Create</button>
+                            <button
+                                className="closeButton"
+                                type="button"
+                                onClick={onClose}
+                            >
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </form>
             )}
-        </>
+        </div>
     );
 };

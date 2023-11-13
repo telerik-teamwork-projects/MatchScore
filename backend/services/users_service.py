@@ -19,13 +19,7 @@ def register(user_data: users.User):
     sql_params = (username, email, password, role.value)
     registered_user_id = insert_query(sql, sql_params)
 
-    user = get_user_by_id(registered_user_id)
-
-    response_data = users.User(
-        **user
-    )
-
-    return response_data
+    return get_user_by_id(registered_user_id)
 
 
 def login(

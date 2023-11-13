@@ -1,0 +1,113 @@
+.createModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+
+    .createFormContainer {
+        background-color: #fff;
+        height: 90vh;
+        width: 40%;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 15px;
+
+        .createFormWrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .createTop {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 60%;
+                gap: 5px;
+
+                .dateInputContainer {
+                    display: flex;
+                    align-items: center;
+                    flex-direction: column;
+                    justify-content: center;
+                    gap: 5px;
+                    width: 93%;
+
+                    .dateInputLabel {
+                        font-size: 14px;
+                        color: #555;
+                    }
+
+                    .dateInput {
+                        width: 100%;
+                        padding: 10px;
+                        margin: 5px 0;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                        font-size: 16px;
+                    }
+                }
+
+                .createInput,
+                .createSelect {
+                    width: 100%;
+                    padding: 10px;
+                    margin: 10px 0;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    font-size: 16px;
+                }
+            }
+
+            .createHr {
+                border: 1px solid #ccc;
+                width: 100%;
+            }
+
+            .createBottom {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                .createButton {
+                    background-color: #007bff;
+                    color: #fff;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 18px;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
+                    margin-top: 10px;
+
+                    &:hover {
+                        background: #0056b3;
+                    }
+                }
+
+                .closeButton {
+                    background-color: #d70000;
+                    color: white;
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 18px;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
+                    margin-top: 10px;
+
+                    &:hover {
+                        background: #a00202;
+                    }
+                }
+            }
+        }
+    }
+}

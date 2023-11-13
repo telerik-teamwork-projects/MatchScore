@@ -32,3 +32,9 @@ class TournamentFormat(Enum):
 
     def __str__(self):
         return str(self.value).capitalize()
+
+
+class TournamentRequest(Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
