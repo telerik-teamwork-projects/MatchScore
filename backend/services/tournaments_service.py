@@ -7,7 +7,8 @@ from models import tournaments
 
 from database.database import insert_query, read_query, get_connection
 from models.users import User
-from models.tournaments import Owner, TournamentLeagueCreate, Tournament, TournamentLeagueResponse
+from models.tournaments import Owner, TournamentLeagueCreate, Tournament, TournamentLeagueResponse, DbTournament, \
+    TournamentRoundResponse
 from mariadb import Error
 from mariadb.connections import Connection
 
@@ -138,9 +139,9 @@ def get_owner_data_by_id(owner_id):
         return user
 
 
-def get_format(id: int):
-    data = read_query('SELECT format FROM  tournaments WHERE id = ?', (id,))
-    return data[0][0]
+def find(id: int):
+    data = read_query('SELECT * FROM tournaments WHERE id = ?', (id,))
+    return next((DbTournament.from_query_result(*row) for row in data), None)
 
 
 def create_league(data: TournamentLeagueCreate, user: User):
@@ -177,6 +178,36 @@ def create_league(data: TournamentLeagueCreate, user: User):
                                                               data.description, data.match_format.value, rounds,
                                                               data.status.value, data.location, data.start_date,
                                                               end_date, owner)
+        except Error as err:
+            conn.rollback()
+            logging.exception(err.msg)
+            raise InternalServerError("Something went wrong")
+
+
+def view_league_tournament(tournament: DbTournament):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute('''SELECT m.round, m.id, p.full_name, pm.score, pm.points
+                                FROM players_matches pm, players p, matches m
+                                WHERE pm.match_id = m.id AND p.id = pm.player_id AND m.tournaments_id = ?
+                                ORDER BY m.round, m.id''', (tournament.id,))
+            data = list(cursor)
+            rounds = []
+            # for r in range(1, tournament.rounds + 1):
+            #     matches = [el[1:] for el in data if el[0] == r]
+            #     rounds.append([r, matches])
+            for r in range(1, tournament.rounds + 1):
+                matches = []
+                for el in data:
+                    if el[0] == r:
+                        if matches and matches[-1][0] == el[1]:
+                            matches[-1][1].append(el[2:])
+                        else:
+                            matches.append([el[1], [el[2:]]])
+                rounds.append([r, matches])
+            conn.commit()
+            return TournamentRoundResponse.from_query_result(tournament.id, rounds)
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)

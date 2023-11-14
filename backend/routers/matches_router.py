@@ -4,7 +4,7 @@ from typing import List
 from fastapi import APIRouter
 
 from common.authorization import get_current_user
-from common.exceptions import Unauthorized, NotFound, Forbidden
+from common.exceptions import Unauthorized, NotFound, Forbidden, BadRequest
 from common.utils import is_admin, is_director
 from models.matches import Match, MatchResponse, MatchScoreUpdate, MatchBase, MatchDateUpdate, MatchPlayerUpdate
 from models.users import User
@@ -19,6 +19,9 @@ router = APIRouter()
 def create_match(match: Match, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized('User has insufficient privileges')
+    p_count = len({p.full_name for p in match.participants})
+    if p_count != len(match.participants):
+        raise BadRequest("Participants should be unique!")
 
     return matches_service.create(match)
 
@@ -63,6 +66,9 @@ def update_players(id: int, match_players: List[MatchPlayerUpdate], current_user
         raise NotFound(f'Match {id} does not exist')
     if match.tournaments_id is not None:
         raise Forbidden("The participants cannot be changed! The match is part of tournament!")
+    p_count = len({p.player for p in match_players})
+    if p_count != len(match_players):
+        raise BadRequest("Participants should be unique!")
     participants = matches_service.find_match_participants(id, match_players)
     if participants is not None:
         raise Forbidden('The participants provided already play in this match!')

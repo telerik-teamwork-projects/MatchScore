@@ -13,7 +13,7 @@ def create(match: Match):
         try:
             cursor.execute('INSERT INTO matches(date, format) VALUES(?,?)', (match.date, match.format.value))
             generated_id = cursor.lastrowid
-            cursor.execute('SELECT * FROM matches WHERE id = ?', (generated_id,))
+            cursor.execute('SELECT id, date, format FROM matches WHERE id = ?', (generated_id,))
             inserted_row = cursor.fetchone()
             participants = []
             score = []
@@ -28,7 +28,7 @@ def create(match: Match):
                 cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
                                (player_id, generated_id))
                 participants.append((player_id, p.full_name))
-                score.append((generated_id, p.full_name, 0, 0))
+                score.append((p.full_name, 0, 0))
             conn.commit()
             inserted_row = list(inserted_row)
             inserted_row.extend([participants, score])
@@ -86,13 +86,13 @@ def update_score(match: MatchBase, participants: List[MatchScoreUpdate]):
             if len(data) == 2:
                 if data[0][1] == data[1][1]:
                     cursor.execute('''UPDATE players_matches SET points = 1 WHERE match_id = ?''', (match.id,))
-                    score_updated.extend([(match.id, data[0][3], data[0][1], 1), (match.id, data[1][3], data[0][1], 1)])
+                    score_updated.extend([(data[0][3], data[0][1], 1), (data[1][3], data[0][1], 1)])
                 else:
                     cursor.execute('''UPDATE players_matches SET points = 2 WHERE match_id = ? AND player_id = ?''',
                                    (match.id, data[0][0]))
                     cursor.execute('''UPDATE players_matches SET points = 0 WHERE match_id = ? AND player_id = ?''',
                                    (match.id, data[1][0]))
-                    score_updated.extend([(match.id, data[0][3], data[0][1], 2), (match.id, data[1][3], data[1][1], 0)])
+                    score_updated.extend([(data[0][3], data[0][1], 2), (data[1][3], data[1][1], 0)])
                 participants_updated.extend([(data[0][0], data[0][3]), (data[1][0], data[1][3])])
             elif len(data) > 2:
                 if data[0][1] == data[1][1] == data[2][1]:
@@ -108,12 +108,11 @@ def update_score(match: MatchBase, participants: List[MatchScoreUpdate]):
                                    (match.id, data[0][0]))
                     cursor.execute('''UPDATE players_matches SET points = 2 WHERE match_id = ? AND player_id in ?''',
                                    (match.id, (data[1][0], data[2][0])))
-                cursor.execute('''UPDATE players_matches SET points = 0 WHERE match_id = ? 
-                                                                        AND player_id not in ?''',
+                cursor.execute('''UPDATE players_matches SET points = 0 WHERE match_id = ? AND player_id not in ?''',
                                (match.id, (data[0][0], data[1][0], data[2][0])))
                 for p in data:
                     participants_updated.append([p[0], p[3]])
-                    score_updated.append([match.id, p[3], p[1], p[2]])
+                    score_updated.append([p[3], p[1], p[2]])
             conn.commit()
             return MatchResponse.from_query_result(match.id, match.date, match.format, participants_updated,
                                                    score_updated)
@@ -152,7 +151,7 @@ def update_players(match: MatchBase, players_update: List[MatchPlayerUpdate]):
                     player_id = player[0]
                 cursor.execute('INSERT INTO players_matches VALUES(?,?,?,?)', (player_id, match.id, score, points))
                 participants.append((player_id, p.player))
-                scores.append((match.id, p.player, score))
+                scores.append((p.player, score, points))
             conn.commit()
             return MatchResponse.from_query_result(match.id, match.date, match.format, participants, scores)
         except Error as err:

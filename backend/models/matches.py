@@ -6,15 +6,13 @@ from models.users import PlayerProfile
 
 
 class MatchScore(BaseModel):
-    match_id: int | None = None
     player: str | None = None
     score: int | None = None
     points: int | None = None
 
     @classmethod
-    def from_query_result(cls, match_id, player, score=0, points=0):
+    def from_query_result(cls, player, score=0, points=0):
         return cls(
-            match_id=match_id,
             player=player,
             score=score,
             points=points)
