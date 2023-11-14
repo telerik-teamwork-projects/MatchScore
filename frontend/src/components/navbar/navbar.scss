@@ -54,16 +54,31 @@
                 align-items: center;
                 justify-content: flex-end;
                 gap: 15px;
-            }
 
-            .navbarRightLink {
-                font-size: 24px;
-                text-decoration: none;
-                color: inherit;
-            }
+                .navbarNotifications {
+                    background: #007bff;
+                    color: #fff;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 6px 10px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
 
-            .navbarRightLink:hover {
-                color: #1775ee;
+                    &:hover {
+                        background: #0056b3;
+                    }
+                }
+
+                .navbarRightLink {
+                    font-size: 24px;
+                    text-decoration: none;
+                    color: inherit;
+                }
+
+                .navbarRightLink:hover {
+                    color: #1775ee;
+                }
             }
         }
     }

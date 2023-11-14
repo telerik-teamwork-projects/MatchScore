@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import List
 from models.enums import MatchFormat
-from models.users import PlayerProfile
+from models.players import PlayerProfile
 
 
 class MatchScore(BaseModel):

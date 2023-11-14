@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from models.enums import TournamentRequest 
+from models.enums import Request 
 
 class TournamentRequest(BaseModel):
     id: int
@@ -9,4 +9,4 @@ class TournamentRequest(BaseModel):
     full_name: str
     country: Optional[str]
     sports_club: Optional[str]
-    status: TournamentRequest = TournamentRequest.PENDING
+    status: Request = Request.PENDING

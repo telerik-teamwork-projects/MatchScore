@@ -7,12 +7,13 @@ from starlette.staticfiles import StaticFiles
 from routers.users_router import router as users_router
 from routers.matches_router import router as matches_router
 from routers.tournaments_router import router as tournaments_router
+from routers.players_router import router as players_router
 
 app = FastAPI()
 app.include_router(users_router, prefix='/users')
 app.include_router(matches_router, prefix='/matches')
 app.include_router(tournaments_router, prefix='/tournaments')
-
+app.include_router(players_router, prefix="/players")
 
 app.add_middleware(
     CORSMiddleware,

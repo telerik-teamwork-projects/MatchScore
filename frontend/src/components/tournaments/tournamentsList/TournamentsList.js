@@ -5,7 +5,7 @@ import { MoreVert } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { USER_BASE_PATH } from "../../../routes/paths";
 import { useState } from "react";
-import { RequestModal } from "../../requestModal/RequestModal";
+import { RequestJoinTournament } from "../../requestModal/requestJoinTournament/RequestJoinTournament";
 
 export const TournamentsList = ({ user, token, tournaments }) => {
     const [requestWindow, setRequestWindow] = useState(false);
@@ -93,7 +93,7 @@ export const TournamentsList = ({ user, token, tournaments }) => {
                 </div>
             ))}
             {requestWindow && (
-                <RequestModal
+                <RequestJoinTournament
                     userId={user?.id}
                     tournamentId={selectedTournament.id}
                     token={token}

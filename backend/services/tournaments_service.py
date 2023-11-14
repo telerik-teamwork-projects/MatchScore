@@ -3,7 +3,7 @@ from models import tournaments
 from database.database import insert_query, read_query
 from models.users import User
 from models.tournaments import Owner
-from models.enums import TournamentRequest
+from models.enums import Request
 
 def create(
     tournament_data: tournaments.TournamentCreate,
@@ -131,7 +131,7 @@ def get_tournament_requests(tournament_id: int):
             "full_name": request_tuple[3],
             "country": request_tuple[4],
             "sports_club": request_tuple[5],
-            "status": TournamentRequest(request_tuple[6]),
+            "status": Request(request_tuple[6]),
         }
         requests_list.append(request_dict)
 

@@ -1,10 +1,15 @@
-import "./requestModal.scss";
+import "./requestJoinTournament.scss";
 import { useState } from "react";
-import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
-import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
-import { sendJoinRequest } from "../../services/authService";
+import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
+import { SuccessMessage } from "../../responseMessages/successMessages/SuccessMessages";
+import { sendJoinRequest } from "../../../services/authService";
 
-export const RequestModal = ({ userId, tournamentId, token, onClose }) => {
+export const RequestJoinTournament = ({
+    userId,
+    tournamentId,
+    token,
+    onClose,
+}) => {
     const [error, setError] = useState(null);
     const [successMsg, setSuccessMsg] = useState(null);
     const [formData, setFormData] = useState({
