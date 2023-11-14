@@ -1,15 +1,15 @@
 from database.database import read_query, insert_query, update_query
 
-from models.users import User, UserLoginResponse
+from models import users
 from models.enums import Role
 
 from common.hashing import hash_password
 from common.authorization import create_token
 from common.utils import save_image
-from common.responses import RequestOK
+from common.responses import RequestOK, RequestCreate
 
 
-def register(user_data: User):
+def register(user_data: users.User):
     username = user_data.username
     email = user_data.email
     password = hash_password(user_data.password)
@@ -21,7 +21,7 @@ def register(user_data: User):
 
     user = get_user_by_id(registered_user_id)
 
-    response_data = User(
+    response_data = users.User(
         **user
     )
 
@@ -29,17 +29,17 @@ def register(user_data: User):
 
 
 def login(
-        user: User
+        user: users.User
 ):
     token = create_token(user)
 
-    return UserLoginResponse(
+    return users.UserLoginResponse(
         token=token, user=user
     )
 
 
 def update(
-        target_user: User,
+        target_user: users.User,
         username: str,
         email: str,
         bio: str,
@@ -66,7 +66,7 @@ def update(
 
 
 def user_delete(
-        target_user: User
+        target_user: users.User
 ):
     sql = "DELETE FROM users WHERE id = ?"
     sql_params = (target_user.id,)
@@ -88,7 +88,7 @@ def get_users(username):
 
     user_data = []
     for row in result:
-        user = User(
+        user = users.User(
             id=row[0],
             username=row[1],
             email=row[2],
@@ -100,6 +100,27 @@ def get_users(username):
         )
         user_data.append(user)
     return user_data
+
+def create_join_request(
+    user_id: int, 
+    tournament_id: int, 
+    player_data: users.PlayerCreate
+):
+    sql = """
+        INSERT INTO tournament_requests 
+        (user_id, tournament_id, full_name, country, sports_club, status) 
+        VALUES (?, ?, ?, ?, ?, 'pending')
+    """
+    sql_params = (
+        user_id,
+        tournament_id,
+        player_data.full_name,
+        player_data.country,
+        player_data.sports_club,
+    )
+
+    insert_query(sql, sql_params)
+    return RequestCreate("Join request sent successfully")
 
 
 def get_user_by_username(username):
@@ -148,7 +169,7 @@ def get_user_by_id(user_id):
 
     result = read_query(sql, sql_params)
     if result:
-        user = User(
+        user = users.User(
             id=result[0][0],
             username=result[0][1],
             email=result[0][2],

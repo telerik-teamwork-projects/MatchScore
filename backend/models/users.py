@@ -47,3 +47,15 @@ class PlayerProfile(BaseModel):
             full_name=full_name,
             country=country,
             sports_club=sports_club)
+
+
+class PlayerCreate(BaseModel):
+    full_name: str
+    country: Optional[str] = None
+    sports_club: Optional[str] = None
+    
+
+class JoinRequestCreate(BaseModel):
+    full_name: str
+    country: str
+    sports_club: str

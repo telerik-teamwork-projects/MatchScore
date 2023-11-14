@@ -99,3 +99,26 @@ export const getUsers = async (searchQ) => {
         throw error;
     }
 };
+
+export const sendJoinRequest = async (
+    userId,
+    tournamentId,
+    token,
+    playerData
+) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/users/${userId}/join-request/${tournamentId}`,
+            JSON.stringify(playerData),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

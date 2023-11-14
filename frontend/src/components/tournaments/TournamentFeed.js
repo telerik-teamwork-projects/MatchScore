@@ -32,7 +32,11 @@ export const TournamentFeed = () => {
                 />
                 <hr className="tournamentHr" />
                 <h1 className="tournamentTitleMain">Tournaments</h1>
-                <TournamentsList user={user} tournaments={tournaments} />
+                <TournamentsList
+                    user={user}
+                    token={token}
+                    tournaments={tournaments}
+                />
             </div>
         </div>
     );

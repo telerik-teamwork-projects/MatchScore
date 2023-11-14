@@ -2,7 +2,7 @@ import "./register.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { register } from "../../services/authService";
-import { AuthErrorMessage } from "../../components/errorMessages/authErrorMessages";
+import { ErrorMessage } from "../../components/responseMessages/errorMessages/ErrorMessages";
 import { LOGIN } from "../../routes/routes";
 
 export const Register = () => {
@@ -91,7 +91,7 @@ export const Register = () => {
                                 required
                                 autoComplete="text"
                             />
-                            <AuthErrorMessage message={error} />
+                            <ErrorMessage message={error} />
 
                             <button className="registerButton">Sign Up</button>
                             <Link className="linkLogin" to={"/login"}>

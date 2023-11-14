@@ -2,7 +2,7 @@ import "./login.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/authContext";
-import { AuthErrorMessage } from "../../components/errorMessages/authErrorMessages";
+import { ErrorMessage } from "../../components/responseMessages/errorMessages/ErrorMessages";
 import { HOME } from "../../routes/routes";
 
 export const Login = () => {
@@ -64,7 +64,7 @@ export const Login = () => {
                             autoComplete="text"
                         />
 
-                        <AuthErrorMessage message={error} />
+                        <ErrorMessage message={error} />
 
                         <button className="loginButton">Log in</button>
                         <Link to={"/register"} className="linkRegister">

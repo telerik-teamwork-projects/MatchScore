@@ -2,7 +2,7 @@ import "./createTournament.scss";
 import { useState } from "react";
 
 import { create } from "../../../services/tournamentService";
-import { AuthErrorMessage } from "../../errorMessages/authErrorMessages";
+import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 
 export const CreateTournament = ({ user, token, setTournaments }) => {
     const [error, setError] = useState("");
@@ -174,7 +174,7 @@ export const CreateTournament = ({ user, token, setTournaments }) => {
                                 Include Third Place
                             </label>
                         </div>
-                        {error && <AuthErrorMessage message={error} />}
+                        {error && <ErrorMessage message={error} />}
                         <hr className="createHr" />
                         <div className="createBottom">
                             <button className="createButton">Create</button>

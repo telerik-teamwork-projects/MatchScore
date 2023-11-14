@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 from typing import List
+from models import tournaments, users
 
 from common.authorization import get_current_user
+from common.exceptions import Unauthorized, InternalServerError, BadRequest
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound
 from common.utils import is_admin, is_director
 from models.enums import TournamentFormat
@@ -41,6 +43,15 @@ def get_tournament(tournament_id):
         return tournaments_service.get_one(tournament_id)
     except Exception:
         raise InternalServerError("Retrieving tournament details failed")
+
+
+@router.post("/{tournament_id}/add/{user_id}")
+def add_player(
+    tournament_id: int,
+    user_id: int,
+    current_user: users.User = Depends(get_current_user)
+):
+    pass
 
 
 @router.post('/league', response_model=TournamentLeagueResponse, status_code=201)
