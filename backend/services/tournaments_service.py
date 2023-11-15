@@ -181,6 +181,14 @@ def accept_player_to_tournament(request_id: int):
     insert_query(sql, sql_params)
 
 
+def reject_player_from_tournament(request_id: int):
+    tournament_request = get_tournament_request_by_id(request_id)
+    if not tournament_request:
+        raise NotFound("Tournament not found")
+    
+    update_tournament_request_status(request_id, "rejected")
+
+    
 
 def get_owner_data_by_id(owner_id):
     sql = """

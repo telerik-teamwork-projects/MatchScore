@@ -55,10 +55,7 @@ export const getRequests = async (tournamentId, token) => {
     }
 };
 
-export const acceptTournamentRequest = async (
-    requestId,
-    token
-) => {
+export const acceptTournamentRequest = async (requestId, token) => {
     try {
         const response = await axios.post(
             `${USER_BASE_PATH}/tournaments/requests/accept/${requestId}`,
@@ -75,14 +72,10 @@ export const acceptTournamentRequest = async (
     }
 };
 
-export const rejectTournamentRequest = async (
-    playerId,
-    tournamentId,
-    token
-) => {
+export const rejectTournamentRequest = async (requestId, token) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/tournaments/${tournamentId}/reject/${playerId}`,
+            `${USER_BASE_PATH}/tournaments/requests/reject/${requestId}`,
             {},
             {
                 headers: {

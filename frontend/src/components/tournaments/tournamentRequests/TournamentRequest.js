@@ -30,9 +30,9 @@ export const TournamentRequest = ({
         }
     };
 
-    const onReject = async (requestId, playerId, tournamentId) => {
+    const onReject = async (requestId) => {
         try {
-            await rejectTournamentRequest(playerId, tournamentId, token);
+            await rejectTournamentRequest(requestId, token);
             setError(null);
             setSuccess("User rejected");
             updateStatus(requestId, "rejected");

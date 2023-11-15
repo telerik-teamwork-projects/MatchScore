@@ -69,7 +69,17 @@ def accept_player_to_tournament(
     return RequestOK("Player accepted to tournament")
 
 
-# @router.post("/")
+@router.post("/requests/reject/{request_id}")
+def reject_player_from_tournament(
+    request_id: int,
+    current_user: users.User = Depends(get_current_user)
+):
+    
+    if current_user.role.value not in ["admin", "director"]:
+        raise Unauthorized("You are not authorized")
+    
+    tournaments_service.reject_player_from_tournament(request_id)
+    return RequestOK("Player rejected from entering tournaments")
 
 
 @router.post('/league', response_model=TournamentLeagueResponse, status_code=201)
