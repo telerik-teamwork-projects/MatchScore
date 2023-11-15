@@ -1,14 +1,37 @@
 import "./tournamentDetails.scss";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getOne } from "../../../services/tournamentService";
 import { TournamentTree } from "../tournamentTree/TournamentTree";
 import { PROFILE } from "../../../routes/routes";
+import { TournamentRequest } from "../tournamentRequests/TournamentRequest";
+import { AuthContext } from "../../../contexts/authContext";
+import { getRequests } from "../../../services/tournamentService";
 
 export const TournamentDetails = () => {
     const { tournamentId } = useParams();
+    const { token, user } = useContext(AuthContext);
     const [tournament, setTournament] = useState(null);
+
+    const [requestModalOpen, setRequestModalOpen] = useState(false);
+    const [requestsResult, setRequestsResult] = useState(null);
+
+    const closeRequestModal = () => {
+        setRequestModalOpen(false);
+    };
+
+    const onRequests = async (e) => {
+        e.preventDefault();
+
+        try {
+            const requestsData = await getRequests(tournamentId, token);
+            setRequestsResult(requestsData);
+            setRequestModalOpen(true);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     useEffect(() => {
         try {
@@ -26,7 +49,9 @@ export const TournamentDetails = () => {
         <div className="tournamentDetails">
             <h1 className="tournamentTitle">{tournament?.title}</h1>
             <p className="tournamentDesc">
-                {tournament?.description ? tournament?.description : "No description"}
+                {tournament?.description
+                    ? tournament?.description
+                    : "No description"}
             </p>
             <div className="tournamentData">
                 <div className="tournamentOwner">
@@ -70,10 +95,28 @@ export const TournamentDetails = () => {
                         {tournament?.end_date.slice(0, 10)}
                     </span>
                 </div>
+                {user?.id === tournament?.owner.id && (
+                    <div className="requestsBtns">
+                        <button
+                            className="openRequestsbtn"
+                            type="button"
+                            onClick={(e) => onRequests(e)}
+                        >
+                            Show Requests
+                        </button>
+                    </div>
+                )}
             </div>
             <div>
                 <TournamentTree tournament={tournament} />
             </div>
+            {requestModalOpen && (
+                <TournamentRequest
+                    requests={requestsResult}
+                    onClose={closeRequestModal}
+                    token={token}
+                />
+            )}
         </div>
     );
 };

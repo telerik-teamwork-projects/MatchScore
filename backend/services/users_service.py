@@ -1,6 +1,6 @@
 from database.database import read_query, insert_query, update_query
 
-from models import users
+from models import users, players
 from models.enums import Role
 
 from common.hashing import hash_password
@@ -19,13 +19,7 @@ def register(user_data: users.User):
     sql_params = (username, email, password, role.value)
     registered_user_id = insert_query(sql, sql_params)
 
-    user = get_user_by_id(registered_user_id)
-
-    response_data = users.User(
-        **user
-    )
-
-    return response_data
+    return get_user_by_id(registered_user_id)
 
 
 def login(
@@ -96,7 +90,6 @@ def get_users(username):
             bio=row[5],
             profile_img=row[6],
             cover_img=row[7],
-            player_id=row[8],
         )
         user_data.append(user)
     return user_data
@@ -104,7 +97,7 @@ def get_users(username):
 def create_join_request(
     user_id: int, 
     tournament_id: int, 
-    player_data: users.PlayerCreate
+    player_data: players.PlayerCreate
 ):
     sql = """
         INSERT INTO tournament_requests 
@@ -137,7 +130,6 @@ def get_user_by_username(username):
             "bio": result[0][5],
             "profile_img": result[0][6],
             "cover_img": result[0][7],
-            "player_id": result[0][8]
         }
         return user
 
@@ -158,7 +150,6 @@ def get_user_by_email(email):
             "bio": result[0][5],
             "profile_img": result[0][6],
             "cover_img": result[0][7],
-            "player_id": result[0][8]
         }
         return user
 
@@ -177,7 +168,6 @@ def get_user_by_id(user_id):
             bio=result[0][5],
             profile_img=result[0][6],
             cover_img=result[0][7],
-            player_id=result[0][8],
         )
         return user
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
 from common import exceptions, hashing, authorization
-from models import users
+from models import users, players
 from services import users_service
 from typing import List, Union
 from mariadb import IntegrityError
@@ -137,7 +137,7 @@ def user_delete(
 def send_join_request(
     user_id: int, 
     tournament_id: int, 
-    player_data: users.PlayerCreate, 
+    player_data: players.PlayerCreate, 
     current_user: users.User = Depends(authorization.get_current_user)
 ):
     if user_id != current_user.id:
@@ -149,3 +149,5 @@ def send_join_request(
         raise exceptions.IntegrityError("Join request already sent")
     except Exception:
         raise exceptions.InternalServerError("Sending join request failed")
+    
+

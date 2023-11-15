@@ -8,6 +8,7 @@ import { getUser, deleteUser } from "../../services/authService";
 import { HOME, PROFILE } from "../../routes/routes";
 import { USER_BASE_PATH } from "../../routes/paths";
 import { DeleteUserConfirmation } from "../../components/userDelete/DeleteUserConfirmation";
+import { RequestBecomePlayer } from "../../components/requestModal/requestBecomePlayer/RequestBecomePlayer";
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ export const Profile = () => {
     const { token, user } = useContext(AuthContext);
     const [profile, setProfile] = useState(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+    const [becomePlayerModalOpen, setBecomePlayerModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -40,6 +42,14 @@ export const Profile = () => {
 
     const cancelDelete = () => {
         setDeleteConfirmation(false);
+    };
+
+    const openBecomePlayer = () => {
+        setBecomePlayerModalOpen(true);
+    };
+
+    const closeBecomePlayer = () => {
+        setBecomePlayerModalOpen(false);
     };
 
     return (
@@ -80,6 +90,12 @@ export const Profile = () => {
                         {(profile?.id === user?.id ||
                             user?.role === "admin") && (
                             <div className="profileBtns">
+                                <button
+                                    className="profileRequestPlayerBtn"
+                                    onClick={() => openBecomePlayer()}
+                                >
+                                    Become Player
+                                </button>
                                 <Link
                                     to={`${PROFILE}/${userId}/update`}
                                     className="profileEditBtn"
@@ -114,6 +130,14 @@ export const Profile = () => {
                         <p>sdnasda</p>
                     </div>
                 </div>
+
+                {becomePlayerModalOpen && (
+                    <RequestBecomePlayer
+                        userId={userId}
+                        token={token}
+                        onClose={closeBecomePlayer}
+                    />
+                )}
             </div>
         </>
     );
