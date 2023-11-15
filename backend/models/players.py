@@ -18,6 +18,7 @@ class PlayerProfile(BaseModel):
 
 
 class PlayerCreate(BaseModel):
+    user_id: Optional[int] = None
     full_name: str
     country: Optional[str] = None
     sports_club: Optional[str] = None
@@ -31,3 +32,9 @@ class PlayerRequest(BaseModel):
     country: Optional[str]
     sports_club: Optional[str]
     status: Request = Request.PENDING
+
+
+# class JoinTournamentRequestCreate(PlayerCreate):
+    # full_name: str
+    # country: str
+    # sports_club: str

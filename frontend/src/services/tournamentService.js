@@ -55,10 +55,34 @@ export const getRequests = async (tournamentId, token) => {
     }
 };
 
-export const acceptRequest = async (userId, tournamentId, token) => {
+export const acceptTournamentRequest = async (
+    requestId,
+    token
+) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/tournaments/${tournamentId}/accept/${userId}`,
+            `${USER_BASE_PATH}/tournaments/requests/accept/${requestId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const rejectTournamentRequest = async (
+    playerId,
+    tournamentId,
+    token
+) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/tournaments/${tournamentId}/reject/${playerId}`,
             {},
             {
                 headers: {

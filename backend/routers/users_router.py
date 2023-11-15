@@ -1,9 +1,8 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
 from common import exceptions, hashing, authorization
-from models import users, players
+from models import users
 from services import users_service
 from typing import List, Union
-from mariadb import IntegrityError
 
 router = APIRouter()
 
@@ -132,22 +131,3 @@ def user_delete(
     except Exception:
         raise exceptions.InternalServerError("Deleting user failed")
     
-
-@router.post("/{user_id}/join-request/{tournament_id}")
-def send_join_request(
-    user_id: int, 
-    tournament_id: int, 
-    player_data: players.PlayerCreate, 
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    if user_id != current_user.id:
-        raise exceptions.Unauthorized("You are not authorized")
-
-    try:
-        return users_service.create_join_request(user_id, tournament_id, player_data)
-    except IntegrityError:
-        raise exceptions.IntegrityError("Join request already sent")
-    except Exception:
-        raise exceptions.InternalServerError("Sending join request failed")
-    
-

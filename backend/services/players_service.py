@@ -1,10 +1,9 @@
 from database.database import insert_query, read_query 
-from models.players import PlayerCreate, PlayerRequest
-from models.users import User
+from models.players import PlayerCreate, PlayerRequest, PlayerProfile
 from models.enums import Request
-from common.exceptions import Unauthorized, NotFound
+from models.users import User
+from common.exceptions import NotFound
 from common.responses import RequestCreate, RequestOK
-
 
 def send_player_request(
     user_id: int, 
@@ -75,6 +74,46 @@ def reject_player_request(request_id: int):
     return RequestOK("User request rejected")
 
 
+def create_tournament_join_request_no_player(
+    tournament_id: int, 
+    player_data: PlayerCreate,
+    current_user: User
+):
+    sql = """
+        INSERT INTO tournament_requests 
+        (player_id, tournament_id, user_id, full_name, country, sports_club, status) 
+        VALUES (NULL, ?, ?, ?, ?, ?, 'pending')
+    """
+    sql_params = (
+        tournament_id,
+        current_user.id,
+        player_data.full_name,
+        player_data.country,
+        player_data.sports_club
+    )
+
+    insert_query(sql, sql_params)
+
+
+def create_tournament_join_request_with_player(
+    tournament_id: int, 
+    player_data: PlayerProfile,
+):
+    sql = """
+        INSERT INTO tournament_requests 
+        (player_id, tournament_id, user_id, full_name, country, sports_club, status) 
+        VALUES (?, ?, NULL, ?, ?, ?, 'pending')
+    """
+    sql_params = (
+        player_data.id,
+        tournament_id,
+        player_data.full_name,
+        player_data.country,
+        player_data.sports_club,
+    )
+
+    insert_query(sql, sql_params)
+
 
 def get_player_request_by_id(request_id: int):
     sql = """
@@ -114,10 +153,38 @@ def update_player_request_status(request_id: int, status: str) -> None:
     insert_query(sql, sql_params)
 
 
-def insert_player(user_id: int, full_name: str, country: str, sports_club: str) -> int:
+def insert_player(user_id: int, full_name: str, country: str, sports_club: str):
     sql = """
         INSERT INTO players (user_id, full_name, country, sports_club)
         VALUES (?, ?, ?, ?);
     """
     sql_params = (user_id, full_name, country, sports_club)
     return insert_query(sql, sql_params)
+
+
+def get_player_by_user_id(user_id:int):
+    sql = "SELECT id, full_name, country, sports_club FROM players WHERE user_id = ?;"
+    sql_params = (user_id,)
+
+    result = read_query(sql, sql_params)
+
+    if result:
+        id, full_name, country, sports_club = result[0]
+
+        return PlayerProfile.from_query_result(
+            id, full_name, country, sports_club
+        )
+    
+def get_player_by_id(player_id:int):
+    sql = "SELECT id, full_name, country, sports_club FROM players WHERE id = ?;"
+    sql_params = (player_id,)
+
+    result = read_query(sql, sql_params)
+
+    if result:
+        id, full_name, country, sports_club = result[0]
+
+        return PlayerProfile.from_query_result(
+            id, full_name, country, sports_club
+        )
+    

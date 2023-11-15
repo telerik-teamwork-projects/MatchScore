@@ -100,15 +100,36 @@ export const getUsers = async (searchQ) => {
     }
 };
 
-export const sendJoinRequest = async (
-    userId,
+export const sendJoinTournamentRequestNoPlayer = async (
     tournamentId,
     token,
     playerData
 ) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/users/${userId}/join-request/${tournamentId}`,
+            `${USER_BASE_PATH}/players/tournament-request/${tournamentId}`,
+            JSON.stringify(playerData),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const sendJoinTournamentRequestWithPlayer = async (
+    tournamentId,
+    token,
+    playerData
+) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/players/tournament-request/${tournamentId}/existing`,
             JSON.stringify(playerData),
             {
                 headers: {

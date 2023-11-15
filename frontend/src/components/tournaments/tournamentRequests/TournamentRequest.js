@@ -1,24 +1,52 @@
 import "./tournamentRequest.scss";
 import { PROFILE } from "../../../routes/routes";
 import { Link } from "react-router-dom";
-import { acceptRequest } from "../../../services/tournamentService";
+import {
+    acceptTournamentRequest,
+    rejectTournamentRequest,
+} from "../../../services/tournamentService";
 import { useState } from "react";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../../responseMessages/successMessages/SuccessMessages";
 
-export const TournamentRequest = ({ requests, onClose, token }) => {
+export const TournamentRequest = ({
+    requests,
+    setRequests,
+    onClose,
+    token,
+}) => {
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
 
-    const onAccept = async (userId, tournamentId) => {
+    const onAccept = async (requestId) => {
         try {
-            await acceptRequest(userId, tournamentId, token);
+            await acceptTournamentRequest(requestId, token);
             setError(null);
             setSuccess("User accepted");
+            updateStatus(requestId, "accepted");
         } catch (error) {
             setError(error.response.data.detail);
             setSuccess(null);
         }
+    };
+
+    const onReject = async (requestId, playerId, tournamentId) => {
+        try {
+            await rejectTournamentRequest(playerId, tournamentId, token);
+            setError(null);
+            setSuccess("User rejected");
+            updateStatus(requestId, "rejected");
+        } catch (error) {
+            setError(error.response.data.detail);
+            setSuccess(null);
+        }
+    };
+
+    const updateStatus = (requestId, status) => {
+        const updatedRequests = requests.map((request) =>
+            request.id === requestId ? { ...request, status } : request
+        );
+        setRequests(updatedRequests);
     };
 
     return (
@@ -48,23 +76,33 @@ export const TournamentRequest = ({ requests, onClose, token }) => {
                             <div>
                                 <strong>Status:</strong> {request.status}
                             </div>
-                            <hr />
-                            <div className="requestBtns">
-                                <button
-                                    className="requestAccept"
-                                    onClick={() => {
-                                        onAccept(
-                                            request.user_id,
-                                            request.tournament_id
-                                        );
-                                    }}
-                                >
-                                    Accept
-                                </button>
-                                <button className="requestReject">
-                                    Reject
-                                </button>
-                            </div>
+                            {request.status === "pending" && (
+                                <>
+                                    <hr />
+                                    <div className="requestBtns">
+                                        <button
+                                            className="requestAccept"
+                                            onClick={() => {
+                                                onAccept(request.id);
+                                            }}
+                                        >
+                                            Accept
+                                        </button>
+                                        <button
+                                            className="requestReject"
+                                            onClick={() => {
+                                                onReject(
+                                                    request.id,
+                                                    request.player_id,
+                                                    request.tournament_id
+                                                );
+                                            }}
+                                        >
+                                            Reject
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </li>
                     ))}
                 </ul>

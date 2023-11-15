@@ -2,14 +2,14 @@ import logging
 import random as rand
 from datetime import timedelta
 
-from common.exceptions import InternalServerError
-from models import tournaments
-
+from common.exceptions import InternalServerError, NotFound, BadRequest
+from models import tournaments, requests, players
+from services import players_service
 from database.database import insert_query, read_query, get_connection
 from models.enums import TournamentStatus
 from models.users import User
 from models.tournaments import Owner
-from models.enums import Request
+# from models.enums import Request
 from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
     TournamentRoundResponse
 from mariadb import Error
@@ -128,38 +128,58 @@ def get_one(tournament_id):
 
 def get_tournament_requests(tournament_id: int):
     sql = """
-            SELECT id, user_id, tournament_id, full_name, country, sports_club, status 
+            SELECT *
             FROM tournament_requests
             WHERE tournament_id = ?
         """
     sql_params = (tournament_id,)
 
     result = read_query(sql, sql_params)
-    requests_list = []
-    for request_tuple in result:
-        request_dict = {
-            "id": request_tuple[0],
-            "user_id": request_tuple[1],
-            "tournament_id": request_tuple[2],
-            "full_name": request_tuple[3],
-            "country": request_tuple[4],
-            "sports_club": request_tuple[5],
-            "status": Request(request_tuple[6]),
-        }
-        requests_list.append(request_dict)
+    
+    requests_list = [
+        requests.TournamentRequest.from_query_result(*request_tuple) for request_tuple in result
+    ]
 
     return requests_list
 
 
-def accept_user(tournament_id: int, user_id: int):
+def accept_player_to_tournament(request_id: int):
+    tournament_request  = get_tournament_request_by_id(request_id)
+    if not tournament_request:
+        raise NotFound("Tournament requests not found") 
+
+
+    tournament_id = tournament_request.tournament_id
+    player_id = tournament_request.player_id
+    user_id = tournament_request.user_id
+
+    if not player_id:
+        new_player_data = players.PlayerCreate(
+            user_id=user_id,
+            full_name=tournament_request.full_name,
+            country=tournament_request.country,
+            sports_club=tournament_request.sports_club
+        )
+
+        player_id = players_service.insert_player(
+                                        new_player_data.user_id,
+                                        new_player_data.full_name,
+                                        new_player_data.country,
+                                        new_player_data.sports_club
+                                        )
+
+    if is_user_accepted(tournament_id, player_id):
+        raise BadRequest("Player already in tournament")
+    
+    update_tournament_request_status(request_id, "accepted")
+
     sql = """
         INSERT INTO players_tournaments (tournament_id, player_id)
         VALUES (?, ?)
     """
-    sql_params = (tournament_id, user_id)
-    result = insert_query(sql, sql_params)
-    print(result)
-    return {"message": f"User {user_id} accepted into tournament {tournament_id}"}
+    sql_params = (tournament_id, player_id)
+    insert_query(sql, sql_params)
+
 
 
 def get_owner_data_by_id(owner_id):
@@ -305,3 +325,37 @@ def _manage_league_matches(cursor: Connection, id: int, data: TournamentLeagueCr
         t.remove(rounds - r + 1)
         t.insert(1, rounds - r + 1)
         date = date + timedelta(days=1)
+
+
+def update_tournament_request_status(request_id: int, status: str):
+    sql = """
+        UPDATE tournament_requests
+        SET status = ?
+        WHERE id = ?
+    """
+    sql_params = (status, request_id)
+    insert_query(sql, sql_params)
+
+
+def get_tournament_request_by_id(request_id: int):
+    sql = """
+        SELECT *
+        FROM tournament_requests
+        WHERE id = ?;
+    """
+    sql_params = (request_id,)
+    result = read_query(sql, sql_params)
+    id, player_id, tournament_id, user_id, full_name, country, sports_club, status, created_at = result[0]
+    if result:
+        return requests.TournamentRequest.from_query_result(
+            id=id,
+            player_id=player_id,
+            tournament_id=tournament_id,
+            user_id=user_id,
+            full_name=full_name,
+            country=country,
+            sports_club=sports_club,
+            status=status,
+            created_at=created_at
+        )
+    

@@ -94,27 +94,6 @@ def get_users(username):
         user_data.append(user)
     return user_data
 
-def create_join_request(
-    user_id: int, 
-    tournament_id: int, 
-    player_data: players.PlayerCreate
-):
-    sql = """
-        INSERT INTO tournament_requests 
-        (user_id, tournament_id, full_name, country, sports_club, status) 
-        VALUES (?, ?, ?, ?, ?, 'pending')
-    """
-    sql_params = (
-        user_id,
-        tournament_id,
-        player_data.full_name,
-        player_data.country,
-        player_data.sports_club,
-    )
-
-    insert_query(sql, sql_params)
-    return RequestCreate("Join request sent successfully")
-
 
 def get_user_by_username(username):
     sql = "SELECT * FROM users WHERE username = ?"

@@ -113,6 +113,7 @@ export const TournamentDetails = () => {
             {requestModalOpen && (
                 <TournamentRequest
                     requests={requestsResult}
+                    setRequests={setRequestsResult}
                     onClose={closeRequestModal}
                     token={token}
                 />
