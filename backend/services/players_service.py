@@ -29,7 +29,8 @@ def send_player_request(
 def get_all_player_requests():
     sql = """
         SELECT id, requester_id, full_name, country, sports_club, status
-        FROM players_requests;
+        FROM players_requests
+        ORDER BY id DESC;
     """
     sql_params = ()
     result = read_query(sql, sql_params)
@@ -48,10 +49,7 @@ def get_all_player_requests():
     return player_requests
 
 
-def accept_player_request(request_id:int, current_user: User):
-
-    if not current_user.role.value == "admin":
-        raise Unauthorized("You are not authorized to accept player requests")
+def accept_player_request(request_id:int):
 
     player_request = get_player_request_by_id(request_id)
     
@@ -65,6 +63,17 @@ def accept_player_request(request_id:int, current_user: User):
     insert_player(player_request.requester_id, **player_info)
 
     return RequestOK("User accepted as a player")
+
+
+def reject_player_request(request_id: int):
+    player_request = get_player_request_by_id(request_id)
+
+    if not player_request:
+        raise NotFound("Player request not found")
+    
+    update_player_request_status(request_id, Request.REJECTED.value)
+    return RequestOK("User request rejected")
+
 
 
 def get_player_request_by_id(request_id: int):

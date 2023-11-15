@@ -102,12 +102,14 @@ export const Navbar = () => {
                         <div className="navbarRightInfo">
                             {token ? (
                                 <>
-                                    <button
-                                        className="navbarNotifications"
-                                        onClick={(e) => onNotifications(e)}
-                                    >
-                                        Notifications
-                                    </button>
+                                    {user?.role === "admin" && (
+                                        <button
+                                            className="navbarNotifications"
+                                            onClick={(e) => onNotifications(e)}
+                                        >
+                                            Notifications
+                                        </button>
+                                    )}
                                     <Link
                                         className="navbarRightLink"
                                         to={`/profile/${user.id}`}
@@ -148,6 +150,7 @@ export const Navbar = () => {
             {notifiacationsModalOpen && (
                 <PlayerRequests
                     requests={notificationsResult}
+                    setRequests={setNotificationsResult}
                     onClose={closeMotificationsModal}
                     token={token}
                 />

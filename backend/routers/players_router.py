@@ -30,4 +30,17 @@ def accept_player_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
 ):
-    return players_service.accept_player_request(request_id, current_user)
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+    
+    return players_service.accept_player_request(request_id)
+
+@router.post("/requests/reject/{request_id}")
+def reject_player_request(
+    request_id: int,
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+
+    return players_service.reject_player_request(request_id)
