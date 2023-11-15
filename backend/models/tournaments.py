@@ -69,7 +69,6 @@ class TournamentLeagueCreate(BaseModel):
     description: str | None = None
     match_format: MatchFormat = MatchFormat.TIME
     rounds: int | None = None
-    status: TournamentStatus = TournamentStatus.OPEN
     location: str | None = None
     start_date: datetime
     end_date: datetime | None = None
@@ -83,14 +82,13 @@ class TournamentLeagueResponse(BaseModel):
     description: str | None = None
     match_format: str
     rounds: int
-    status: str
     location: str | None = None
     start_date: datetime
     end_date: datetime
     owner: Owner
 
     @classmethod
-    def from_query_result(cls, id, format, title, description, match_format, rounds, status, location, start_date,
+    def from_query_result(cls, id, format, title, description, match_format, rounds, location, start_date,
                           end_date, owner):
         owner = Owner.from_query_result(*owner)
         return cls(id=id,
@@ -99,7 +97,6 @@ class TournamentLeagueResponse(BaseModel):
                    description=description,
                    match_format=str(MatchFormat(match_format)),
                    rounds=rounds,
-                   status=str(TournamentStatus(status)),
                    location=location,
                    start_date=start_date,
                    end_date=end_date,

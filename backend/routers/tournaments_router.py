@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import List
-from models import tournaments, users
 
 from common.authorization import get_current_user
-from common.exceptions import Unauthorized, InternalServerError, BadRequest
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound
 from common.utils import is_admin, is_director
 from models.enums import TournamentFormat
@@ -22,7 +20,6 @@ MIN_PARTICIPANTS = 2
 def create_tournament(tournament_data: TournamentCreate, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("You are not authorized")
-
     try:
         return tournaments_service.create(tournament_data, current_user)
     except Exception:
@@ -47,9 +44,9 @@ def get_tournament(tournament_id):
 
 @router.post("/{tournament_id}/add/{user_id}")
 def add_player(
-    tournament_id: int,
-    user_id: int,
-    current_user: users.User = Depends(get_current_user)
+        tournament_id: int,
+        user_id: int,
+        current_user: User = Depends(get_current_user)
 ):
     pass
 
@@ -58,6 +55,8 @@ def add_player(
 def create_league_tournament(tournament: TournamentLeagueCreate, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("User has insufficient privileges")
+    if tournament.format != TournamentFormat.LEAGUE.value:
+        raise BadRequest("Wrong tournament format!")
     p_count = len({p.full_name for p in tournament.participants})
     if p_count != len(tournament.participants):
         raise BadRequest("Participants should be unique!")

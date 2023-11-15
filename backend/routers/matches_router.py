@@ -22,6 +22,8 @@ def create_match(match: Match, current_user: User = Depends(get_current_user)):
     p_count = len({p.full_name for p in match.participants})
     if p_count != len(match.participants):
         raise BadRequest("Participants should be unique!")
+    if p_count < 2:
+        raise BadRequest("Participants must be at least 2!")
 
     return matches_service.create(match)
 

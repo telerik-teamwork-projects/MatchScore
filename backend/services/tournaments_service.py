@@ -6,8 +6,9 @@ from common.exceptions import InternalServerError
 from models import tournaments
 
 from database.database import insert_query, read_query, get_connection
+from models.enums import TournamentStatus
 from models.users import User
-from models.tournaments import Owner, TournamentLeagueCreate, Tournament, TournamentLeagueResponse, DbTournament, \
+from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
     TournamentRoundResponse
 from mariadb import Error
 from mariadb.connections import Connection
@@ -154,7 +155,7 @@ def create_league(data: TournamentLeagueCreate, user: User):
                                                         status, location, start_date, end_date, owner_id)
                                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                            (data.format.value, data.title, data.description, data.match_format.value,
-                            rounds, data.status.value, data.location, data.start_date, end_date, user.id))
+                            rounds, TournamentStatus.CLOSED.value, data.location, data.start_date, end_date, user.id))
             tournament_id = cursor.lastrowid
             cursor.execute('SELECT id, username, profile_img FROM users WHERE id = ?', (user.id,))
             owner = cursor.fetchone()
@@ -176,8 +177,7 @@ def create_league(data: TournamentLeagueCreate, user: User):
             conn.commit()
             return TournamentLeagueResponse.from_query_result(tournament_id, data.format.value, data.title,
                                                               data.description, data.match_format.value, rounds,
-                                                              data.status.value, data.location, data.start_date,
-                                                              end_date, owner)
+                                                              data.location, data.start_date, end_date, owner)
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)
@@ -194,9 +194,6 @@ def view_league_tournament(tournament: DbTournament):
                                 ORDER BY m.round, m.id''', (tournament.id,))
             data = list(cursor)
             rounds = []
-            # for r in range(1, tournament.rounds + 1):
-            #     matches = [el[1:] for el in data if el[0] == r]
-            #     rounds.append([r, matches])
             for r in range(1, tournament.rounds + 1):
                 matches = []
                 for el in data:
