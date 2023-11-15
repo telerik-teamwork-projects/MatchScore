@@ -40,10 +40,3 @@ def save_image(upload_file: Union[UploadFile, str], folder: str):
         image_file.write(upload_file.file.read())
 
     return f"/{directory_name}/{filename}"
-
-
-def is_knockout(id: int):
-    if TournamentFormat.KNOCKOUT.value == tournaments_service.get_format(id):
-        return True
-
-    return False

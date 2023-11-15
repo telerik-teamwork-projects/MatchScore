@@ -6,15 +6,13 @@ from models.players import PlayerProfile
 
 
 class MatchScore(BaseModel):
-    match_id: int | None = None
     player: str | None = None
     score: int | None = None
     points: int | None = None
 
     @classmethod
-    def from_query_result(cls, match_id, player, score=0, points=0):
+    def from_query_result(cls, player, score=0, points=0):
         return cls(
-            match_id=match_id,
             player=player,
             score=score,
             points=points)
@@ -30,34 +28,39 @@ class MatchPlayerUpdate(BaseModel):
     player_prev: str
 
 
-class MatchScoreUpdate(MatchPlayerUpdate):
-    player_prev: str | None = None
+class MatchScoreUpdate(BaseModel):
+    player_id: int | None = None
+    player: str
     score: int
-    points: int | None = None
 
 
 class MatchBase(BaseModel):
     id: int | None = None
     date: datetime
     format: MatchFormat
-    tournament_id: int | None = None
+    tournaments_id: int | None = None
     next_match: int | None = None
+    round: int | None = None
 
     @classmethod
-    def from_query_result(cls, id, date, format, tournament_id, next_match):
+    def from_query_result(cls, id, date, format, tournaments_id, next_match, round):
         return cls(
             id=id,
             date=date,
             format=format,
-            tournament_id=tournament_id,
-            next_match=next_match)
+            tournaments_id=tournaments_id,
+            next_match=next_match,
+            round=round)
 
 
-class Match(MatchBase):
+class Match(BaseModel):
+    id: int | None = None
+    date: datetime
+    format: MatchFormat
     participants: List[PlayerProfile]
 
     @classmethod
-    def from_query_result(cls, id, date, format, tournament_id, participants=None):
+    def from_query_result(cls, id, date, format, participants=None):
         if participants == '' or participants is None:
             participants = []
         else:
@@ -66,16 +69,18 @@ class Match(MatchBase):
             id=id,
             date=date,
             format=format,
-            tournament_id=tournament_id,
             participants=participants)
 
 
 class MatchResponse(Match):
+    id: int
+    date: datetime
     format: str
+    participants: List[PlayerProfile]
     score: List[MatchScore]
 
     @classmethod
-    def from_query_result(cls, id, date, format, tournament_id, participants=None, score=None):
+    def from_query_result(cls, id, date, format, participants=None, score=None):
         if participants == '' or participants is None:
             participants = []
         else:
@@ -88,6 +93,5 @@ class MatchResponse(Match):
             id=id,
             date=date,
             format=str(MatchFormat(format)),
-            tournament_id=tournament_id,
             participants=participants,
             score=score)

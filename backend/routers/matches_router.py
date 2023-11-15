@@ -4,8 +4,8 @@ from typing import List
 from fastapi import APIRouter
 
 from common.authorization import get_current_user
-from common.exceptions import Unauthorized, NotFound, Forbidden
-from common.utils import is_admin, is_director, is_knockout
+from common.exceptions import Unauthorized, NotFound, Forbidden, BadRequest
+from common.utils import is_admin, is_director
 from models.matches import Match, MatchResponse, MatchScoreUpdate, MatchBase, MatchDateUpdate, MatchPlayerUpdate
 from models.users import User
 from fastapi import Depends
@@ -19,6 +19,11 @@ router = APIRouter()
 def create_match(match: Match, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized('User has insufficient privileges')
+    p_count = len({p.full_name for p in match.participants})
+    if p_count != len(match.participants):
+        raise BadRequest("Participants should be unique!")
+    if p_count < 2:
+        raise BadRequest("Participants must be at least 2!")
 
     return matches_service.create(match)
 
@@ -36,10 +41,7 @@ def update_score(id: int, match_score: List[MatchScoreUpdate], current_user: Use
     if participants is None:
         raise NotFound(f'The participants provided do not play in this match')
 
-    if match.tournament_id is None or is_knockout(match.tournament_id):
-        return matches_service.update_simple_score(match, participants, match.tournament_id)
-
-    return matches_service.update_league_score(match, participants)
+    return matches_service.update_score(match, participants)
 
 
 @router.put('/{id}/date', response_model=MatchBase)
@@ -64,8 +66,11 @@ def update_players(id: int, match_players: List[MatchPlayerUpdate], current_user
     match = matches_service.find(id)
     if match is None:
         raise NotFound(f'Match {id} does not exist')
-    if match.tournament_id is not None:
+    if match.tournaments_id is not None:
         raise Forbidden("The participants cannot be changed! The match is part of tournament!")
+    p_count = len({p.player for p in match_players})
+    if p_count != len(match_players):
+        raise BadRequest("Participants should be unique!")
     participants = matches_service.find_match_participants(id, match_players)
     if participants is not None:
         raise Forbidden('The participants provided already play in this match!')
