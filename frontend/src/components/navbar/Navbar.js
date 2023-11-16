@@ -8,8 +8,12 @@ import { LOGIN } from "../../routes/routes";
 import { Search } from "@mui/icons-material";
 import { getUsers } from "../../services/authService";
 import { getPlayerRequests } from "../../services/playerService";
+import { getDirectorRequests } from "../../services/authService";
 import { UserSearchModal } from "../userSearch/UserSearchModal";
 import { PlayerRequests } from "../playerRequests/PlayerRequests";
+import { Notifications } from "@mui/icons-material";
+import Work from "@mui/icons-material/Work";
+import { DirectorRequests } from "../directorRequests/DirectorRequests";
 
 export const Navbar = () => {
     const { token, user, userLogout } = useContext(AuthContext);
@@ -20,9 +24,17 @@ export const Navbar = () => {
     const [showUsersSearch, setShowUsersSearch] = useState(false);
     const [userSearchResults, setUserSearchResults] = useState(null);
 
-    const [notifiacationsModalOpen, setNotificationsModalOpen] =
+    const [playerNotificationsModalOpen, setPlayerNotificationsModalOpen] =
         useState(false);
-    const [notificationsResult, setNotificationsResult] = useState(null);
+    const [playerNotificationsResult, setPlayerNotificationsResult] =
+        useState(null);
+
+    const [
+        directorNotificacationsModalOpen,
+        setDirectorNotificationsModalOpen,
+    ] = useState(false);
+    const [directorNotificationsResult, setDirectorNotificationsResult] =
+        useState(null);
 
     const [searchQ, setSearchQ] = useState({
         search: "",
@@ -57,19 +69,35 @@ export const Navbar = () => {
         }
     };
 
-    const closeMotificationsModal = () => {
-        setNotificationsModalOpen(false);
+    const closePlayerNotifications = () => {
+        setPlayerNotificationsModalOpen(false);
     };
 
-    const onNotifications = async (e) => {
+    const closeDirectorNotifications = () => {
+        setDirectorNotificationsModalOpen(false);
+    };
+
+    const onPlayerNotifications = async (e) => {
         e.preventDefault();
 
         try {
             const result = await getPlayerRequests(token);
-            setNotificationsResult(result);
-            setNotificationsModalOpen(true);
+            setPlayerNotificationsResult(result);
+            setPlayerNotificationsModalOpen(true);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const onDirectorNotifications = async (e) => {
+        e.preventDefault();
+
+        try {
+            const result = await getDirectorRequests(token);
+            setDirectorNotificationsResult(result);
+            setDirectorNotificationsModalOpen(true);
+        } catch (error) {
+            throw error;
         }
     };
 
@@ -103,12 +131,20 @@ export const Navbar = () => {
                             {token ? (
                                 <>
                                     {user?.role === "admin" && (
-                                        <button
-                                            className="navbarNotifications"
-                                            onClick={(e) => onNotifications(e)}
-                                        >
-                                            Notifications
-                                        </button>
+                                        <>
+                                            <Work
+                                                className="navbarNotifications"
+                                                onClick={(e) =>
+                                                    onDirectorNotifications(e)
+                                                }
+                                            />
+                                            <Notifications
+                                                className="navbarNotifications"
+                                                onClick={(e) =>
+                                                    onPlayerNotifications(e)
+                                                }
+                                            />
+                                        </>
                                     )}
                                     <Link
                                         className="navbarRightLink"
@@ -147,11 +183,19 @@ export const Navbar = () => {
                     </div>
                 </div>
             </div>
-            {notifiacationsModalOpen && (
+            {playerNotificationsModalOpen && (
                 <PlayerRequests
-                    requests={notificationsResult}
-                    setRequests={setNotificationsResult}
-                    onClose={closeMotificationsModal}
+                    requests={playerNotificationsResult}
+                    setRequests={setPlayerNotificationsResult}
+                    onClose={closePlayerNotifications}
+                    token={token}
+                />
+            )}
+            {directorNotificacationsModalOpen && (
+                <DirectorRequests
+                    requests={directorNotificationsResult}
+                    setRequests={setDirectorNotificationsResult}
+                    onClose={closeDirectorNotifications}
                     token={token}
                 />
             )}

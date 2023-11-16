@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
 from common import exceptions, hashing, authorization
-from models import users
+from models import users, requests
 from services import users_service
 from typing import List, Union
 
@@ -131,3 +131,12 @@ def user_delete(
     except Exception:
         raise exceptions.InternalServerError("Deleting user failed")
     
+
+@router.get("/director-requests/", response_model=List[requests.DirectorRequest])
+def get_director_requests(
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+
+    return users_service.get_director_requests()

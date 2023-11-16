@@ -32,6 +32,8 @@ export const getPlayerRequests = async (token) => {
     }
 };
 
+
+
 export const acceptPlayerRequest = async (requestId, token) => {
     try {
         const response = await axios.post(

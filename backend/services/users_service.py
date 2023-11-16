@@ -7,7 +7,7 @@ from common.hashing import hash_password
 from common.authorization import create_token
 from common.utils import save_image
 from common.responses import RequestOK, RequestCreate
-
+from models.requests import DirectorRequest
 
 def register(user_data: users.User):
     username = user_data.username
@@ -93,6 +93,24 @@ def get_users(username):
         )
         user_data.append(user)
     return user_data
+
+
+def get_director_requests():
+    sql = "Select * FROM director_requests"
+    sql_params = ()
+
+    result = read_query(sql, sql_params)
+    director_requests = [
+        DirectorRequest(
+            id=row[0],
+            user_id=row[1],
+            email=row[2],
+            status=row[3],
+            created_at=row[4]
+        ) 
+        for row in result
+    ]
+    return director_requests
 
 
 def get_user_by_username(username):

@@ -91,7 +91,7 @@ export const getUser = async (userId, token) => {
 
 export const getUsers = async (searchQ) => {
     try {
-        const response = await axios.get(`${USER_BASE_PATH}/users/`, {
+        const response = await axios.get(`${USER_BASE_PATH}/users`, {
             params: searchQ,
         });
         return response.data;
@@ -134,6 +134,22 @@ export const sendJoinTournamentRequestWithPlayer = async (
             {
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getDirectorRequests = async (token) => {
+    try {
+        const response = await axios.get(
+            `${USER_BASE_PATH}/users/director-requests/`,
+            {
+                headers: {
                     Authorization: `Bearer ${token}`,
                 },
             }
