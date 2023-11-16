@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, List
 
-from models.enums import TournamentStatus, TournamentFormat, MatchFormat
+from models.enums import TournamentStatus, TournamentFormat, MatchFormat, Request
 from models.matches import MatchScore
 from models.players import PlayerProfile
 
@@ -61,6 +61,20 @@ class Tournament(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     owner: Owner
+
+
+class TournamentRequestCreate(BaseModel):
+    player_id: int
+    tournament_id:int
+    full_name: str
+    country: str
+    sports_club: str
+    status: Request = Request.PENDING
+    created_at: str
+
+
+class TournamentRequest(TournamentRequestCreate):
+    id: int
 
 
 class TournamentWithoutOwner(BaseModel):

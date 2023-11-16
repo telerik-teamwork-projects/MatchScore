@@ -32,9 +32,3 @@ class User(UserBase):
 class UserLoginResponse(BaseModel):
     token: str
     user: User
-
-
-class JoinRequestCreate(BaseModel):
-    full_name: str
-    country: str
-    sports_club: str

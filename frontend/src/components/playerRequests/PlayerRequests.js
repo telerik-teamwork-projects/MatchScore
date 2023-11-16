@@ -2,11 +2,14 @@ import "./playerRequests.scss";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PROFILE } from "../../routes/routes";
-import { acceptPlayerRequest } from "../../services/playerService";
+import {
+    acceptPlayerRequest,
+    rejectPlayerRequest,
+} from "../../services/playerService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 
-export const PlayerRequests = ({ requests, onClose, token }) => {
+export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
 
@@ -15,10 +18,30 @@ export const PlayerRequests = ({ requests, onClose, token }) => {
             await acceptPlayerRequest(requestId, token);
             setError(null);
             setSuccess("User accepted");
+            updateStatus(requestId, "accepted");
         } catch (error) {
             setError(error.response.data.detail);
             setSuccess(null);
         }
+    };
+
+    const onReject = async (requestId) => {
+        try {
+            await rejectPlayerRequest(requestId, token);
+            setError(null);
+            setSuccess("User rejected");
+            updateStatus(requestId, "rejected");
+        } catch (error) {
+            setError(error.response.data.detail);
+            setSuccess(null);
+        }
+    };
+
+    const updateStatus = (requestId, status) => {
+        const updatedRequests = requests.map((request) =>
+            request.id === requestId ? { ...request, status } : request
+        );
+        setRequests(updatedRequests);
     };
 
     return (
@@ -60,7 +83,12 @@ export const PlayerRequests = ({ requests, onClose, token }) => {
                                         >
                                             Accept
                                         </button>
-                                        <button className="requestReject">
+                                        <button
+                                            className="requestReject"
+                                            onClick={() => {
+                                                onReject(request.id);
+                                            }}
+                                        >
                                             Reject
                                         </button>
                                     </div>

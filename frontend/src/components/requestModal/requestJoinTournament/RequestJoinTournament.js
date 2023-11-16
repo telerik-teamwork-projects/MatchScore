@@ -2,14 +2,12 @@ import "./requestJoinTournament.scss";
 import { useState } from "react";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../../responseMessages/successMessages/SuccessMessages";
-import { sendJoinRequest } from "../../../services/authService";
+import {
+    sendJoinTournamentRequestNoPlayer,
+    sendJoinTournamentRequestWithPlayer,
+} from "../../../services/authService";
 
-export const RequestJoinTournament = ({
-    userId,
-    tournamentId,
-    token,
-    onClose,
-}) => {
+export const RequestJoinTournament = ({ tournamentId, token, onClose }) => {
     const [error, setError] = useState(null);
     const [successMsg, setSuccessMsg] = useState(null);
     const [formData, setFormData] = useState({
@@ -22,23 +20,51 @@ export const RequestJoinTournament = ({
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async () => {
+    const handleSubmitNoPlayer = async () => {
         try {
-            const result = await sendJoinRequest(
-                userId,
+            const result = await sendJoinTournamentRequestNoPlayer(
                 tournamentId,
                 token,
                 formData
             );
-            formData.full_name = "";
-            formData.country = "";
-            formData.sports_club = "";
+            setFormData({
+                full_name: "",
+                country: "",
+                sports_club: "",
+            });
             setError(null);
             setSuccessMsg(result);
         } catch (error) {
-            formData.full_name = "";
-            formData.country = "";
-            formData.sports_club = "";
+            setFormData({
+                full_name: "",
+                country: "",
+                sports_club: "",
+            });
+            setSuccessMsg(null);
+            setError(error.response.data.detail);
+        }
+    };
+
+    const handleSubmitWithPlayer = async () => {
+        try {
+            const result = await sendJoinTournamentRequestWithPlayer(
+                tournamentId,
+                token,
+                formData
+            );
+            setFormData({
+                full_name: "",
+                country: "",
+                sports_club: "",
+            });
+            setError(null);
+            setSuccessMsg(result);
+        } catch (error) {
+            setFormData({
+                full_name: "",
+                country: "",
+                sports_club: "",
+            });
             setSuccessMsg(null);
             setError(error.response.data.detail);
         }
@@ -80,7 +106,7 @@ export const RequestJoinTournament = ({
                         <button
                             className="requestSubmit"
                             type="button"
-                            onClick={handleSubmit}
+                            onClick={handleSubmitNoPlayer}
                         >
                             Submit
                         </button>
@@ -92,6 +118,14 @@ export const RequestJoinTournament = ({
                             Close
                         </button>
                     </div>
+                    <h3>I already have a player profile</h3>
+                    <button
+                        className="submitExistingPlayer"
+                        type="button"
+                        onClick={handleSubmitWithPlayer}
+                    >
+                        Submit as a Player
+                    </button>
                 </form>
             </div>
         </div>

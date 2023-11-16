@@ -1,16 +1,19 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends
 from typing import List
+from models import tournaments, users, requests
 from models import users, requests
 
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound
 from common.utils import is_admin, is_director, is_power_of_two
+from common.utils import is_admin, is_director
+from common.responses import RequestOK
 from models.enums import TournamentFormat
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
     TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate
 from models.users import User
-
+from services.players_service import get_player_by_id
 from services import tournaments_service, users_service
 
 router = APIRouter()
@@ -56,28 +59,30 @@ def get_tournament_requests(
         raise InternalServerError("Retrieving requests failed")
 
 
-@router.post("/{tournament_id}/accept/{user_id}")
-def accept_user(
-        tournament_id: int,
-        user_id: int,
-        current_user: users.User = Depends(get_current_user)
+@router.post("/requests/accept/{request_id}")
+def accept_player_to_tournament(
+    request_id: int,
+    current_user: users.User = Depends(get_current_user)
 ):
-    tournament = tournaments_service.get_one(tournament_id)
-    if not tournament:
-        raise NotFound("Tournament not found")
 
-    user = users_service.get_user_by_id(user_id)
-    if not user:
-        raise NotFound("User not found")
-
-    if not tournament.owner.id == current_user.id or current_user.role.value != "admin":
+    if current_user.role.value not in ["admin", "director"]:
         raise Unauthorized("You are not authorized")
 
-    if tournaments_service.is_user_accepted(tournament_id, user_id):
-        raise BadRequest("User already in tournament")
+    tournaments_service.accept_player_to_tournament(request_id)
+    return RequestOK("Player accepted to tournament")
 
-    tournaments_service.accept_user(tournament_id, user_id)
-    pass
+
+@router.post("/requests/reject/{request_id}")
+def reject_player_from_tournament(
+    request_id: int,
+    current_user: users.User = Depends(get_current_user)
+):
+
+    if current_user.role.value not in ["admin", "director"]:
+        raise Unauthorized("You are not authorized")
+
+    tournaments_service.reject_player_from_tournament(request_id)
+    return RequestOK("Player rejected from entering tournaments")
 
 
 @router.post('/league', response_model=TournamentLeagueResponse, status_code=201)

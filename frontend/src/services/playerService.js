@@ -48,3 +48,20 @@ export const acceptPlayerRequest = async (requestId, token) => {
         throw error;
     }
 };
+
+export const rejectPlayerRequest = async (requestId, token) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/players/requests/reject/${requestId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
