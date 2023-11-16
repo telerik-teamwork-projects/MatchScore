@@ -3,7 +3,7 @@ from typing import List
 
 from common.exceptions import InternalServerError
 from models.matches import Match, MatchResponse, MatchBase, MatchScoreUpdate, MatchDateUpdate, MatchPlayerUpdate
-from database.database import get_connection, read_query, insert_query, update_query
+from database.database import get_connection, read_query, update_query
 from mariadb import Error
 
 

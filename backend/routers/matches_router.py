@@ -51,7 +51,7 @@ def update_date(id: int, match_date: MatchDateUpdate, current_user: User = Depen
     match = matches_service.find(id)
     if match is None:
         raise NotFound(f'Match {id} does not exist')
-    if match_date.date < datetime.utcnow() and not is_admin(current_user):
+    if match_date.date < datetime.utcnow():
         raise Forbidden('The new match date should be in the future!')
 
     if match.date == match_date.date:

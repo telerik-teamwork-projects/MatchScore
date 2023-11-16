@@ -5,7 +5,7 @@ from typing import Optional, List
 
 from models.enums import TournamentStatus, TournamentFormat, MatchFormat
 from models.matches import MatchScore
-from models.users import PlayerProfile
+from models.players import PlayerProfile
 
 
 class TournamentCreate(BaseModel):
@@ -13,13 +13,13 @@ class TournamentCreate(BaseModel):
     title: str
     description: Optional[str] = None
     match_format: MatchFormat = MatchFormat.TIME
-    rounds: int
+    rounds: int | None = None
     third_place: bool
     status: TournamentStatus = TournamentStatus.OPEN
     location: Optional[str] = None
     start_date: Optional[str] = None
     end_date: Optional[str] = None
-    owner_id: int
+    owner_id: int | None = None
 
 
 class TournamentUpdate(BaseModel):
@@ -78,11 +78,9 @@ class TournamentWithoutOwner(BaseModel):
 
 
 class TournamentLeagueCreate(BaseModel):
-    format: TournamentFormat = TournamentFormat.LEAGUE
     title: str
     description: str | None = None
     match_format: MatchFormat = MatchFormat.TIME
-    rounds: int | None = None
     location: str | None = None
     start_date: datetime
     end_date: datetime | None = None
@@ -119,16 +117,18 @@ class TournamentLeagueResponse(BaseModel):
 
 class TournamentMatch(BaseModel):
     match_id: int
+    next_match: int | None = None
     participants: List[MatchScore]
 
     @classmethod
-    def from_query_result(cls, match_id, participants):
+    def from_query_result(cls, match_id, next_match, participants):
         if participants == '' or participants is None:
             participants = []
         else:
             participants = list(MatchScore.from_query_result(*row) for row in participants)
         return cls(
             match_id=match_id,
+            next_match=next_match,
             participants=participants)
 
 
@@ -191,3 +191,44 @@ class DbTournament(BaseModel):
                    start_date=start_date,
                    end_date=end_date,
                    owner_id=owner_id)
+
+
+class TournamentKnockoutCreate(BaseModel):
+    title: str
+    description: str | None = None
+    match_format: MatchFormat = MatchFormat.TIME
+    third_place: bool
+    location: str | None = None
+    start_date: datetime
+    end_date: datetime | None = None
+    participants: List[PlayerProfile]
+
+
+class TournamentKnockoutResponse(BaseModel):
+    id: int
+    format: str
+    title: str
+    description: str | None = None
+    match_format: str
+    rounds: int
+    third_place: bool
+    location: str | None = None
+    start_date: datetime
+    end_date: datetime
+    owner: Owner
+
+    @classmethod
+    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, location, start_date,
+                          end_date, owner):
+        owner = Owner.from_query_result(*owner)
+        return cls(id=id,
+                   format=str(TournamentFormat(format)),
+                   title=title,
+                   description=description,
+                   match_format=str(MatchFormat(match_format)),
+                   rounds=rounds,
+                   third_place=third_place,
+                   location=location,
+                   start_date=start_date,
+                   end_date=end_date,
+                   owner=owner)
