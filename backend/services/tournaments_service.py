@@ -9,9 +9,6 @@ from services import players_service
 from database.database import insert_query, read_query, get_connection
 from models.enums import TournamentStatus, TournamentFormat
 from models.users import User
-from models.tournaments import Owner
-# from models.enums import Request
-from models.enums import Request
 from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
     TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse
 from mariadb import Error
@@ -146,10 +143,9 @@ def get_tournament_requests(tournament_id: int):
 
 
 def accept_player_to_tournament(request_id: int):
-    tournament_request  = get_tournament_request_by_id(request_id)
+    tournament_request = get_tournament_request_by_id(request_id)
     if not tournament_request:
         raise NotFound("Tournament requests not found")
-
 
     tournament_id = tournament_request.tournament_id
     player_id = tournament_request.player_id
@@ -164,11 +160,11 @@ def accept_player_to_tournament(request_id: int):
         )
 
         player_id = players_service.insert_player(
-                                        new_player_data.user_id,
-                                        new_player_data.full_name,
-                                        new_player_data.country,
-                                        new_player_data.sports_club
-                                        )
+            new_player_data.user_id,
+            new_player_data.full_name,
+            new_player_data.country,
+            new_player_data.sports_club
+        )
 
     if is_user_accepted(tournament_id, player_id):
         raise BadRequest("Player already in tournament")
@@ -189,7 +185,6 @@ def reject_player_from_tournament(request_id: int):
         raise NotFound("Tournament not found")
 
     update_tournament_request_status(request_id, "rejected")
-
 
 
 def get_owner_data_by_id(owner_id):
@@ -353,30 +348,6 @@ def view_tournament(tournament: DbTournament):
     return TournamentRoundResponse.from_query_result(tournament.id, rounds)
 
 
-def _manage_league_matches(cursor: Connection, id: int, data: TournamentLeagueCreate,
-                           participants: list[int], rounds: int):
-    rand.shuffle(participants)
-    # matches per round
-    mpr = (rounds + 1) // 2
-    # table of participants
-    t = [i + 1 for i in range(len(participants))]
-    # generate matches along with their participants and rounds they belong to
-    date = data.start_date
-    for r in range(rounds):
-        for m in range(mpr):
-            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
-                           (date, data.match_format.value, id, r + 1))
-            match_id = cursor.lastrowid
-            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                           (participants[t[m] - 1], match_id))
-            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                           (participants[t[-1 - m] - 1], match_id))
-
-        t.remove(rounds - r + 1)
-        t.insert(1, rounds - r + 1)
-        date = date + timedelta(days=1)
-
-
 def update_tournament_request_status(request_id: int, status: str):
     sql = """
         UPDATE tournament_requests
@@ -449,3 +420,27 @@ def _manage_knockout_matches(cursor: Connection, id: int, data: TournamentKnocko
             else:
                 cursor.execute('''UPDATE matches SET next_match = ? WHERE id = ?''',
                                (matches[r + 1][i - 1], matches[r][m]))
+
+
+def _manage_league_matches(cursor: Connection, id: int, data: TournamentLeagueCreate,
+                           participants: list[int], rounds: int):
+    rand.shuffle(participants)
+    # matches per round
+    mpr = (rounds + 1) // 2
+    # table of participants
+    t = [i + 1 for i in range(len(participants))]
+    # generate matches along with their participants and rounds they belong to
+    date = data.start_date
+    for r in range(rounds):
+        for m in range(mpr):
+            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
+                           (date, data.match_format.value, id, r + 1))
+            match_id = cursor.lastrowid
+            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                           (participants[t[m] - 1], match_id))
+            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                           (participants[t[-1 - m] - 1], match_id))
+
+        t.remove(rounds - r + 1)
+        t.insert(1, rounds - r + 1)
+        date = date + timedelta(days=1)

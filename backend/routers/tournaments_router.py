@@ -1,20 +1,16 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends
 from typing import List
-from models import tournaments, users, requests
 from models import users, requests
 
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound
 from common.utils import is_admin, is_director, is_power_of_two
-from common.utils import is_admin, is_director
 from common.responses import RequestOK
-from models.enums import TournamentFormat
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
     TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate
 from models.users import User
-from services.players_service import get_player_by_id
-from services import tournaments_service, users_service
+from services import tournaments_service
 
 router = APIRouter()
 MAX_PARTICIPANTS = 16
@@ -48,9 +44,7 @@ def get_tournament(tournament_id):
 
 
 @router.get("/{tournament_id}/requests", response_model=List[requests.TournamentRequest])
-def get_tournament_requests(
-        tournament_id: int,
-):
+def get_tournament_requests(tournament_id: int):
     if not tournaments_service.get_tournament_by_id(tournament_id):
         raise NotFound("Tournament not found")
     try:
@@ -61,10 +55,9 @@ def get_tournament_requests(
 
 @router.post("/requests/accept/{request_id}")
 def accept_player_to_tournament(
-    request_id: int,
-    current_user: users.User = Depends(get_current_user)
+        request_id: int,
+        current_user: users.User = Depends(get_current_user)
 ):
-
     if current_user.role.value not in ["admin", "director"]:
         raise Unauthorized("You are not authorized")
 
@@ -74,10 +67,9 @@ def accept_player_to_tournament(
 
 @router.post("/requests/reject/{request_id}")
 def reject_player_from_tournament(
-    request_id: int,
-    current_user: users.User = Depends(get_current_user)
+        request_id: int,
+        current_user: users.User = Depends(get_current_user)
 ):
-
     if current_user.role.value not in ["admin", "director"]:
         raise Unauthorized("You are not authorized")
 
