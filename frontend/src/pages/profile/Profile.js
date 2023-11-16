@@ -9,6 +9,7 @@ import { HOME, PROFILE } from "../../routes/routes";
 import { USER_BASE_PATH } from "../../routes/paths";
 import { DeleteUserConfirmation } from "../../components/userDelete/DeleteUserConfirmation";
 import { RequestBecomePlayer } from "../../components/requestModal/requestBecomePlayer/RequestBecomePlayer";
+import { RequestBecomeDirector } from "../../components/requestBecomeDirector/RequestBecomeDirector";
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -16,7 +17,10 @@ export const Profile = () => {
     const { token, user } = useContext(AuthContext);
     const [profile, setProfile] = useState(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+
     const [becomePlayerModalOpen, setBecomePlayerModalOpen] = useState(false);
+    const [becomeDirectorModalOpen, setBecomeDirectorModalOpen] =
+        useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -50,6 +54,14 @@ export const Profile = () => {
 
     const closeBecomePlayer = () => {
         setBecomePlayerModalOpen(false);
+    };
+
+    const openBecomeDirector = () => {
+        setBecomeDirectorModalOpen(true);
+    };
+
+    const closeBecomeDirector = () => {
+        setBecomeDirectorModalOpen(false);
     };
 
     return (
@@ -89,26 +101,42 @@ export const Profile = () => {
                         </div>
                         {(profile?.id === user?.id ||
                             user?.role === "admin") && (
-                            <div className="profileBtns">
-                                <button
-                                    className="profileRequestPlayerBtn"
-                                    onClick={() => openBecomePlayer()}
-                                >
-                                    Become Player
-                                </button>
-                                <Link
-                                    to={`${PROFILE}/${userId}/update`}
-                                    className="profileEditBtn"
-                                >
-                                    Edit
-                                </Link>
-                                <Link
-                                    className="profileDeleteBtn"
-                                    onClick={onDelete}
-                                >
-                                    Delete
-                                </Link>
-                            </div>
+                            <>
+                                <div className="profileBtns">
+                                    <Link
+                                        to={`${PROFILE}/${userId}/update`}
+                                        className="profileEditBtn"
+                                    >
+                                        Edit
+                                    </Link>
+                                    <Link
+                                        className="profileDeleteBtn"
+                                        onClick={onDelete}
+                                    >
+                                        Delete
+                                    </Link>
+                                </div>
+                                <div className="profileRequestBtns">
+                                    <button
+                                        className="profileRequestPlayerBtn"
+                                        onClick={() => openBecomePlayer()}
+                                    >
+                                        Player Request
+                                    </button>
+                                    <button
+                                        className="profileRequestPlayerBtn"
+                                        onClick={() => openBecomeDirector()}
+                                    >
+                                        Director Request
+                                    </button>
+                                    <button
+                                        className="profileRequestPlayerBtn"
+                                        onClick={() => openBecomePlayer()}
+                                    >
+                                        Link to Player
+                                    </button>
+                                </div>
+                            </>
                         )}
                         {deleteConfirmation && (
                             <DeleteUserConfirmation
@@ -136,6 +164,14 @@ export const Profile = () => {
                         userId={userId}
                         token={token}
                         onClose={closeBecomePlayer}
+                    />
+                )}
+
+                {becomeDirectorModalOpen && (
+                    <RequestBecomeDirector
+                        user={user}
+                        token={token}
+                        onClose={closeBecomeDirector}
                     />
                 )}
             </div>

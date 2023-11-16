@@ -144,6 +144,23 @@ export const sendJoinTournamentRequestWithPlayer = async (
     }
 };
 
+export const sendDirectorRequest = async (userId, userEmail, token) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/users/director-requests/`,
+            { userId, userEmail },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const getDirectorRequests = async (token) => {
     try {
         const response = await axios.get(
@@ -176,7 +193,6 @@ export const acceptDirectorRequest = async (requestId, token) => {
         throw error;
     }
 };
-
 
 export const rejectDirectorRequest = async (requestId, token) => {
     try {

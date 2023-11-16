@@ -95,6 +95,15 @@ def get_users(username):
     return user_data
 
 
+def send_director_request(current_user: users.User):
+    sql = """
+        INSERT INTO director_requests(user_id, email, status)
+        VALUES(?, ?, ?)
+    """
+    sql_params = (current_user.id, current_user.email, "pending")
+    insert_query(sql, sql_params)
+
+
 def get_director_requests():
     sql = "Select * FROM director_requests"
     sql_params = ()

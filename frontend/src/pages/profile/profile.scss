@@ -34,22 +34,6 @@
             justify-content: center;
             gap: 8px;
 
-            .profileRequestPlayerBtn {
-                background-color: rgb(3, 160, 3);
-                color: white;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                text-decoration: none;
-                transition: background-color 0.2s ease-in-out;
-                text-align: center;
-            }
-
-            .profileRequestPlayerBtn:hover {
-                background-color: rgb(2, 102, 2);
-            }
-
             .profileEditBtn {
                 background-color: #007bff;
                 color: white;
@@ -80,6 +64,30 @@
 
             .profileDeleteBtn:hover {
                 background-color: #a70404;
+            }
+        }
+
+        .profileRequestBtns {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+
+            .profileRequestPlayerBtn {
+                background-color: rgb(3, 160, 3);
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                text-decoration: none;
+                transition: background-color 0.2s ease-in-out;
+                text-align: center;
+
+                &:hover {
+                    background-color: rgb(2, 102, 2);
+                }
             }
         }
 

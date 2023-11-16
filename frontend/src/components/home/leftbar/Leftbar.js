@@ -1,38 +1,38 @@
 import "./leftbar.scss";
-
 import { Link } from "react-router-dom";
-
 import { TOURNAMENTS } from "../../../routes/routes";
+import { useEffect, useState } from "react";
+import { getAll } from "../../../services/tournamentService";
 
 export const Leftbar = () => {
+    const [tournaments, setTournaments] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const tournamentData = await getAll();
+                setTournaments(tournamentData);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        fetchData();
+    }, []);
+
     return (
         <div className="leftbar">
             <div className="leftbarWrapper">
-                <Link className="link" to={TOURNAMENTS}>
+                <Link className="leftbarLink" to={TOURNAMENTS}>
                     Tournaments
                 </Link>
                 <ul className="leftbarList">
-                    <li className="leftbarListItem">
-                        <span>Champions League</span>
-                        <span>All stars</span>
-                        <span>Grand Prix</span>
-                    </li>
-                </ul>
-
-                <Link className="link" to={TOURNAMENTS}>
-                    Sports
-                </Link>
-
-                <ul className="leftbarList">
-                    <li className="leftbarListItem">
-                        <span>Football</span>
-                        <span>Basketball</span>
-                        <span>Volleyball</span>
-                        <span>Baseball</span>
-                        <span>Tennis</span>
-                        <span>Box</span>
-                        <span>America Football</span>
-                    </li>
+                    {tournaments?.map((tournament) => (
+                        <li key={tournament.id} className="leftbarListItem">
+                            <Link to={`${TOURNAMENTS}/${tournament.id}`} className="link">
+                                <span>{tournament.title}</span>
+                            </Link>
+                        </li>
+                    ))}
                 </ul>
             </div>
         </div>

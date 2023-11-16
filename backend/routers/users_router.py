@@ -132,6 +132,22 @@ def user_delete(
         raise exceptions.InternalServerError("Deleting user failed")
     
 
+@router.post("/director-requests/")
+def send_director_request(
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if current_user.role.value == "admin":
+        raise exceptions.BadRequest("Admins cannot send a director request")
+
+    if current_user.role.value == "director":
+        raise exceptions.BadRequest("User is already a director")
+    
+
+    users_service.send_director_request(current_user)
+    return responses.RequestOK("Successfully sent a director request")
+
+
+
 @router.get("/director-requests/", response_model=List[requests.DirectorRequest])
 def get_director_requests(
     current_user: users.User = Depends(authorization.get_current_user)

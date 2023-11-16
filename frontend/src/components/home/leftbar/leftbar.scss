@@ -3,30 +3,42 @@
     height: calc(100vh - 50px);
     position: sticky;
     top: 50px;
+    overflow-y: auto;
 
     .leftbarWrapper {
         display: flex;
         flex-direction: column;
         padding: 20px;
 
-        a {
+        .leftbarLink {
             display: flex;
             justify-content: center;
+            text-decoration: none;
             color: limegreen;
             text-transform: uppercase;
+            font-size: 24px;
 
             &:hover {
-                color: green
+                color: green;
             }
+        }
+
+        .leftbarList {
+            overflow-y: auto;
+            flex: 1;
         }
 
         .leftbarListItem {
             display: flex;
-            flex-direction: column;
             margin-bottom: 20px;
 
             span {
+                color: #7b7979;
                 padding: 8px;
+
+                &:hover {
+                    color: black;
+                }
             }
         }
     }
