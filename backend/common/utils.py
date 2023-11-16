@@ -1,11 +1,11 @@
+import math
 import os
 import uuid
 from fastapi import UploadFile
 from typing import Union
 
-from models.enums import Role, TournamentFormat
+from models.enums import Role
 from models.users import User
-from services import tournaments_service
 
 UPLOAD_DIR = "media"
 
@@ -40,3 +40,10 @@ def save_image(upload_file: Union[UploadFile, str], folder: str):
         image_file.write(upload_file.file.read())
 
     return f"/{directory_name}/{filename}"
+
+
+def is_power_of_two(n):
+    if n < 2:
+        return False
+
+    return 2 ** int(math.log(n, 2)) == n
