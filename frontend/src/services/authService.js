@@ -159,3 +159,38 @@ export const getDirectorRequests = async (token) => {
         throw error;
     }
 };
+
+export const acceptDirectorRequest = async (requestId, token) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/users/requests/accept/${requestId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+export const rejectDirectorRequest = async (requestId, token) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/users/requests/reject/${requestId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

@@ -17,13 +17,27 @@ class UserLogin(BaseModel):
     password: str
 
 
-class User(UserBase):
+class User(BaseModel):
     id: int
+    username: str
+    email: str
     role: Role = Role.USER
     bio: Optional[str] = None
     profile_img: Optional[str] = None
     cover_img: Optional[str] = None
-    player_id: Optional[int] = None
+
+    @classmethod
+    def from_query_result(cls, id, username, email, role, bio, profile_img, cover_img):
+        return cls(
+            id=id,
+            username=username,
+            email=email,
+            role=role,
+            bio=bio,
+            profile_img=profile_img,
+            cover_img=cover_img,
+        )
+
 
     class Config:
         from_attributes = True

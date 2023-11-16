@@ -34,7 +34,9 @@ def accept_player_request(
     if current_user.role.value != "admin":
         raise exceptions.Unauthorized("You are not authorized")
     
-    return players_service.accept_player_request(request_id)
+    players_service.accept_player_request(request_id)
+    return responses.RequestOK("Player request accepted")
+
 
 @router.post("/requests/reject/{request_id}")
 def reject_player_request(
@@ -44,7 +46,9 @@ def reject_player_request(
     if current_user.role.value != "admin":
         raise exceptions.Unauthorized("You are not authorized")
 
-    return players_service.reject_player_request(request_id)
+    players_service.reject_player_request(request_id)
+    return responses.RequestOK("Player request rejected")
+
 
 
 @router.post("/tournament-request/{tournament_id}")
@@ -53,40 +57,40 @@ def send_join_tournament_request_no_player(
     player_data: players.PlayerCreate, 
     current_user: users.User = Depends(authorization.get_current_user)
 ):
-    # try:
-    player_profile = players_service.get_player_by_user_id(current_user.id)
-    if player_profile:
-        raise exceptions.BadRequest("User already have a player profile")
+    try:
+        player_profile = players_service.get_player_by_user_id(current_user.id)
+        if player_profile:
+            raise exceptions.BadRequest("User already have a player profile")
 
-    players_service.create_tournament_join_request_no_player(tournament_id, player_data, current_user)
-    
+        players_service.create_tournament_join_request_no_player(tournament_id, player_data, current_user)
+        
 
-    return responses.RequestOK("Join request sent successfully")
+        return responses.RequestOK("Tournament request sent successfully")
 
-    # except IntegrityError:
-        # raise exceptions.IntegrityError("Join request already sent")
-    # except Exception:
-        # raise exceptions.InternalServerError("Sending join request failed")
+    except IntegrityError:
+        raise exceptions.IntegrityError("Tournament request already sent")
+    except Exception:
+        raise exceptions.InternalServerError("Sending tournament request failed")
     
 @router.post("/tournament-request/{tournament_id}/existing")
 def send_join_tournament_request_with_player(
     tournament_id: int, 
     current_user: users.User = Depends(authorization.get_current_user)
 ):
-    # try:
-    player_profile = players_service.get_player_by_user_id(current_user.id)
-    if not player_profile:
-        raise exceptions.BadRequest("User does not have a player profile")
-    
-    players_service.create_tournament_join_request_with_player(
-        tournament_id, 
-        player_profile
-    )
-    
-    return responses.RequestOK("Join request sent successfully")
+    try:
+        player_profile = players_service.get_player_by_user_id(current_user.id)
+        if not player_profile:
+            raise exceptions.BadRequest("User does not have a player profile")
+        
+        players_service.create_tournament_join_request_with_player(
+            tournament_id, 
+            player_profile
+        )
+        
+        return responses.RequestOK("Tournament request sent successfully")
 
-    # except IntegrityError:
-        # raise exceptions.IntegrityError("Join request already sent")
-    # except Exception:
-        # raise exceptions.InternalServerError("Sending join request failed")
+    except IntegrityError:
+        raise exceptions.IntegrityError("Tournamet request already sent")
+    except Exception:
+        raise exceptions.InternalServerError("Sending tournament request failed")
     

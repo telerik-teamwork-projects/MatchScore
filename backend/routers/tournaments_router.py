@@ -62,7 +62,7 @@ def accept_player_to_tournament(
         raise Unauthorized("You are not authorized")
 
     tournaments_service.accept_player_to_tournament(request_id)
-    return RequestOK("Player accepted to tournament")
+    return RequestOK("Player accepted in tournament")
 
 
 @router.post("/requests/reject/{request_id}")

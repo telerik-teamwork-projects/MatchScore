@@ -2,10 +2,10 @@ import "./directorRequests.scss";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PROFILE } from "../../routes/routes";
-// import {
-//     acceptdirectorRequest,
-//     rejectdirectorRequest,
-// } from "../../services/directorService";
+import {
+    acceptDirectorRequest,
+    rejectDirectorRequest,
+} from "../../services/authService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 
@@ -13,36 +13,36 @@ export const DirectorRequests = ({ requests, setRequests, onClose, token }) => {
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
 
-    // const onAccept = async (requestId) => {
-    //     try {
-    //         await acceptdirectorRequest(requestId, token);
-    //         setError(null);
-    //         setSuccess("User accepted");
-    //         updateStatus(requestId, "accepted");
-    //     } catch (error) {
-    //         setError(error.response.data.detail);
-    //         setSuccess(null);
-    //     }
-    // };
+    const onAccept = async (requestId) => {
+        try {
+            await acceptDirectorRequest(requestId, token);
+            setError(null);
+            setSuccess("User accepted");
+            updateStatus(requestId, "accepted");
+        } catch (error) {
+            setError(error.response.data.detail);
+            setSuccess(null);
+        }
+    };
 
-    // const onReject = async (requestId) => {
-    //     try {
-    //         await rejectdirectorRequest(requestId, token);
-    //         setError(null);
-    //         setSuccess("User rejected");
-    //         updateStatus(requestId, "rejected");
-    //     } catch (error) {
-    //         setError(error.response.data.detail);
-    //         setSuccess(null);
-    //     }
-    // };
+    const onReject = async (requestId) => {
+        try {
+            await rejectDirectorRequest(requestId, token);
+            setError(null);
+            setSuccess("User rejected");
+            updateStatus(requestId, "rejected");
+        } catch (error) {
+            setError(error.response.data.detail);
+            setSuccess(null);
+        }
+    };
 
-    // const updateStatus = (requestId, status) => {
-    //     const updatedRequests = requests.map((request) =>
-    //         request.id === requestId ? { ...request, status } : request
-    //     );
-    //     setRequests(updatedRequests);
-    // };
+    const updateStatus = (requestId, status) => {
+        const updatedRequests = requests.map((request) =>
+            request.id === requestId ? { ...request, status } : request
+        );
+        setRequests(updatedRequests);
+    };
 
     return (
         <div className="directorRequests">
@@ -70,17 +70,17 @@ export const DirectorRequests = ({ requests, setRequests, onClose, token }) => {
                                     <div className="requestBtns">
                                         <button
                                             className="requestAccept"
-                                            // onClick={() => {
-                                            //     onAccept(request.id);
-                                            // }}
+                                            onClick={() => {
+                                                onAccept(request.id);
+                                            }}
                                         >
                                             Accept
                                         </button>
                                         <button
                                             className="requestReject"
-                                            // onClick={() => {
-                                            //     onReject(request.id);
-                                            // }}
+                                            onClick={() => {
+                                                onReject(request.id);
+                                            }}
                                         >
                                             Reject
                                         </button>

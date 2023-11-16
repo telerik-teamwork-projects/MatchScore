@@ -2,12 +2,12 @@ from database.database import read_query, insert_query, update_query
 
 from models import users, players
 from models.enums import Role
-
+from models.requests import DirectorRequest
 from common.hashing import hash_password
 from common.authorization import create_token
 from common.utils import save_image
-from common.responses import RequestOK, RequestCreate
-from models.requests import DirectorRequest
+from common.responses import RequestOK
+from common.exceptions import NotFound
 
 def register(user_data: users.User):
     username = user_data.username
@@ -113,6 +113,24 @@ def get_director_requests():
     return director_requests
 
 
+def accept_director_request(request_id: int):
+    director_request = get_director_request_by_id(request_id)
+    if not director_request:
+        raise NotFound("Director request not found")
+
+    update_director_request_status(request_id, "accepted")
+    update_user_to_player(director_request.user_id, "director")
+    
+
+def reject_director_request(request_id: int):
+    player_request = get_director_request_by_id(request_id)
+
+    if not player_request:
+        raise NotFound("Player request not found")
+
+    update_director_request_status(request_id, "rejected")
+
+
 def get_user_by_username(username):
     sql = "SELECT * FROM users WHERE username = ?"
     sql_params = (username,)
@@ -157,7 +175,7 @@ def get_user_by_id(user_id):
 
     result = read_query(sql, sql_params)
     if result:
-        user = users.User(
+        user = users.User.from_query_result(
             id=result[0][0],
             username=result[0][1],
             email=result[0][2],
@@ -189,3 +207,42 @@ def handle_cover_image(cover_image):
         cover_image_path = save_image(cover_image, "cover_pics")
 
     return cover_image_path
+
+
+def get_director_request_by_id(request_id: int):
+    sql = """
+        SELECT id, user_id, email, status, created_at
+        FROM director_requests
+        WHERE id = ?;
+    """
+    sql_params = (request_id,)
+    result = read_query(sql, sql_params)
+    result = result[0]
+    if result:
+        return DirectorRequest(
+            id=result[0],
+            user_id=result[1],
+            email=result[2],
+            status=result[3],
+            created_at=result[4]
+        )
+    
+
+def update_director_request_status(request_id, status):
+    sql = """
+        UPDATE director_requests
+        SET status = ?
+        WHERE id = ?;
+    """
+    sql_params = (status, request_id)
+    insert_query(sql, sql_params)
+
+
+def update_user_to_player(user_id:int, status: str):
+    sql = """
+        UPDATE users
+        SET role = ?
+        WHERE id = ?;
+    """
+    sql_params = (status, user_id)
+    insert_query(sql, sql_params)

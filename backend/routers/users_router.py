@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
-from common import exceptions, hashing, authorization
+from common import exceptions, hashing, authorization, responses
 from models import users, requests
 from services import users_service
 from typing import List, Union
@@ -140,3 +140,26 @@ def get_director_requests(
         raise exceptions.Unauthorized("You are not authorized")
 
     return users_service.get_director_requests()
+
+
+@router.post("/requests/accept/{request_id}")
+def accept_director_request(
+    request_id: int,
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+    
+    users_service.accept_director_request(request_id)
+    return responses.RequestOK("Director request accepted")
+
+@router.post("/requests/reject/{request_id}")
+def accept_director_request(
+    request_id: int,
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+    
+    users_service.reject_director_request(request_id)
+    return responses.RequestOK("Director request rejected")

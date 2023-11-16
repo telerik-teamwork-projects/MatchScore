@@ -61,7 +61,6 @@ def accept_player_request(request_id:int):
 
     insert_player(player_request.requester_id, **player_info)
 
-    return RequestOK("User accepted as a player")
 
 
 def reject_player_request(request_id: int):
@@ -71,7 +70,6 @@ def reject_player_request(request_id: int):
         raise NotFound("Player request not found")
     
     update_player_request_status(request_id, Request.REJECTED.value)
-    return RequestOK("User request rejected")
 
 
 def create_tournament_join_request_no_player(
