@@ -69,7 +69,7 @@ def users_get(
         raise exceptions.InternalServerError("Loading users failed")
 
 
-@router.put("/{user_id}", response_model=users.User)
+@router.put("/{user_id}/", response_model=users.User)
 def users_update(
     user_id : int,
     username: str = Form(None),
@@ -79,11 +79,12 @@ def users_update(
     cover_img: Union[UploadFile, str] = File(None),
     current_user: users.User = Depends(authorization.get_current_user)
 ):
+    
     target_user = users_service.get_user_by_id(user_id)
     if not target_user:
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
 
-    if current_user.id != user_id or current_user.role != "admin":
+    if current_user.id != user_id and current_user.role.value != "admin":
         raise exceptions.Unauthorized("You are not authorized")
 
     if email and email != target_user.email:
@@ -158,7 +159,7 @@ def get_director_requests(
     return users_service.get_director_requests()
 
 
-@router.post("/requests/accept/{request_id}")
+@router.post("/director-requests/accept/{request_id}")
 def accept_director_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -169,8 +170,8 @@ def accept_director_request(
     users_service.accept_director_request(request_id)
     return responses.RequestOK("Director request accepted")
 
-@router.post("/requests/reject/{request_id}")
-def accept_director_request(
+@router.post("/director-requests/reject/{request_id}")
+def reject_director_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
 ):
@@ -179,3 +180,13 @@ def accept_director_request(
     
     users_service.reject_director_request(request_id)
     return responses.RequestOK("Director request rejected")
+
+
+@router.post("/link-player-requests/")
+def send_link_to_player_request(
+    user_data: users.LinkToPlayerCreate, 
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    
+    users_service.send_link_to_player_request(current_user, user_data.full_name)
+    return responses.RequestOK("Link to player request sent successfully")

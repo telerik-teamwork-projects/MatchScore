@@ -4,7 +4,7 @@ import { USER_BASE_PATH } from "../routes/paths";
 export const sendPlayerRequest = async (userId, token, playerData) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/players/${userId}/player-request`,
+            `${USER_BASE_PATH}/players/player-request/${userId}`,
             JSON.stringify(playerData),
             {
                 headers: {
@@ -21,7 +21,7 @@ export const sendPlayerRequest = async (userId, token, playerData) => {
 
 export const getPlayerRequests = async (token) => {
     try {
-        const response = await axios.get(`${USER_BASE_PATH}/players/requests`, {
+        const response = await axios.get(`${USER_BASE_PATH}/players/player-requests`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -32,12 +32,10 @@ export const getPlayerRequests = async (token) => {
     }
 };
 
-
-
 export const acceptPlayerRequest = async (requestId, token) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/players/requests/accept/${requestId}`,
+            `${USER_BASE_PATH}/players/player-requests/accept/${requestId}`,
             {},
             {
                 headers: {
@@ -54,7 +52,7 @@ export const acceptPlayerRequest = async (requestId, token) => {
 export const rejectPlayerRequest = async (requestId, token) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/players/requests/reject/${requestId}`,
+            `${USER_BASE_PATH}/players/player-requests/reject/${requestId}`,
             {},
             {
                 headers: {

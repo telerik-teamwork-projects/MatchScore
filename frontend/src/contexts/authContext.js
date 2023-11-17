@@ -15,9 +15,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const userUpdate = async (formData, user_id) => {
+    const userUpdate = async (formData, user_id, token) => {
         try {
-            return await authService.update(formData, user_id);
+            return await authService.update(formData, user_id, token);
         } catch (error) {
             throw error;
         }

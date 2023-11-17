@@ -10,6 +10,7 @@ import { USER_BASE_PATH } from "../../routes/paths";
 import { DeleteUserConfirmation } from "../../components/userDelete/DeleteUserConfirmation";
 import { RequestBecomePlayer } from "../../components/requestModal/requestBecomePlayer/RequestBecomePlayer";
 import { RequestBecomeDirector } from "../../components/requestBecomeDirector/RequestBecomeDirector";
+import { RequestLinkWithPlayer } from "../../components/requestLinkWithPlayer/RequestLinkWithPlayer";
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -20,6 +21,8 @@ export const Profile = () => {
 
     const [becomePlayerModalOpen, setBecomePlayerModalOpen] = useState(false);
     const [becomeDirectorModalOpen, setBecomeDirectorModalOpen] =
+        useState(false);
+    const [linkWithPlayerModalOpen, setlinkWithPlayerModalOpen] =
         useState(false);
 
     useEffect(() => {
@@ -62,6 +65,14 @@ export const Profile = () => {
 
     const closeBecomeDirector = () => {
         setBecomeDirectorModalOpen(false);
+    };
+
+    const openLinkWithPlayer = () => {
+        setlinkWithPlayerModalOpen(true);
+    };
+
+    const closeLinkWithPlayer = () => {
+        setlinkWithPlayerModalOpen(false);
     };
 
     return (
@@ -131,7 +142,7 @@ export const Profile = () => {
                                     </button>
                                     <button
                                         className="profileRequestPlayerBtn"
-                                        onClick={() => openBecomePlayer()}
+                                        onClick={() => openLinkWithPlayer()}
                                     >
                                         Link to Player
                                     </button>
@@ -154,9 +165,9 @@ export const Profile = () => {
                             </span>
                         </div>
                     </div>
-                    <div className="profileRightBottom">
+                    {/* <div className="profileRightBottom">
                         <p>sdnasda</p>
-                    </div>
+                    </div> */}
                 </div>
 
                 {becomePlayerModalOpen && (
@@ -172,6 +183,14 @@ export const Profile = () => {
                         user={user}
                         token={token}
                         onClose={closeBecomeDirector}
+                    />
+                )}
+
+                {linkWithPlayerModalOpen && (
+                    <RequestLinkWithPlayer
+                        userId={userId}
+                        token={token}
+                        onClose={closeLinkWithPlayer}
                     />
                 )}
             </div>

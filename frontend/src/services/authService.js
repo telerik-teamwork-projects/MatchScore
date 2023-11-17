@@ -36,7 +36,7 @@ export const login = async (userData) => {
     }
 };
 
-export const update = async (formData, userId) => {
+export const update = async (formData, userId, token) => {
     try {
         const formDataToSend = new FormData();
         formDataToSend.append("username", formData.username);
@@ -46,11 +46,12 @@ export const update = async (formData, userId) => {
         formDataToSend.append("cover_img", formData.cover_img);
 
         const response = await axios.put(
-            `${USER_BASE_PATH}/users/${userId}`,
+            `${USER_BASE_PATH}/users/${userId}/`,
             formDataToSend,
             {
                 headers: {
                     "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${token}`,
                 },
             }
         );
@@ -107,7 +108,7 @@ export const sendJoinTournamentRequestNoPlayer = async (
 ) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/players/tournament-request/${tournamentId}`,
+            `${USER_BASE_PATH}/players/tournament-requests/${tournamentId}`,
             JSON.stringify(playerData),
             {
                 headers: {
@@ -129,7 +130,7 @@ export const sendJoinTournamentRequestWithPlayer = async (
 ) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/players/tournament-request/${tournamentId}/existing`,
+            `${USER_BASE_PATH}/players/tournament-requests/${tournamentId}/existing`,
             JSON.stringify(playerData),
             {
                 headers: {
@@ -180,7 +181,7 @@ export const getDirectorRequests = async (token) => {
 export const acceptDirectorRequest = async (requestId, token) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/users/requests/accept/${requestId}`,
+            `${USER_BASE_PATH}/users/director-requests/accept/${requestId}`,
             {},
             {
                 headers: {
@@ -197,8 +198,25 @@ export const acceptDirectorRequest = async (requestId, token) => {
 export const rejectDirectorRequest = async (requestId, token) => {
     try {
         const response = await axios.post(
-            `${USER_BASE_PATH}/users/requests/reject/${requestId}`,
+            `${USER_BASE_PATH}/users/director-requests/reject/${requestId}`,
             {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const sendLinkToPlayerRequest = async (token, formData) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/users/link-player-requests/`,
+            formData,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,

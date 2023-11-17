@@ -46,3 +46,7 @@ class User(BaseModel):
 class UserLoginResponse(BaseModel):
     token: str
     user: User
+
+
+class LinkToPlayerCreate(BaseModel):
+    full_name:str

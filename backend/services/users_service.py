@@ -140,6 +140,15 @@ def reject_director_request(request_id: int):
     update_director_request_status(request_id, "rejected")
 
 
+def send_link_to_player_request(current_user: users.User, full_name: str):
+    sql = """
+        INSERT INTO link_player_requests(user_id, requested_full_name, status)
+        VALUES(?, ?, ?)
+    """
+    sql_params = (current_user.id, full_name, "pending")
+    insert_query(sql, sql_params)
+
+
 def get_user_by_username(username):
     sql = "SELECT * FROM users WHERE username = ?"
     sql_params = (username,)

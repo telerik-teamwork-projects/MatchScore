@@ -7,7 +7,7 @@ from services import players_service
 
 router = APIRouter()
 
-@router.post("/{user_id}/player-request")
+@router.post("/player-request/{user_id}")
 def send_player_request(
     user_id: int,
     player_data: players.PlayerCreate,
@@ -16,7 +16,7 @@ def send_player_request(
     return players_service.send_player_request(user_id, player_data)
 
 
-@router.get("/requests", response_model=List[players.PlayerRequest])
+@router.get("/player-requests", response_model=List[players.PlayerRequest])
 def get_player_requests(
     current_user: users.User = Depends(authorization.get_current_user)
 ):
@@ -26,7 +26,7 @@ def get_player_requests(
     return players_service.get_all_player_requests()
 
 
-@router.post("/requests/accept/{request_id}")
+@router.post("/player-requests/accept/{request_id}")
 def accept_player_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -38,7 +38,7 @@ def accept_player_request(
     return responses.RequestOK("Player request accepted")
 
 
-@router.post("/requests/reject/{request_id}")
+@router.post("/player-requests/reject/{request_id}")
 def reject_player_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -51,7 +51,7 @@ def reject_player_request(
 
 
 
-@router.post("/tournament-request/{tournament_id}")
+@router.post("/tournament-requests/{tournament_id}")
 def send_join_tournament_request_no_player(
     tournament_id: int, 
     player_data: players.PlayerCreate, 
@@ -72,7 +72,7 @@ def send_join_tournament_request_no_player(
     except Exception:
         raise exceptions.InternalServerError("Sending tournament request failed")
     
-@router.post("/tournament-request/{tournament_id}/existing")
+@router.post("/tournament-requests/{tournament_id}/existing")
 def send_join_tournament_request_with_player(
     tournament_id: int, 
     current_user: users.User = Depends(authorization.get_current_user)
