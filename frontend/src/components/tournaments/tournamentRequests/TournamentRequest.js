@@ -20,9 +20,9 @@ export const TournamentRequest = ({
 
     const onAccept = async (requestId) => {
         try {
-            await acceptTournamentRequest(requestId, token);
+            const result = await acceptTournamentRequest(requestId, token);
             setError(null);
-            setSuccess("User accepted");
+            setSuccess(result);
             updateStatus(requestId, "accepted");
         } catch (error) {
             setError(error.response.data.detail);
@@ -32,9 +32,9 @@ export const TournamentRequest = ({
 
     const onReject = async (requestId) => {
         try {
-            await rejectTournamentRequest(requestId, token);
+            const result = await rejectTournamentRequest(requestId, token);
             setError(null);
-            setSuccess("User rejected");
+            setSuccess(result);
             updateStatus(requestId, "rejected");
         } catch (error) {
             setError(error.response.data.detail);

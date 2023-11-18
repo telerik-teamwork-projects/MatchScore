@@ -6,14 +6,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/authContext";
 import { LOGIN } from "../../routes/routes";
 import { Search } from "@mui/icons-material";
-import { getUsers } from "../../services/authService";
+import { getLinkNotifications, getUsers } from "../../services/authService";
 import { getPlayerRequests } from "../../services/playerService";
 import { getDirectorRequests } from "../../services/authService";
 import { UserSearchModal } from "../userSearch/UserSearchModal";
 import { PlayerRequests } from "../playerRequests/PlayerRequests";
 import { Notifications } from "@mui/icons-material";
 import Work from "@mui/icons-material/Work";
+import PeopleIcon from "@mui/icons-material/People";
 import { DirectorRequests } from "../directorRequests/DirectorRequests";
+import { LinkPlayerRequests } from "../linkPlayerRequeests/LinkPlayerRequests";
 
 export const Navbar = () => {
     const { token, user, userLogout } = useContext(AuthContext);
@@ -34,6 +36,11 @@ export const Navbar = () => {
         setDirectorNotificationsModalOpen,
     ] = useState(false);
     const [directorNotificationsResult, setDirectorNotificationsResult] =
+        useState(null);
+
+    const [linkNotificationsModalOpen, setLinkNotificationsModalOpen] =
+        useState(false);
+    const [linkNotificationsResult, setLinkNotificationsResult] =
         useState(null);
 
     const [searchQ, setSearchQ] = useState({
@@ -77,6 +84,10 @@ export const Navbar = () => {
         setDirectorNotificationsModalOpen(false);
     };
 
+    const closeLinkNotifications = () => {
+        setLinkNotificationsModalOpen(false);
+    };
+
     const onPlayerNotifications = async (e) => {
         e.preventDefault();
 
@@ -97,7 +108,19 @@ export const Navbar = () => {
             setDirectorNotificationsResult(result);
             setDirectorNotificationsModalOpen(true);
         } catch (error) {
-            throw error;
+            console.error(error);
+        }
+    };
+
+    const onLinkNotifications = async (e) => {
+        e.preventDefault();
+
+        try {
+            const result = await getLinkNotifications(token);
+            setLinkNotificationsResult(result);
+            setLinkNotificationsModalOpen(true);
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -132,6 +155,12 @@ export const Navbar = () => {
                                 <>
                                     {user?.role === "admin" && (
                                         <>
+                                            <PeopleIcon
+                                                className="navbarNotifications"
+                                                onClick={(e) =>
+                                                    onLinkNotifications(e)
+                                                }
+                                            />
                                             <Work
                                                 className="navbarNotifications"
                                                 onClick={(e) =>
@@ -196,6 +225,14 @@ export const Navbar = () => {
                     requests={directorNotificationsResult}
                     setRequests={setDirectorNotificationsResult}
                     onClose={closeDirectorNotifications}
+                    token={token}
+                />
+            )}
+            {linkNotificationsModalOpen && (
+                <LinkPlayerRequests
+                    requests={linkNotificationsResult}
+                    setRequests={setLinkNotificationsResult}
+                    onClose={closeLinkNotifications}
                     token={token}
                 />
             )}

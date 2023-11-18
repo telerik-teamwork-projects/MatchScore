@@ -15,9 +15,9 @@ export const DirectorRequests = ({ requests, setRequests, onClose, token }) => {
 
     const onAccept = async (requestId) => {
         try {
-            await acceptDirectorRequest(requestId, token);
+            const result = await acceptDirectorRequest(requestId, token);
             setError(null);
-            setSuccess("User accepted");
+            setSuccess(result);
             updateStatus(requestId, "accepted");
         } catch (error) {
             setError(error.response.data.detail);

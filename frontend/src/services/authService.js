@@ -228,3 +228,53 @@ export const sendLinkToPlayerRequest = async (token, formData) => {
         throw error;
     }
 };
+
+export const getLinkNotifications = async (token) => {
+    try {
+        const response = await axios.get(
+            `${USER_BASE_PATH}/users/link-player-requests/`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const acceptLinkPlayerRequest = async (requestId, token) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/users/link-player-requests/accept/${requestId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const rejectLinkPlayerRequest = async (requestId, token) => {
+    try {
+        const response = await axios.post(
+            `${USER_BASE_PATH}/users/link-player-requests/reject/${requestId}`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

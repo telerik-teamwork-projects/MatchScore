@@ -40,10 +40,10 @@ def user_login(
     ):
         raise exceptions.Unauthorized("Password is invalid")
 
-    try:
-        return users_service.login(user)
-    except Exception:
-        raise exceptions.InternalServerError("Login failed")
+    # try:
+    return users_service.login(user)
+    # except Exception:
+        # raise exceptions.InternalServerError("Login failed")
     
 @router.get('/{user_id}', response_model=users.User)
 def user_get(
@@ -190,3 +190,37 @@ def send_link_to_player_request(
     
     users_service.send_link_to_player_request(current_user, user_data.full_name)
     return responses.RequestOK("Link to player request sent successfully")
+
+
+@router.get("/link-player-requests/")
+def get_link_requests(
+    current_user: users.User = Depends(authorization.get_current_user)
+): 
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+    
+    return users_service.get_link_requests()
+
+
+@router.post("/link-player-requests/accept/{request_id}")
+def accept_link_player_request(
+    request_id: int,
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+    
+    users_service.accept_link_player_request(request_id, current_user)
+    return responses.RequestOK("Link player request accepted")
+
+
+@router.post("/link-player-requests/reject/{request_id}")
+def reject_link_player_request(
+    request_id: int,
+    current_user: users.User = Depends(authorization.get_current_user)
+):
+    if current_user.role.value != "admin":
+        raise exceptions.Unauthorized("You are not authorized")
+    
+    users_service.reject_link_player_request(request_id)
+    return responses.RequestOK("Link player request rejected")
