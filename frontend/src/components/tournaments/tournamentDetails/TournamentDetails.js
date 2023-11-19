@@ -3,7 +3,8 @@ import "./tournamentDetails.scss";
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getOne } from "../../../services/tournamentService";
-import { TournamentTree } from "../tournamentTree/TournamentTree";
+import { TournamentKnockoutTree } from "../tournamentKnockoutTree/TournamentKnockoutTree";
+import { TournamentLeagueTree } from "../tournamentLeagueTree/TournamentLeagueTree";
 import { PROFILE } from "../../../routes/routes";
 import { TournamentRequest } from "../tournamentRequests/TournamentRequest";
 import { AuthContext } from "../../../contexts/authContext";
@@ -110,9 +111,17 @@ export const TournamentDetails = () => {
                     </div>
                 )}
             </div>
-            <div>
-                <TournamentTree tournament={tournament} />
-            </div>
+            {tournament?.format === "knockout" && (
+                <div>
+                    <TournamentKnockoutTree tournament={tournament} />
+                </div>
+            )}
+            {tournament?.format === "league" && (
+                <div>
+                    <TournamentLeagueTree tournament={tournament} />
+                </div>
+            )}
+
             {requestModalOpen && (
                 <TournamentRequest
                     requests={requestsResult}
