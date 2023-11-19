@@ -1,10 +1,31 @@
-import { createContext } from "react";
+import { createContext, useEffect } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import * as authService from "../services/authService";
+
 export const AuthContext = createContext("auth", null);
 
 export const AuthProvider = ({ children }) => {
     const [auth, setAuth] = useLocalStorage("auth", null);
+
+    useEffect(() => {
+        if (auth?.token) {
+            const checkTokenExpiration = async () => {
+                try {
+                    const decodedToken = await authService.verifyToken(
+                        auth.token
+                    );
+                    setAuth((prevAuth) => ({
+                        ...prevAuth,
+                        user: decodedToken,
+                    }));
+                } catch (error) {
+                    console.error(error);
+                    setAuth(null);
+                }
+            };
+            checkTokenExpiration();
+        }
+    }, [auth?.token, setAuth]);
 
     const userLogin = async (userData) => {
         try {
@@ -32,7 +53,7 @@ export const AuthProvider = ({ children }) => {
         token: auth?.token,
         userUpdate,
         userLogin,
-        userLogout
+        userLogout,
     };
 
     return (

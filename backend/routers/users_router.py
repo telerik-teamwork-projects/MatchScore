@@ -40,11 +40,20 @@ def user_login(
     ):
         raise exceptions.Unauthorized("Password is invalid")
 
-    # try:
-    return users_service.login(user)
-    # except Exception:
-        # raise exceptions.InternalServerError("Login failed")
+    try:
+        return users_service.login(user)
+    except Exception:
+        raise exceptions.InternalServerError("Login failed")
     
+
+@router.get("/verify-token", response_model=users.User)
+def verify_token_route(current_user: users.User = Depends(authorization.verify_token)):
+    try:
+        return current_user
+    except Exception as e:
+        exceptions.Unauthorized(str(e))
+
+
 @router.get('/{user_id}', response_model=users.User)
 def user_get(
     user_id: int

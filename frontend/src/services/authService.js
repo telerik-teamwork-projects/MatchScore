@@ -36,6 +36,20 @@ export const login = async (userData) => {
     }
 };
 
+export const verifyToken = async (token) => {
+    try {
+        const response = await axios.get(`${USER_BASE_PATH}/users/verify-token`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const update = async (formData, userId, token) => {
     try {
         const formDataToSend = new FormData();
