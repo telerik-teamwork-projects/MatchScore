@@ -6,9 +6,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/authContext";
 import { LOGIN } from "../../routes/routes";
 import { Search } from "@mui/icons-material";
-import { getLinkNotifications, getUsers } from "../../services/authService";
-import { getPlayerRequests } from "../../services/playerService";
-import { getDirectorRequests } from "../../services/authService";
+import { getUsers } from "../../services/authService";
+import {
+    getDirectorRequests,
+    getLinkPlayerRequests,
+    getPlayerRequests,
+} from "../../services/requestService";
 import { UserSearchModal } from "../userSearch/UserSearchModal";
 import { PlayerRequests } from "../playerRequests/PlayerRequests";
 import { Notifications } from "@mui/icons-material";
@@ -116,7 +119,7 @@ export const Navbar = () => {
         e.preventDefault();
 
         try {
-            const result = await getLinkNotifications(token);
+            const result = await getLinkPlayerRequests(token);
             setLinkNotificationsResult(result);
             setLinkNotificationsModalOpen(true);
         } catch (error) {
@@ -187,21 +190,6 @@ export const Navbar = () => {
                                     >
                                         Logout
                                     </Link>
-                                    {logoutWindow && (
-                                        <LogoutConfirmation
-                                            isOpen={logoutWindow}
-                                            onConfirm={confirmLogout}
-                                            onCancel={cancelLogout}
-                                        />
-                                    )}
-                                    {showUsersSearch && userSearchResults && (
-                                        <UserSearchModal
-                                            users={userSearchResults}
-                                            onClose={() =>
-                                                setShowUsersSearch(false)
-                                            }
-                                        />
-                                    )}
                                 </>
                             ) : (
                                 <Link className="navbarRightLink" to="/login">
@@ -234,6 +222,19 @@ export const Navbar = () => {
                     setRequests={setLinkNotificationsResult}
                     onClose={closeLinkNotifications}
                     token={token}
+                />
+            )}
+            {showUsersSearch && (
+                <UserSearchModal
+                    users={userSearchResults}
+                    onClose={() => setShowUsersSearch(false)}
+                />
+            )}
+            {logoutWindow && (
+                <LogoutConfirmation
+                    isOpen={logoutWindow}
+                    onConfirm={confirmLogout}
+                    onCancel={cancelLogout}
                 />
             )}
         </>

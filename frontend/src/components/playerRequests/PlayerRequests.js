@@ -5,7 +5,7 @@ import { PROFILE } from "../../routes/routes";
 import {
     acceptPlayerRequest,
     rejectPlayerRequest,
-} from "../../services/playerService";
+} from "../../services/requestService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 
@@ -47,7 +47,7 @@ export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
     return (
         <div className="playerRequests">
             <div className="playerRequestsWrapper">
-                <h2>Notifications</h2>
+                <h2>Player Requests</h2>
                 <ul>
                     {requests?.map((request) => (
                         <li key={request.id}>

@@ -2,7 +2,7 @@ import "./requestLinkWithPlayer.scss";
 import { useState } from "react";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
-import { sendLinkToPlayerRequest } from "../../services/authService";
+import { sendLinkToPlayerRequest } from "../../services/requestService";
 
 export const RequestLinkWithPlayer = ({ token, onClose }) => {
     const [error, setError] = useState(null);

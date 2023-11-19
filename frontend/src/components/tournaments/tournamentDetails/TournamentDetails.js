@@ -7,7 +7,7 @@ import { TournamentTree } from "../tournamentTree/TournamentTree";
 import { PROFILE } from "../../../routes/routes";
 import { TournamentRequest } from "../tournamentRequests/TournamentRequest";
 import { AuthContext } from "../../../contexts/authContext";
-import { getRequests } from "../../../services/tournamentService";
+import { getTournamentRequests } from "../../../services/requestService";
 
 export const TournamentDetails = () => {
     const { tournamentId } = useParams();
@@ -25,7 +25,10 @@ export const TournamentDetails = () => {
         e.preventDefault();
 
         try {
-            const requestsData = await getRequests(tournamentId, token);
+            const requestsData = await getTournamentRequests(
+                tournamentId,
+                token
+            );
             setRequestsResult(requestsData);
             setRequestModalOpen(true);
         } catch (error) {

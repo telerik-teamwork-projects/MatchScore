@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
     acceptTournamentRequest,
     rejectTournamentRequest,
-} from "../../../services/tournamentService";
+} from "../../../services/requestService";
 import { useState } from "react";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../../responseMessages/successMessages/SuccessMessages";

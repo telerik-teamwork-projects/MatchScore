@@ -8,24 +8,19 @@ export const AuthProvider = ({ children }) => {
     const [auth, setAuth] = useLocalStorage("auth", null);
 
     useEffect(() => {
-        if (auth?.token) {
-            const checkTokenExpiration = async () => {
-                try {
-                    const decodedToken = await authService.verifyToken(
-                        auth.token
-                    );
-                    setAuth((prevAuth) => ({
-                        ...prevAuth,
-                        user: decodedToken,
-                    }));
-                } catch (error) {
-                    console.error(error);
-                    setAuth(null);
+        const checkTokenExpiration = async () => {
+            try {
+                if (auth?.token) {
+                    await authService.verifyToken(auth.token);
                 }
-            };
-            checkTokenExpiration();
-        }
-    }, [auth?.token, setAuth]);
+            } catch (error) {
+                console.error(error);
+                setAuth(null);
+            }
+        };
+
+        checkTokenExpiration();
+    }, []);
 
     const userLogin = async (userData) => {
         try {

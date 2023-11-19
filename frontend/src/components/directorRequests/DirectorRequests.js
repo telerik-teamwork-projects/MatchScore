@@ -5,7 +5,7 @@ import { PROFILE } from "../../routes/routes";
 import {
     acceptDirectorRequest,
     rejectDirectorRequest,
-} from "../../services/authService";
+} from "../../services/requestService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 
@@ -47,7 +47,7 @@ export const DirectorRequests = ({ requests, setRequests, onClose, token }) => {
     return (
         <div className="directorRequests">
             <div className="directorRequestsWrapper">
-                <h2>Notifications</h2>
+                <h2>Director Requests</h2>
                 <ul>
                     {requests?.map((request) => (
                         <li key={request.id}>

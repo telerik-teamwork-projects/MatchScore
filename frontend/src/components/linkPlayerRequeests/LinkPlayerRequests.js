@@ -5,7 +5,7 @@ import { PROFILE } from "../../routes/routes";
 import {
     acceptLinkPlayerRequest,
     rejectLinkPlayerRequest,
-} from "../../services/authService";
+} from "../../services/requestService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 
@@ -52,7 +52,7 @@ export const LinkPlayerRequests = ({
     return (
         <div className="linkPlayerRequests">
             <div className="linkPlayerRequestsWrapper">
-                <h2>Notifications</h2>
+                <h2>Link Player Requests</h2>
                 <ul>
                     {requests?.map((request) => (
                         <li key={request.id}>

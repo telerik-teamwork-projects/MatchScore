@@ -6,7 +6,7 @@ import { AuthContext } from "../../contexts/authContext";
 import { Leftbar } from "../../components/home/leftbar/Leftbar";
 import { getUser, deleteUser } from "../../services/authService";
 import { HOME, PROFILE } from "../../routes/routes";
-import { USER_BASE_PATH } from "../../routes/paths";
+import { BASE_PATH } from "../../routes/paths";
 import { DeleteUserConfirmation } from "../../components/userDelete/DeleteUserConfirmation";
 import { RequestBecomePlayer } from "../../components/requestModal/requestBecomePlayer/RequestBecomePlayer";
 import { RequestBecomeDirector } from "../../components/requestBecomeDirector/RequestBecomeDirector";
@@ -85,7 +85,7 @@ export const Profile = () => {
                             {profile?.cover_img ? (
                                 <img
                                     className="profileCoverImg"
-                                    src={`${USER_BASE_PATH}${profile?.cover_img}`}
+                                    src={`${BASE_PATH}${profile?.cover_img}`}
                                     alt={profile?.username}
                                 />
                             ) : (
@@ -99,7 +99,7 @@ export const Profile = () => {
                             {profile?.profile_img ? (
                                 <img
                                     className="profileUserImg"
-                                    src={`${USER_BASE_PATH}${profile?.profile_img}`}
+                                    src={`${BASE_PATH}${profile?.profile_img}`}
                                     alt=""
                                 />
                             ) : (

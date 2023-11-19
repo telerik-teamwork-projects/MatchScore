@@ -16,7 +16,7 @@ load_dotenv()
 _JWT_SECRET = os.environ['secret']
 _JWT_ALGORITHM = os.environ['algorithm']
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login/", auto_error=False)
 
 
 active_sessions = {}
@@ -89,25 +89,3 @@ def refresh_token(old_token: str) -> str:
 
     except PyJWTError:
         raise exceptions.Unauthorized("Could not refresh token")
-
-
-def verify_token(token: str = Depends(oauth2_scheme)) -> User:
-    try:
-        payload = jwt.decode(token, _JWT_SECRET, algorithms=[_JWT_ALGORITHM])
-        user_id = payload.get("id")
-        username = payload.get("username")
-        email = payload.get("email")
-        role = payload.get("role")
-        iat = datetime.utcfromtimestamp(payload.get("iat"))
-        exp = datetime.utcfromtimestamp(payload.get("exp"))
-
-        if not all([user_id, username, email, role, iat, exp]):
-            raise exceptions.Unauthorized("Invalid token payload")
-
-        if exp - iat < timedelta(minutes=5):
-            raise exceptions.Unauthorized("Token has expired")
-
-        return User(id=user_id, username=username, email=email, role=role)
-
-    except PyJWTError:
-        raise exceptions.Unauthorized("Could not validate credentials")

@@ -2,7 +2,7 @@ import "./requestBecomeDirector.scss";
 import { useState } from "react";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
-import { sendDirectorRequest } from "../../services/authService";
+import { sendDirectorRequest } from "../../services/requestService";
 
 export const RequestBecomeDirector = ({ user, token, onClose }) => {
     const [error, setError] = useState(null);

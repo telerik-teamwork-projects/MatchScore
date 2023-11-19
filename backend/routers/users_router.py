@@ -25,7 +25,7 @@ def user_register(
         raise exceptions.InternalServerError("Registration failed")
 
 
-@router.post('/login')
+@router.post('/login/')
 def user_login(
     user_data: users.UserLogin
 ):
@@ -46,15 +46,15 @@ def user_login(
         raise exceptions.InternalServerError("Login failed")
     
 
-@router.get("/verify-token", response_model=users.User)
-def verify_token_route(current_user: users.User = Depends(authorization.verify_token)):
+@router.get("/verify-token/")
+def verify_token_route(current_user: users.User = Depends(authorization.get_current_user)):
     try:
-        return current_user
+        return responses.RequestOK("The token is valid")
     except Exception as e:
         exceptions.Unauthorized(str(e))
 
 
-@router.get('/{user_id}', response_model=users.User)
+@router.get('/{user_id}/', response_model=users.User)
 def user_get(
     user_id: int
 ):  
@@ -121,7 +121,7 @@ def users_update(
         raise exceptions.InternalServerError("Updating user failed")
     
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}/")
 def user_delete(
     user_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -141,95 +141,3 @@ def user_delete(
     except Exception:
         raise exceptions.InternalServerError("Deleting user failed")
     
-
-@router.post("/director-requests/")
-def send_director_request(
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    if current_user.role.value == "admin":
-        raise exceptions.BadRequest("Admins cannot send a director request")
-
-    if current_user.role.value == "director":
-        raise exceptions.BadRequest("User is already a director")
-    
-
-    users_service.send_director_request(current_user)
-    return responses.RequestOK("Successfully sent a director request")
-
-
-
-@router.get("/director-requests/", response_model=List[requests.DirectorRequest])
-def get_director_requests(
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    if current_user.role.value != "admin":
-        raise exceptions.Unauthorized("You are not authorized")
-
-    return users_service.get_director_requests()
-
-
-@router.post("/director-requests/accept/{request_id}")
-def accept_director_request(
-    request_id: int,
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    if current_user.role.value != "admin":
-        raise exceptions.Unauthorized("You are not authorized")
-    
-    users_service.accept_director_request(request_id)
-    return responses.RequestOK("Director request accepted")
-
-@router.post("/director-requests/reject/{request_id}")
-def reject_director_request(
-    request_id: int,
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    if current_user.role.value != "admin":
-        raise exceptions.Unauthorized("You are not authorized")
-    
-    users_service.reject_director_request(request_id)
-    return responses.RequestOK("Director request rejected")
-
-
-@router.post("/link-player-requests/")
-def send_link_to_player_request(
-    user_data: users.LinkToPlayerCreate, 
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    
-    users_service.send_link_to_player_request(current_user, user_data.full_name)
-    return responses.RequestOK("Link to player request sent successfully")
-
-
-@router.get("/link-player-requests/")
-def get_link_requests(
-    current_user: users.User = Depends(authorization.get_current_user)
-): 
-    if current_user.role.value != "admin":
-        raise exceptions.Unauthorized("You are not authorized")
-    
-    return users_service.get_link_requests()
-
-
-@router.post("/link-player-requests/accept/{request_id}")
-def accept_link_player_request(
-    request_id: int,
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    if current_user.role.value != "admin":
-        raise exceptions.Unauthorized("You are not authorized")
-    
-    users_service.accept_link_player_request(request_id, current_user)
-    return responses.RequestOK("Link player request accepted")
-
-
-@router.post("/link-player-requests/reject/{request_id}")
-def reject_link_player_request(
-    request_id: int,
-    current_user: users.User = Depends(authorization.get_current_user)
-):
-    if current_user.role.value != "admin":
-        raise exceptions.Unauthorized("You are not authorized")
-    
-    users_service.reject_link_player_request(request_id)
-    return responses.RequestOK("Link player request rejected")

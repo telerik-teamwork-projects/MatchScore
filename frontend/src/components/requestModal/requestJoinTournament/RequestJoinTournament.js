@@ -3,9 +3,9 @@ import { useState } from "react";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../../responseMessages/successMessages/SuccessMessages";
 import {
-    sendJoinTournamentRequestNoPlayer,
-    sendJoinTournamentRequestWithPlayer,
-} from "../../../services/authService";
+    sendTournamentRequestNoPlayer,
+    sendTournamentRequestWithPlayer,
+} from "../../../services/requestService";
 
 export const RequestJoinTournament = ({ tournamentId, token, onClose }) => {
     const [error, setError] = useState(null);
@@ -22,7 +22,7 @@ export const RequestJoinTournament = ({ tournamentId, token, onClose }) => {
 
     const handleSubmitNoPlayer = async () => {
         try {
-            const result = await sendJoinTournamentRequestNoPlayer(
+            const result = await sendTournamentRequestNoPlayer(
                 tournamentId,
                 token,
                 formData
@@ -47,7 +47,7 @@ export const RequestJoinTournament = ({ tournamentId, token, onClose }) => {
 
     const handleSubmitWithPlayer = async () => {
         try {
-            const result = await sendJoinTournamentRequestWithPlayer(
+            const result = await sendTournamentRequestWithPlayer(
                 tournamentId,
                 token,
                 formData
