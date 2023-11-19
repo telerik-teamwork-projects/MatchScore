@@ -1,6 +1,6 @@
 from database.database import read_query, insert_query, update_query
 
-from models import users
+from models import users, players
 from models.enums import Role
 from common.hashing import hash_password
 from common.authorization import create_token
@@ -91,6 +91,26 @@ def get_users(username):
         )
         user_data.append(user)
     return user_data
+
+
+def get_user_with_player(user_id):
+    sql = """
+        SELECT u.id, u.username, u.email, u.role, u.bio, u.profile_img, u.cover_img, p.id as player_id, p.full_name, p.country, p.sports_club
+        FROM users u
+        LEFT JOIN players p ON u.id = p.user_id
+        WHERE u.id = ?
+    """
+    sql_params = (user_id,)
+
+    result = read_query(sql, sql_params)
+    if result:
+        user_values = result[0][:7]
+        player_values = result[0][7:]
+
+        if not player_values[0]:
+            return users.UserWithPlayer.from_query_result(*user_values)
+
+        return users.UserWithPlayer.from_query_result(*user_values, *player_values)
 
 
 def get_user_by_username(username):

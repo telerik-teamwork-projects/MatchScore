@@ -54,12 +54,12 @@ def verify_token_route(current_user: users.User = Depends(authorization.get_curr
         exceptions.Unauthorized(str(e))
 
 
-@router.get('/{user_id}/', response_model=users.User)
+@router.get('/{user_id}/', response_model=users.UserWithPlayer)
 def user_get(
     user_id: int
 ):  
     try:
-        target_user = users_service.get_user_by_id(user_id)
+        target_user = users_service.get_user_with_player(user_id)
     except Exception:
         raise exceptions.InternalServerError("Loading profile failed")
     

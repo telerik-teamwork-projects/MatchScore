@@ -165,9 +165,43 @@ export const Profile = () => {
                             </span>
                         </div>
                     </div>
-                    {/* <div className="profileRightBottom">
-                        <p>sdnasda</p>
-                    </div> */}
+                    {profile?.player && (
+                        <div className="profileRightBottom">
+                            <div className="profileRightBottomLeft">
+                                <div className="playerProfileWrapper">
+                                    <div className="playerTop">
+                                        <h2>Player Profile</h2>
+                                    </div>
+                                    <div className="playerMain">
+                                        <div className="playerMainFullName">
+                                            <p>Full Name:</p>
+                                            <span>
+                                                {profile?.player.full_name ||
+                                                    "N/A"}
+                                            </span>
+                                        </div>
+                                        <div className="playerMainCountry">
+                                            <p>Country:</p>
+                                            <span>
+                                                {profile?.player.country ||
+                                                    "N/A"}
+                                            </span>
+                                        </div>
+                                        <div className="playerMainSportsClub">
+                                            <p>Sports Club:</p>
+                                            <span>
+                                                {profile?.player.sports_club ||
+                                                    "N/A"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="profileRightBottomRight">
+                                <h2>Achievements</h2>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {becomePlayerModalOpen && (
