@@ -1,12 +1,10 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends
 from typing import List
-from models import users, requests
 
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound, Forbidden
 from common.utils import is_admin, is_director, is_power_of_two
-from common.responses import RequestOK
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
     TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate, DbTournament, TournamentDateUpdate, \
     TournamentPlayerUpdate
@@ -42,40 +40,6 @@ def get_tournament(tournament_id):
         return tournaments_service.get_one(tournament_id)
     except Exception:
         raise InternalServerError("Retrieving tournament details failed")
-
-
-@router.get("/{tournament_id}/requests", response_model=List[requests.TournamentRequest])
-def get_tournament_requests(tournament_id: int):
-    if not tournaments_service.get_tournament_by_id(tournament_id):
-        raise NotFound("Tournament not found")
-    try:
-        return tournaments_service.get_tournament_requests(tournament_id)
-    except Exception:
-        raise InternalServerError("Retrieving requests failed")
-
-
-@router.post("/requests/accept/{request_id}")
-def accept_player_to_tournament(
-        request_id: int,
-        current_user: users.User = Depends(get_current_user)
-):
-    if current_user.role.value not in ["admin", "director"]:
-        raise Unauthorized("You are not authorized")
-
-    tournaments_service.accept_player_to_tournament(request_id)
-    return RequestOK("Player accepted to tournament")
-
-
-@router.post("/requests/reject/{request_id}")
-def reject_player_from_tournament(
-        request_id: int,
-        current_user: users.User = Depends(get_current_user)
-):
-    if current_user.role.value not in ["admin", "director"]:
-        raise Unauthorized("You are not authorized")
-
-    tournaments_service.reject_player_from_tournament(request_id)
-    return RequestOK("Player rejected from entering tournaments")
 
 
 @router.post('/league', response_model=TournamentLeagueResponse, status_code=201)
