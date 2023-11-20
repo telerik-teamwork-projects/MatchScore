@@ -2,6 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import List
 from models.enums import MatchFormat
+from models.pagination import Pagination
 from models.players import PlayerProfile
 
 
@@ -14,10 +15,10 @@ class MatchScore(BaseModel):
     @classmethod
     def from_query_result(cls, id, player, score=0, points=0):
         return cls(
-            id=id,
+            id=int(id) if id else None,
             player=player,
-            score=score,
-            points=points)
+            score=int(score) if score else None,
+            points=int(points) if points else None)
 
 
 class MatchDateUpdate(BaseModel):
@@ -120,3 +121,8 @@ class MatchTournamentResponse(BaseModel):
             tournament_id=tournament_id,
             tournament_title=title,
             score=score)
+
+
+class PaginatedMatch(BaseModel):
+    players: list[MatchTournamentResponse]
+    pagination: Pagination

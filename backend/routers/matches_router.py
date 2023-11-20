@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, NotFound, Forbidden, BadRequest
-from common.utils import is_admin, is_director
+from common.utils import is_admin, is_director, manage_pages
 from models.matches import Match, MatchResponse, MatchScoreUpdate, MatchBase, MatchDateUpdate, MatchPlayerUpdate, \
-    MatchTournamentResponse
+    MatchTournamentResponse, PaginatedMatch
+from models.pagination import Pagination
 from models.users import User
 from fastapi import Depends
 
@@ -93,3 +94,14 @@ def get_match_by_id(id: int):
         return match
 
     raise NotFound(f'Match {id} does not exist')
+
+
+@router.get('/', response_model=PaginatedMatch)
+def get_matches(page: int = Query(default=1)):
+    total_players = matches_service.count()
+    params, (page, total_pages) = manage_pages(page, total_players)
+
+    result = matches_service.all(params)
+
+    return PaginatedMatch(players=list(result),
+                          pagination=Pagination(page=page, items_per_page=params[-1], total_pages=total_pages))
