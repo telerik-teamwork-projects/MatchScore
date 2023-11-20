@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../../contexts/authContext";
 import { Leftbar } from "../../components/home/leftbar/Leftbar";
+import { Rightbar } from "../../components/home/rightbar/Rightbar";
 import { getUser, deleteUser } from "../../services/authService";
 import { HOME, PROFILE } from "../../routes/routes";
 import { BASE_PATH } from "../../routes/paths";
@@ -79,8 +80,8 @@ export const Profile = () => {
         <>
             <div className="profile">
                 <Leftbar />
-                <div className="profileRight">
-                    <div className="profileRightTop">
+                <div className="profileFeed">
+                    <div className="profileFeedTop">
                         <div className="profileCover">
                             {profile?.cover_img ? (
                                 <img
@@ -166,8 +167,8 @@ export const Profile = () => {
                         </div>
                     </div>
                     {profile?.player && (
-                        <div className="profileRightBottom">
-                            <div className="profileRightBottomLeft">
+                        <div className="profileFeedBottom">
+                            <div className="profileFeedBottomLeft">
                                 <div className="playerProfileWrapper">
                                     <div className="playerTop">
                                         <h2>Player Profile</h2>
@@ -197,7 +198,7 @@ export const Profile = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="profileRightBottomRight">
+                            <div className="profileFeedBottomRight">
                                 <h2>Achievements</h2>
                             </div>
                         </div>
@@ -227,6 +228,7 @@ export const Profile = () => {
                         onClose={closeLinkWithPlayer}
                     />
                 )}
+                <Rightbar />
             </div>
         </>
     );

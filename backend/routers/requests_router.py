@@ -32,7 +32,7 @@ def get_director_requests(
     return requests_service.get_director_requests()
 
 
-@router.post("/director-requests/accept/{request_id}")
+@router.post("/director-requests/accept/{request_id}/")
 def accept_director_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -43,7 +43,7 @@ def accept_director_request(
     requests_service.accept_director_request(request_id)
     return responses.RequestOK("Director request accepted")
 
-@router.post("/director-requests/reject/{request_id}")
+@router.post("/director-requests/reject/{request_id}/")
 def reject_director_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -75,7 +75,7 @@ def get_link_requests(
     return requests_service.get_link_requests()
 
 
-@router.post("/link-player-requests/accept/{request_id}")
+@router.post("/link-player-requests/accept/{request_id}/")
 def accept_link_player_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -87,7 +87,7 @@ def accept_link_player_request(
     return responses.RequestOK("Link player request accepted")
 
 
-@router.post("/link-player-requests/reject/{request_id}")
+@router.post("/link-player-requests/reject/{request_id}/")
 def reject_link_player_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
@@ -181,7 +181,7 @@ def send_tournament_request_with_player(
     except Exception:
         raise exceptions.InternalServerError("Sending tournament request failed")
     
-@router.get("/{tournament_id}/requests", response_model=List[requests.TournamentRequest])
+@router.get("/tournament-requests/{tournament_id}/", response_model=List[requests.TournamentRequest])
 def get_tournament_requests(tournament_id: int):
     if not tournaments_service.get_tournament_by_id(tournament_id):
         raise exceptions.NotFound("Tournament not found")
@@ -191,7 +191,7 @@ def get_tournament_requests(tournament_id: int):
         raise exceptions.InternalServerError("Retrieving requests failed")
 
 
-@router.post("/requests/accept/{request_id}")
+@router.post("/tournament-requests/accept/{request_id}/")
 def accept_tournament_request(
         request_id: int,
         current_user: users.User = Depends(authorization.get_current_user)
@@ -203,7 +203,7 @@ def accept_tournament_request(
     return responses.RequestOK("Player accepted in tournament")
 
 
-@router.post("/requests/reject/{request_id}")
+@router.post("/tournament-requests/reject/{request_id}/")
 def reject_tournament_requets(
         request_id: int,
         current_user: users.User = Depends(authorization.get_current_user)

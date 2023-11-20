@@ -2,7 +2,7 @@ import logging
 import math
 import random as rand
 from datetime import timedelta
-from typing import List
+from typing import List, Tuple
 
 from common.exceptions import InternalServerError, NotFound, BadRequest
 from models import tournaments, requests, players
@@ -126,32 +126,24 @@ def create(
     return response_data
 
 
-def get_all():
+def get_all(params: Tuple):
+    offset, limit = params
     sql = """
             SELECT t.*, u.username, u.profile_img
             FROM tournaments t
             JOIN users u ON t.owner_id = u.id
-            ORDER BY t.start_date;
+            ORDER BY t.start_date
+            LIMIT ? OFFSET ?;
         """
-    sql_params = ()
+    sql_params = (limit, offset)
 
     result = read_query(sql, sql_params)
-
     tournaments_data = []
     for row in result:
-        owner = Owner(id=row[11], username=row[12], profile_img=row[13])
-        tournament = tournaments.Tournament(
-            id=row[0],
-            format=row[1],
-            title=row[2],
-            description=row[3],
-            match_format=row[4],
-            rounds=row[5],
-            third_place=row[6],
-            status=row[7],
-            location=row[8],
-            start_date=str(row[9]),
-            end_date=str(row[10]),
+        tournament_data = row[0:11]
+        owner = Owner.from_query_result(*row[11:])
+        tournament = tournaments.Tournament.from_query_result(
+            *tournament_data,
             owner=owner
         )
         tournaments_data.append(tournament)
@@ -550,3 +542,8 @@ def update_players(tournament: DbTournament, players_update: List[TournamentPlay
             conn.rollback()
             logging.exception(err.msg)
             raise InternalServerError("Something went wrong")
+
+
+def count():
+    data = read_query('SELECT COUNT(*) FROM players')
+    return data[0][0]

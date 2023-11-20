@@ -1,21 +1,21 @@
-.profile {
+.playerProfile {
     display: flex;
 
-    .profileFeed {
+    .playerProfileFeed {
         flex: 8;
 
-        .profileFeedTop {
-            .profileCover {
+        .playerProfileTop {
+            .playerProfileCover {
                 height: 320px;
                 position: relative;
 
-                .profileCoverImg {
+                .playerProfileCoverImg {
                     width: 100%;
                     height: 250px;
                     object-fit: cover;
                 }
 
-                .profileUserImg {
+                .playerProfileImg {
                     width: 150px;
                     height: 150px;
                     border-radius: 50%;
@@ -29,13 +29,13 @@
                 }
             }
 
-            .profileBtns {
+            .playerProfileBtns {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
 
-                .profileEditBtn {
+                .playerProfileEditBtn {
                     background-color: #007bff;
                     color: white;
                     padding: 10px 20px;
@@ -47,11 +47,11 @@
                     text-align: center;
                 }
 
-                .profileEditBtn:hover {
+                .playerProfileEditBtn:hover {
                     background-color: #0056b3;
                 }
 
-                .profileDeleteBtn {
+                .playerProfileDeleteBtn {
                     background-color: rgb(255, 6, 6);
                     color: white;
                     padding: 10px 20px;
@@ -63,19 +63,19 @@
                     text-align: center;
                 }
 
-                .profileDeleteBtn:hover {
+                .playerProfileDeleteBtn:hover {
                     background-color: #a70404;
                 }
             }
 
-            .profileRequestBtns {
+            .playerProfileRequestBtns {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
                 margin-top: 20px;
 
-                .profileRequestPlayerBtn {
+                .playerProfileRequestPlayerBtn {
                     background-color: rgb(3, 160, 3);
                     color: white;
                     padding: 10px 20px;
@@ -92,27 +92,27 @@
                 }
             }
 
-            .profileInfo {
+            .playerProfileInfo {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
 
-                .profileInfoName {
+                .playerProfileInfoName {
                     font-size: 24px;
                 }
 
-                .profileInfoDesc {
+                .playerProfileInfoDesc {
                     font-weight: 300;
                 }
             }
         }
 
-        .profileFeedBottom {
+        .playerProfileBottom {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
 
-            .profileFeedBottomLeft {
+            .playerProfileBottomLeft {
                 flex: 1;
 
                 .playerProfileWrapper {
@@ -121,11 +121,6 @@
                     margin: 20px;
                     border-radius: 8px;
                     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-                    .playerTop {
-                        text-align: center;
-                        margin-bottom: 15px;
-                    }
 
                     .playerMain {
                         display: flex;
@@ -164,7 +159,7 @@
                 }
             }
 
-            .profileFeedBottomRight {
+            .playerProfileBottomRight {
                 flex: 1;
                 display: flex;
                 justify-content: center;
