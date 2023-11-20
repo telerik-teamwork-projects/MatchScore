@@ -185,3 +185,27 @@ def get_by_id(id: int):
             if el[5]:
                 scores.append(el[5:])
         return MatchTournamentResponse.from_query_result(*data[0][:5], scores)
+
+
+def count():
+    data = read_query('SELECT COUNT(*) FROM matches')
+    return data[0][0]
+
+
+def all(parameters: tuple):
+    offset, limit = parameters
+
+    data = read_query('''SELECT m.id, m.date, m.format, t.id, t.title, 
+                                GROUP_CONCAT(CONCAT_WS(
+                                                ',',p.id, p.full_name, pm.score, pm.points) SEPARATOR ';') as scores
+                                FROM matches m 
+                                LEFT JOIN players_matches pm ON pm.match_id = m.id 
+                                LEFT JOIN players p ON p.id = pm.player_id
+                                LEFT JOIN tournaments t ON m.tournaments_id = t.id
+                                GROUP BY m.id, m.date, m.format, t.id, t.title
+                                ORDER BY m.id, m.tournaments_id
+                                LIMIT ? OFFSET ?''', (limit, offset))
+
+    return (MatchTournamentResponse.from_query_result(*row[:5],
+                                                      [tuple(x.split(',')) for x in row[5].split(';') if row[5] != ''])
+            for row in data)
