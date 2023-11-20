@@ -6,13 +6,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/authContext";
 import { LOGIN } from "../../routes/routes";
 import { Search } from "@mui/icons-material";
-import { getUsers } from "../../services/authService";
+import {
+    searchUsers,
+    searchPlayers,
+    searchTournaments,
+} from "../../services/search";
 import {
     getDirectorRequests,
     getLinkPlayerRequests,
     getPlayerRequests,
 } from "../../services/requestService";
-import { UserSearchModal } from "../userSearch/UserSearchModal";
+import { UserSearchModal } from "../search/userSearch/UserSearchModal";
+import { PlayerSearchModal } from "../search/playerSearch/PlayerSearchModal";
+import { TournamentSearchModal } from "../search/tournamentSearch/TournamentsSearchModal";
 import { PlayerRequests } from "../playerRequests/PlayerRequests";
 import { Notifications } from "@mui/icons-material";
 import Work from "@mui/icons-material/Work";
@@ -27,7 +33,13 @@ export const Navbar = () => {
     const [logoutWindow, setLogoutWindow] = useState(null);
 
     const [showUsersSearch, setShowUsersSearch] = useState(false);
-    const [userSearchResults, setUserSearchResults] = useState(null);
+    const [showPlayersSearch, setShowPlayersSearch] = useState(false);
+    const [showTournamentsSearch, setShowTournamentsSearch] = useState(false);
+
+    const [usersSearchResults, setUsersSearchResults] = useState(null);
+    const [playersSearchResults, setPlayersSearchResults] = useState(null);
+    const [tournamentsSearchResults, setTournamentsSearchResults] =
+        useState(null);
 
     const [playerNotificationsModalOpen, setPlayerNotificationsModalOpen] =
         useState(false);
@@ -46,12 +58,18 @@ export const Navbar = () => {
     const [linkNotificationsResult, setLinkNotificationsResult] =
         useState(null);
 
-    const [searchQ, setSearchQ] = useState({
+    const [searchData, setsearchData] = useState({
         search: "",
+        category: "users",
     });
 
-    const onChange = (e) =>
-        setSearchQ({ ...searchQ, [e.target.name]: e.target.value });
+    const onChange = (e) => {
+        const { name, value } = e.target;
+        setsearchData((prevsearchData) => ({
+            ...prevsearchData,
+            [name]: value,
+        }));
+    };
 
     const onLogout = () => {
         setLogoutWindow(true);
@@ -69,13 +87,37 @@ export const Navbar = () => {
 
     const onSearch = async (e) => {
         e.preventDefault();
-        setShowUsersSearch(true);
-
-        try {
-            const userData = await getUsers(searchQ);
-            setUserSearchResults(userData);
-        } catch (error) {
-            console.error(error);
+        if (searchData.category === "users") {
+            try {
+                console.log(searchData);
+                const fetchedSearchData = await searchUsers(searchData.search);
+                setUsersSearchResults(fetchedSearchData);
+                setShowUsersSearch(true);
+            } catch (error) {
+                console.error(error);
+            }
+        } else if (searchData.category === "players") {
+            try {
+                const fetchedSearchData = await searchPlayers(
+                    searchData.search
+                );
+                setPlayersSearchResults(fetchedSearchData);
+                setShowPlayersSearch(true);
+            } catch (error) {
+                console.error(error);
+            }
+        } else if (searchData.category === "tournaments") {
+            try {
+                const fetchedSearchData = await searchTournaments(
+                    searchData.search
+                );
+                setTournamentsSearchResults(fetchedSearchData);
+                setShowTournamentsSearch(true);
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            console.error("You can search for users, players or tournaments");
         }
     };
 
@@ -141,15 +183,29 @@ export const Navbar = () => {
                             onSubmit={(e) => onSearch(e)}
                             className="searchbar"
                         >
-                            <Search className="searchIcon" />
-                            <input
-                                placeholder="Search for users, tournaments and more ..."
-                                className="searchInput"
-                                type="text"
-                                name="search"
-                                value={searchQ.search}
-                                onChange={(e) => onChange(e)}
-                            />
+                            <div className="searchGroup">
+                                <Search className="searchIcon" />
+                                <input
+                                    placeholder="Search for users, players, and tournaments..."
+                                    className="searchInput"
+                                    type="text"
+                                    name="search"
+                                    value={searchData.search}
+                                    onChange={(e) => onChange(e)}
+                                />
+                                <select
+                                    className="searchCategory"
+                                    name="category"
+                                    value={searchData.category}
+                                    onChange={(e) => onChange(e)}
+                                >
+                                    <option value="users">Users</option>
+                                    <option value="players">Players</option>
+                                    <option value="tournaments">
+                                        Tournaments
+                                    </option>
+                                </select>
+                            </div>
                         </form>
                     </div>
                     <div className="navbarRight">
@@ -226,10 +282,23 @@ export const Navbar = () => {
             )}
             {showUsersSearch && (
                 <UserSearchModal
-                    users={userSearchResults}
+                    searchResults={usersSearchResults}
                     onClose={() => setShowUsersSearch(false)}
                 />
             )}
+            {showPlayersSearch && (
+                <PlayerSearchModal
+                    searchResults={playersSearchResults}
+                    onClose={() => setShowPlayersSearch(false)}
+                />
+            )}
+            {showTournamentsSearch && (
+                <TournamentSearchModal
+                    searchResults={tournamentsSearchResults}
+                    onClose={() => setShowTournamentsSearch(false)}
+                />
+            )}
+
             {logoutWindow && (
                 <LogoutConfirmation
                     isOpen={logoutWindow}

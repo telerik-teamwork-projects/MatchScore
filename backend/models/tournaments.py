@@ -104,8 +104,27 @@ class TournamentWithoutOwner(BaseModel):
     third_place: bool
     status: TournamentStatus = TournamentStatus.OPEN
     location: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    owner_id: Optional[int] = None
+
+    @classmethod
+    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, status, location, start_date, end_date, owner_id):
+        return cls(
+            id=id,
+            format=format,
+            title=title,
+            description=description,
+            match_format=match_format,
+            rounds=rounds,
+            third_place=third_place,
+            status=status,
+            location=location,
+            start_date=start_date,
+            end_date=end_date,
+            owner_id=owner_id
+        )
+
 
 
 class TournamentLeagueCreate(BaseModel):

@@ -1,40 +1,40 @@
-import "./userSearchModal.scss";
+import "./playerSearchModal.scss";
 import { Link } from "react-router-dom";
-import { PROFILE } from "../../routes/routes";
-import { BASE_PATH } from "../../routes/paths";
+import { PLAYERS } from "../../../routes/routes";
+import { BASE_PATH } from "../../../routes/paths";
 
-export const UserSearchModal = ({ users, onClose }) => {
+export const PlayerSearchModal = ({ searchResults, onClose }) => {
     return (
         <div className="user-search-results-modal">
             <div className="modalContent">
-                <h2>Search Results</h2>
+                <h2>Players Search</h2>
                 <ul>
-                    {users?.map((user) => (
-                        <li key={user.id}>
+                    {searchResults?.map((player) => (
+                        <li key={player.id}>
                             <div className="modalUserInfo">
                                 <div className="modalUserInfoLeft">
                                     <div className="modalUserData">
-                                        {user.profile_img ? (
+                                        {player.profile_img ? (
                                             <img
-                                                src={`${BASE_PATH}${user.profile_img}`}
-                                                alt={user.full_name}
+                                                src={`${BASE_PATH}${player.profile_img}`}
+                                                alt={player.full_name}
                                                 className="modalUserImage"
                                             />
                                         ) : (
                                             <img
                                                 src="/images/avatar/default.jpg"
-                                                alt={user.username}
+                                                alt={player.full_name}
                                                 className="modalUserImage"
                                             />
                                         )}
                                     </div>
                                     <span className="modalUserUsername">
-                                        {user.username}
+                                        {player.full_name}
                                     </span>
                                 </div>
                                 <div className="modalUserInfoRight">
                                     <Link
-                                        to={`${PROFILE}/${user.id}`}
+                                        to={`${PLAYERS}/${player.id}`}
                                         onClick={onClose}
                                     >
                                         View
