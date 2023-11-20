@@ -98,8 +98,9 @@ def update_score(match: MatchBase, participants: List[MatchScoreUpdate]):
             elif len(data) > 2:
                 # give points only for the first three players
                 if data[0][2] == data[1][2] == data[2][2]:
-                    cursor.execute('''UPDATE players_matches SET points = 1 WHERE match_id = ? AND player_id in ?''',
-                                   (match.id, (data[0][0], data[1][0], data[2][0])))
+                    cursor.execute(f'''UPDATE players_matches SET points = 1 
+                                       WHERE match_id = ? 
+                                       AND player_id in {(data[0][0], data[1][0], data[2][0])}''', (match.id,))
                 elif data[0][2] == data[1][2]:
                     cursor.execute(f'''UPDATE players_matches SET points = 3 
                                        WHERE match_id = ? AND player_id in {(data[0][0], data[1][0])}''', (match.id,))
