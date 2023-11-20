@@ -65,7 +65,7 @@ class Tournament(BaseModel):
 
 class TournamentRequestCreate(BaseModel):
     player_id: int
-    tournament_id:int
+    tournament_id: int
     full_name: str
     country: str
     sports_club: str
@@ -97,7 +97,6 @@ class TournamentLeagueCreate(BaseModel):
     match_format: MatchFormat = MatchFormat.TIME
     location: str | None = None
     start_date: datetime
-    end_date: datetime | None = None
     participants: List[PlayerProfile]
 
 
@@ -214,7 +213,6 @@ class TournamentKnockoutCreate(BaseModel):
     third_place: bool
     location: str | None = None
     start_date: datetime
-    end_date: datetime | None = None
     participants: List[PlayerProfile]
 
 
@@ -246,3 +244,13 @@ class TournamentKnockoutResponse(BaseModel):
                    start_date=start_date,
                    end_date=end_date,
                    owner=owner)
+
+
+class TournamentDateUpdate(BaseModel):
+    date: datetime
+
+
+class TournamentPlayerUpdate(BaseModel):
+    player_id: int | None = None
+    player: str
+    player_prev: str

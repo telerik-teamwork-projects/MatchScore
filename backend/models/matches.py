@@ -6,13 +6,15 @@ from models.players import PlayerProfile
 
 
 class MatchScore(BaseModel):
+    id: int | None = None
     player: str | None = None
     score: int | None = None
     points: int | None = None
 
     @classmethod
-    def from_query_result(cls, player, score=0, points=0):
+    def from_query_result(cls, id, player, score=0, points=0):
         return cls(
+            id=id,
             player=player,
             score=score,
             points=points)
@@ -72,7 +74,7 @@ class Match(BaseModel):
             participants=participants)
 
 
-class MatchResponse(Match):
+class MatchResponse(BaseModel):
     id: int
     date: datetime
     format: str
@@ -94,4 +96,27 @@ class MatchResponse(Match):
             date=date,
             format=str(MatchFormat(format)),
             participants=participants,
+            score=score)
+
+
+class MatchTournamentResponse(BaseModel):
+    id: int
+    date: datetime
+    format: str
+    tournament_id: int | None = None
+    tournament_title: str | None = None
+    score: List[MatchScore]
+
+    @classmethod
+    def from_query_result(cls, id, date, format, tournament_id, title, score):
+        if score == '' or score is None:
+            score = []
+        else:
+            score = list(MatchScore.from_query_result(*row) for row in score)
+        return cls(
+            id=id,
+            date=date,
+            format=str(MatchFormat(format)),
+            tournament_id=tournament_id,
+            tournament_title=title,
             score=score)

@@ -2,17 +2,84 @@ import logging
 import math
 import random as rand
 from datetime import timedelta
+from typing import List
 
 from common.exceptions import InternalServerError, NotFound, BadRequest
 from models import tournaments, requests, players
 from services import players_service
-from database.database import insert_query, read_query, get_connection
+from database.database import insert_query, read_query, get_connection, update_query
 from models.enums import TournamentStatus, TournamentFormat
 from models.users import User
 from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
-    TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse
+    TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse, TournamentDateUpdate, \
+    TournamentPlayerUpdate
 from mariadb import Error
 from mariadb.connections import Connection
+
+
+def _manage_knockout_matches(cursor: Connection, id: int, data: TournamentKnockoutCreate,
+                             participants: list[int], rounds: int):
+    rand.shuffle(participants)
+    # table of participants
+    t = [i for i in participants]
+    matches = []
+    # matches per round
+    m_count = int(len(participants) / 2)
+    # generate matches along with the rounds they belong to, link the participants for the first round
+    date = data.start_date
+    for r in range(rounds):
+        matches.append([])
+        for m in range(m_count):
+            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
+                           (date, data.match_format.value, id, r + 1))
+            match_id = cursor.lastrowid
+            matches[r].append(match_id)
+            if r == 0:
+                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                               (t.pop(), match_id))
+                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                               (t.pop(), match_id))
+        m_count = int(m_count / 2)
+        if m_count < 1 and data.third_place:
+            m_count = 1
+    # update matches with link to their next match
+    m_next = rounds
+    if data.third_place:
+        m_next -= 1
+    for r in range(m_next - 1):
+        i = 0
+        for m in range(len(matches[r])):
+            if m == 0 or m % 2 == 0:
+                cursor.execute('''UPDATE matches SET next_match = ? WHERE id = ?''',
+                               (matches[r + 1][i], matches[r][m]))
+                i += 1
+            else:
+                cursor.execute('''UPDATE matches SET next_match = ? WHERE id = ?''',
+                               (matches[r + 1][i - 1], matches[r][m]))
+
+
+def _manage_league_matches(cursor: Connection, id: int, data: TournamentLeagueCreate,
+                           participants: list[int], rounds: int):
+    rand.shuffle(participants)
+    # matches per round
+    mpr = (rounds + 1) // 2
+    # table of participants
+    t = [i + 1 for i in range(len(participants))]
+    # generate matches along with their participants and rounds they belong to
+    date = data.start_date
+    for r in range(rounds):
+        for m in range(mpr):
+            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
+                           (date, data.match_format.value, id, r + 1))
+            match_id = cursor.lastrowid
+            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                           (participants[t[m] - 1], match_id))
+            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                           (participants[t[-1 - m] - 1], match_id))
+
+        t.remove(rounds - r + 1)
+        t.insert(1, rounds - r + 1)
+        date = date + timedelta(days=1)
 
 
 def create(
@@ -325,7 +392,7 @@ def create_knockout(data: TournamentKnockoutCreate, user: User):
 
 
 def view_tournament(tournament: DbTournament):
-    data = read_query('''SELECT m.round, m.id, m.next_match, p.full_name, pm.score, pm.points
+    data = read_query('''SELECT m.round, m.id, m.next_match, p.id, p.full_name, pm.score, pm.points
                                 FROM matches m 
                                 LEFT JOIN players_matches pm ON pm.match_id = m.id 
                                 LEFT JOIN players p ON p.id = pm.player_id
@@ -381,66 +448,105 @@ def get_tournament_request_by_id(request_id: int):
         )
 
 
-def _manage_knockout_matches(cursor: Connection, id: int, data: TournamentKnockoutCreate,
-                             participants: list[int], rounds: int):
-    rand.shuffle(participants)
-    # table of participants
-    t = [i for i in participants]
-    matches = []
-    # matches per round
-    m_count = int(len(participants) / 2)
-    # generate matches along with the rounds they belong to, link the participants for the first round
-    date = data.start_date
-    for r in range(rounds):
-        matches.append([])
-        for m in range(m_count):
-            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
-                           (date, data.match_format.value, id, r + 1))
-            match_id = cursor.lastrowid
-            matches[r].append(match_id)
-            if r == 0:
-                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                               (t.pop(), match_id))
-                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                               (t.pop(), match_id))
-        m_count = int(m_count / 2)
-        if m_count < 1 and data.third_place:
-            m_count = 1
-    # update matches with link to their next match
-    m_next = rounds
-    if data.third_place:
-        m_next -= 1
-    for r in range(m_next - 1):
-        i = 0
-        for m in range(len(matches[r])):
-            if m == 0 or m % 2 == 0:
-                cursor.execute('''UPDATE matches SET next_match = ? WHERE id = ?''',
-                               (matches[r + 1][i], matches[r][m]))
-                i += 1
+def update_date(tournament: DbTournament, tournament_date: TournamentDateUpdate):
+    end_date = tournament_date.date + timedelta(days=tournament.rounds - 1)
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute('UPDATE tournaments SET start_date = ?, end_date = ? WHERE id = ?',
+                           (tournament_date.date, end_date, tournament.id))
+            result = cursor.rowcount
+            if result > 0:
+                tournament.start_date = tournament_date.date
+                tournament.end_date = end_date
+                date = tournament.start_date
+                for r in range(tournament.rounds):
+                    cursor.execute('UPDATE matches SET date = ? WHERE tournaments_id = ? AND round = ?',
+                                   (date, tournament.id, r + 1))
+                    date = date + timedelta(days=1)
+                conn.commit()
+                return tournament
+        except Error as err:
+            conn.rollback()
+            logging.exception(err.msg)
+            raise InternalServerError("Something went wrong")
+
+
+def find_participants(id: int, players: List[TournamentPlayerUpdate], prev=False):
+    participants = []
+    for item in players:
+        if prev:
+            sql_params = (item.player_prev, id)
+        else:
+            sql_params = (item.player, id)
+        data = read_query('''SELECT p.id FROM players p, players_tournaments pt
+                                    WHERE p.full_name = ?
+                                    AND p.id = pt.player_id
+                                    AND pt.tournament_id = ?''', sql_params)
+        if data:
+            item_updated = item.model_copy(update={'player_id': data[0][0]})
+            participants.append(item_updated)
+
+    if len(players) == len(participants):
+        return participants
+
+
+def update_players(tournament: DbTournament, players_update: List[TournamentPlayerUpdate]):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        try:
+            # re-create players_tournaments with the updated players
+            cursor.execute('SELECT player_id FROM players_tournaments WHERE tournament_id = ?', (tournament.id,))
+            tournament_players_ids = [i[0] for i in list(cursor)]
+            cursor.execute('DELETE FROM players_tournaments WHERE tournament_id = ?', (tournament.id,))
+            participants = []
+            for p in players_update:
+                tournament_players_ids.remove(p.player_id)
+                cursor.execute('SELECT * FROM players WHERE full_name = ?', (p.player,))
+                player = cursor.fetchone()
+                if player is None:
+                    cursor.execute('INSERT INTO players(full_name) VALUES(?)', (p.player,))
+                    player_id = cursor.lastrowid
+                else:
+                    player_id = player[0]
+                cursor.execute('INSERT INTO players_tournaments VALUES(?,?)', (player_id, tournament.id))
+                participants.append(player_id)
+            if tournament_players_ids:
+                for i in tournament_players_ids:
+                    cursor.execute('INSERT INTO players_tournaments VALUES(?,?)', (i, tournament.id))
+                    participants.append(i)
+            # re-create players_matches using the corresponding randomisation schema
+            cursor.execute('SELECT id FROM matches WHERE tournaments_id = ? ORDER BY round', (tournament.id,))
+            tournament_matches_ids = [i[0] for i in list(cursor)]
+            cursor.execute(f'DELETE FROM players_matches WHERE match_id in {tuple(tournament_matches_ids)}')
+            rand.shuffle(participants)
+            rounds = tournament.rounds
+            mpr = (rounds + 1) // 2
+            if tournament.format == TournamentFormat.LEAGUE.value:
+                # table of participants
+                t = [i + 1 for i in range(len(participants))]
+                for r in range(rounds):
+                    for m in range(mpr):
+                        idx = mpr * r + m
+                        match_id = tournament_matches_ids[idx]
+                        cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                                       (participants[t[m] - 1], match_id))
+                        cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                                       (participants[t[-1 - m] - 1], match_id))
+                    t.remove(rounds - r + 1)
+                    t.insert(1, rounds - r + 1)
             else:
-                cursor.execute('''UPDATE matches SET next_match = ? WHERE id = ?''',
-                               (matches[r + 1][i - 1], matches[r][m]))
-
-
-def _manage_league_matches(cursor: Connection, id: int, data: TournamentLeagueCreate,
-                           participants: list[int], rounds: int):
-    rand.shuffle(participants)
-    # matches per round
-    mpr = (rounds + 1) // 2
-    # table of participants
-    t = [i + 1 for i in range(len(participants))]
-    # generate matches along with their participants and rounds they belong to
-    date = data.start_date
-    for r in range(rounds):
-        for m in range(mpr):
-            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
-                           (date, data.match_format.value, id, r + 1))
-            match_id = cursor.lastrowid
-            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                           (participants[t[m] - 1], match_id))
-            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                           (participants[t[-1 - m] - 1], match_id))
-
-        t.remove(rounds - r + 1)
-        t.insert(1, rounds - r + 1)
-        date = date + timedelta(days=1)
+                # table of participants
+                t = [i for i in participants]
+                m_count = int(len(participants) / 2)
+                for m in range(m_count):
+                    cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                                   (t.pop(), tournament_matches_ids[m]))
+                    cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                                   (t.pop(), tournament_matches_ids[m]))
+            conn.commit()
+            return view_tournament(tournament)
+        except Error as err:
+            conn.rollback()
+            logging.exception(err.msg)
+            raise InternalServerError("Something went wrong")

@@ -4,11 +4,12 @@ from typing import List
 from models import users, requests
 
 from common.authorization import get_current_user
-from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound
+from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound, Forbidden
 from common.utils import is_admin, is_director, is_power_of_two
 from common.responses import RequestOK
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
-    TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate
+    TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate, DbTournament, TournamentDateUpdate, \
+    TournamentPlayerUpdate
 from models.users import User
 from services import tournaments_service
 
@@ -88,8 +89,8 @@ def create_league_tournament(tournament: TournamentLeagueCreate, current_user: U
         raise BadRequest(f'Participants must be between {MIN_PARTICIPANTS} and {MAX_PARTICIPANTS}!')
     if p_count % 2 != 0:
         raise BadRequest("Participants should be even number!")
-    if tournament.date <= datetime.utcnow():
-        raise BadRequest("Tournament date should be in the future!")
+    if tournament.start_date <= datetime.utcnow():
+        raise BadRequest("Tournament start date should be in the future!")
 
     return tournaments_service.create_league(tournament, current_user)
 
@@ -105,8 +106,8 @@ def create_knockout_tournament(tournament: TournamentKnockoutCreate, current_use
         raise BadRequest(f'Participants must be between {MIN_PARTICIPANTS} and {MAX_PARTICIPANTS}!')
     if not is_power_of_two(p_count):
         raise BadRequest("Number of participants for knockout tournament is not correct!")
-    if tournament.date <= datetime.utcnow():
-        raise BadRequest("Tournament date should be in the future!")
+    if tournament.start_date <= datetime.utcnow():
+        raise BadRequest("Tournament start date should be in the future!")
 
     return tournaments_service.create_knockout(tournament, current_user)
 
@@ -118,3 +119,43 @@ def view_rounds(id: int):
         raise NotFound(f'Tournament {id} does not exist!')
 
     return tournaments_service.view_tournament(tournament)
+
+
+@router.put('/{id}/date', response_model=DbTournament)
+def update_date(id: int, tournament_date: TournamentDateUpdate, current_user: User = Depends(get_current_user)):
+    if not is_admin(current_user) and not is_director(current_user):
+        raise Unauthorized('User has insufficient privileges')
+    tournament = tournaments_service.find(id)
+    if tournament is None:
+        raise NotFound(f'Tournament {id} does not exist!')
+    if tournament.start_date <= datetime.utcnow():
+        raise Forbidden('The tournament has already started!')
+    if tournament_date.date < datetime.utcnow():
+        raise Forbidden('The new tournament start date should be in the future!')
+
+    if tournament.start_date == tournament_date.date:
+        return tournament
+    return tournaments_service.update_date(tournament, tournament_date)
+
+
+@router.put('/{id}/players', response_model=TournamentRoundResponse)
+def update_players(id: int, players: List[TournamentPlayerUpdate], current_user: User = Depends(get_current_user)):
+    if not is_admin(current_user) and not is_director(current_user):
+        raise Unauthorized('User has insufficient privileges')
+    tournament = tournaments_service.find(id)
+    if tournament is None:
+        raise NotFound(f'Tournament {id} does not exist!')
+    if tournament.start_date <= datetime.utcnow():
+        raise Forbidden('The tournament has already started!')
+    p_count = len({p.player for p in players})
+    p_prev_count = len({p.player_prev for p in players})
+    if (p_count != len(players)) or (p_prev_count != len(players)):
+        raise BadRequest("Participants should be unique!")
+    participants = tournaments_service.find_participants(id, players)
+    if participants is not None:
+        raise Forbidden('The participants provided already play in this tournament!')
+    participants_prev = tournaments_service.find_participants(id, players, prev=True)
+    if participants_prev is None:
+        raise Forbidden('The participants to be updated do not play in this match!')
+
+    return tournaments_service.update_players(tournament, participants_prev)
