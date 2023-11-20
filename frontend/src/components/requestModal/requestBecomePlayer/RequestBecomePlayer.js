@@ -2,7 +2,7 @@ import "./requestBecomePlayer.scss";
 import { useState } from "react";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../../responseMessages/successMessages/SuccessMessages";
-import { sendPlayerRequest } from "../../../services/playerService";
+import { sendPlayerRequest } from "../../../services/requestService";
 
 export const RequestBecomePlayer = ({ userId, token, onClose }) => {
     const [error, setError] = useState(null);

@@ -56,17 +56,16 @@
                 gap: 15px;
 
                 .navbarNotifications {
-                    background: #007bff;
-                    color: #fff;
+                    background: transparent;
+                    color: #555;
                     border: none;
-                    border-radius: 5px;
-                    padding: 6px 10px;
-                    font-size: 16px;
+                    border-radius: 50%;
+                    font-size: 24px;
                     cursor: pointer;
-                    transition: background-color 0.3s;
+                    transition: background-color 0.3s, color 0.3s;
 
                     &:hover {
-                        background: #0056b3;
+                        color: #2ecc71;
                     }
                 }
 

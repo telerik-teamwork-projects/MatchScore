@@ -9,7 +9,7 @@ export const ProfileUpdate = () => {
     const navigate = useNavigate();
 
     const { userId } = useParams();
-    const { userUpdate, user } = useContext(AuthContext);
+    const { userUpdate, user, token } = useContext(AuthContext);
 
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
@@ -57,7 +57,7 @@ export const ProfileUpdate = () => {
         e.preventDefault();
 
         try {
-            await userUpdate(formData, userId);
+            await userUpdate(formData, userId, token);
             navigate(`/profile/${userId}`);
         } catch (error) {
             setError(error.response.data.detail);

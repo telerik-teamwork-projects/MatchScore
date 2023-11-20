@@ -28,3 +28,41 @@ class TournamentRequest(BaseModel):
             status=status,
             created_at=created_at
         )
+    
+
+class DirectorRequest(BaseModel):
+    id: int
+    user_id: int
+    email: str
+    status: Request = Request.PENDING
+    created_at: datetime 
+
+    @classmethod
+    def from_query_result(cls, id, user_id, email, status, created_at):
+        return cls(
+            id=id,
+            user_id=user_id,
+            email=email,
+            status=status,
+            created_at=created_at
+        )
+    
+
+class LinkToPlayerRequest(BaseModel):
+    id: int
+    user_id: int
+    username: str
+    requested_full_name: str
+    status: Request = Request.PENDING
+    created_at: datetime
+
+    @classmethod
+    def from_query_result(cls, id, user_id, username, requested_full_name, status, created_at):
+        return cls(
+            id=id,
+            user_id=user_id,
+            username=username,
+            requested_full_name=requested_full_name,
+            status=status,
+            created_at=created_at
+        )

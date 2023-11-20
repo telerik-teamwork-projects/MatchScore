@@ -1,21 +1,26 @@
-import "./playerRequests.scss";
+import "./linkPlayerRequests.scss";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PROFILE } from "../../routes/routes";
 import {
-    acceptPlayerRequest,
-    rejectPlayerRequest,
+    acceptLinkPlayerRequest,
+    rejectLinkPlayerRequest,
 } from "../../services/requestService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 
-export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
+export const LinkPlayerRequests = ({
+    requests,
+    setRequests,
+    onClose,
+    token,
+}) => {
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
 
     const onAccept = async (requestId) => {
         try {
-            const result = await acceptPlayerRequest(requestId, token);
+            const result = await acceptLinkPlayerRequest(requestId, token);
             setError(null);
             setSuccess(result);
             updateStatus(requestId, "accepted");
@@ -27,7 +32,7 @@ export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
 
     const onReject = async (requestId) => {
         try {
-            const result = await rejectPlayerRequest(requestId, token);
+            const result = await rejectLinkPlayerRequest(requestId, token);
             setError(null);
             setSuccess(result);
             updateStatus(requestId, "rejected");
@@ -45,29 +50,25 @@ export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
     };
 
     return (
-        <div className="playerRequests">
-            <div className="playerRequestsWrapper">
-                <h2>Player Requests</h2>
+        <div className="linkPlayerRequests">
+            <div className="linkPlayerRequestsWrapper">
+                <h2>Link Player Requests</h2>
                 <ul>
                     {requests?.map((request) => (
                         <li key={request.id}>
                             <div>
-                                <strong>Full Name:</strong>{" "}
+                                <strong>Username:</strong>{" "}
                                 <Link
                                     className="link"
                                     onClick={onClose}
-                                    to={`${PROFILE}/${request.requester_id}`}
+                                    to={`${PROFILE}/${request.user_id}`}
                                 >
-                                    {request.full_name}
+                                    {request.username}
                                 </Link>
                             </div>
                             <div>
-                                <strong>Country:</strong>{" "}
-                                {request.country || "N/A"}
-                            </div>
-                            <div>
-                                <strong>Sports Club:</strong>{" "}
-                                {request.sports_club || "N/A"}
+                                <strong>Player Full Name:</strong>{" "}
+                                {request.requested_full_name || "N/A"}
                             </div>
                             <div>
                                 <strong>Status:</strong> {request.status}
@@ -75,7 +76,7 @@ export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
                             {request.status === "pending" && (
                                 <>
                                     <hr />
-                                    <div className="requestBtns">
+                                    <div className="linkPlayerRequestBtns">
                                         <button
                                             className="requestAccept"
                                             onClick={() => {
@@ -103,7 +104,7 @@ export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
                 ) : (
                     <SuccessMessage message={success} />
                 )}
-                <div className="modalBtn">
+                <div className="linkPlayerRequestBtn">
                     <button onClick={onClose}>Close</button>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
-from common import exceptions, hashing, authorization
-from models import users
+from common import exceptions, hashing, authorization, responses
+from models import users, requests
 from services import users_service
 from typing import List, Union
 
@@ -25,7 +25,7 @@ def user_register(
         raise exceptions.InternalServerError("Registration failed")
 
 
-@router.post('/login')
+@router.post('/login/')
 def user_login(
     user_data: users.UserLogin
 ):
@@ -45,12 +45,21 @@ def user_login(
     except Exception:
         raise exceptions.InternalServerError("Login failed")
     
-@router.get('/{user_id}', response_model=users.User)
+
+@router.get("/verify-token/")
+def verify_token_route(current_user: users.User = Depends(authorization.get_current_user)):
+    try:
+        return responses.RequestOK("The token is valid")
+    except Exception as e:
+        exceptions.Unauthorized(str(e))
+
+
+@router.get('/{user_id}/', response_model=users.UserWithPlayer)
 def user_get(
     user_id: int
 ):  
     try:
-        target_user = users_service.get_user_by_id(user_id)
+        target_user = users_service.get_user_with_player(user_id)
     except Exception:
         raise exceptions.InternalServerError("Loading profile failed")
     
@@ -69,7 +78,7 @@ def users_get(
         raise exceptions.InternalServerError("Loading users failed")
 
 
-@router.put("/{user_id}", response_model=users.User)
+@router.put("/{user_id}/", response_model=users.User)
 def users_update(
     user_id : int,
     username: str = Form(None),
@@ -79,11 +88,12 @@ def users_update(
     cover_img: Union[UploadFile, str] = File(None),
     current_user: users.User = Depends(authorization.get_current_user)
 ):
+    
     target_user = users_service.get_user_by_id(user_id)
     if not target_user:
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
 
-    if current_user.id != user_id or current_user.role != "admin":
+    if current_user.id != user_id and current_user.role.value != "admin":
         raise exceptions.Unauthorized("You are not authorized")
 
     if email and email != target_user.email:
@@ -111,7 +121,7 @@ def users_update(
         raise exceptions.InternalServerError("Updating user failed")
     
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}/")
 def user_delete(
     user_id: int,
     current_user: users.User = Depends(authorization.get_current_user)

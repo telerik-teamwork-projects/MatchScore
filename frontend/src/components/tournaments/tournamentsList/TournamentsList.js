@@ -3,7 +3,7 @@ import "./tournamentList.scss";
 import { PROFILE, TOURNAMENTS } from "../../../routes/routes";
 import { MoreVert } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import { USER_BASE_PATH } from "../../../routes/paths";
+import { BASE_PATH } from "../../../routes/paths";
 import { useState } from "react";
 import { RequestJoinTournament } from "../../requestModal/requestJoinTournament/RequestJoinTournament";
 
@@ -35,7 +35,7 @@ export const TournamentsList = ({ user, token, tournaments }) => {
                                     {tournament.owner.profile_img ? (
                                         <img
                                             className="tournamentProfileImg"
-                                            src={`${USER_BASE_PATH}${tournament.owner.profile_img}`}
+                                            src={`${BASE_PATH}${tournament.owner.profile_img}`}
                                             alt=""
                                         />
                                     ) : (

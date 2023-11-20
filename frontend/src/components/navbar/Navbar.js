@@ -7,9 +7,18 @@ import { AuthContext } from "../../contexts/authContext";
 import { LOGIN } from "../../routes/routes";
 import { Search } from "@mui/icons-material";
 import { getUsers } from "../../services/authService";
-import { getPlayerRequests } from "../../services/playerService";
+import {
+    getDirectorRequests,
+    getLinkPlayerRequests,
+    getPlayerRequests,
+} from "../../services/requestService";
 import { UserSearchModal } from "../userSearch/UserSearchModal";
 import { PlayerRequests } from "../playerRequests/PlayerRequests";
+import { Notifications } from "@mui/icons-material";
+import Work from "@mui/icons-material/Work";
+import PeopleIcon from "@mui/icons-material/People";
+import { DirectorRequests } from "../directorRequests/DirectorRequests";
+import { LinkPlayerRequests } from "../linkPlayerRequeests/LinkPlayerRequests";
 
 export const Navbar = () => {
     const { token, user, userLogout } = useContext(AuthContext);
@@ -20,9 +29,22 @@ export const Navbar = () => {
     const [showUsersSearch, setShowUsersSearch] = useState(false);
     const [userSearchResults, setUserSearchResults] = useState(null);
 
-    const [notifiacationsModalOpen, setNotificationsModalOpen] =
+    const [playerNotificationsModalOpen, setPlayerNotificationsModalOpen] =
         useState(false);
-    const [notificationsResult, setNotificationsResult] = useState(null);
+    const [playerNotificationsResult, setPlayerNotificationsResult] =
+        useState(null);
+
+    const [
+        directorNotificacationsModalOpen,
+        setDirectorNotificationsModalOpen,
+    ] = useState(false);
+    const [directorNotificationsResult, setDirectorNotificationsResult] =
+        useState(null);
+
+    const [linkNotificationsModalOpen, setLinkNotificationsModalOpen] =
+        useState(false);
+    const [linkNotificationsResult, setLinkNotificationsResult] =
+        useState(null);
 
     const [searchQ, setSearchQ] = useState({
         search: "",
@@ -57,17 +79,49 @@ export const Navbar = () => {
         }
     };
 
-    const closeMotificationsModal = () => {
-        setNotificationsModalOpen(false);
+    const closePlayerNotifications = () => {
+        setPlayerNotificationsModalOpen(false);
     };
 
-    const onNotifications = async (e) => {
+    const closeDirectorNotifications = () => {
+        setDirectorNotificationsModalOpen(false);
+    };
+
+    const closeLinkNotifications = () => {
+        setLinkNotificationsModalOpen(false);
+    };
+
+    const onPlayerNotifications = async (e) => {
         e.preventDefault();
 
         try {
             const result = await getPlayerRequests(token);
-            setNotificationsResult(result);
-            setNotificationsModalOpen(true);
+            setPlayerNotificationsResult(result);
+            setPlayerNotificationsModalOpen(true);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const onDirectorNotifications = async (e) => {
+        e.preventDefault();
+
+        try {
+            const result = await getDirectorRequests(token);
+            setDirectorNotificationsResult(result);
+            setDirectorNotificationsModalOpen(true);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const onLinkNotifications = async (e) => {
+        e.preventDefault();
+
+        try {
+            const result = await getLinkPlayerRequests(token);
+            setLinkNotificationsResult(result);
+            setLinkNotificationsModalOpen(true);
         } catch (error) {
             console.error(error);
         }
@@ -103,12 +157,26 @@ export const Navbar = () => {
                             {token ? (
                                 <>
                                     {user?.role === "admin" && (
-                                        <button
-                                            className="navbarNotifications"
-                                            onClick={(e) => onNotifications(e)}
-                                        >
-                                            Notifications
-                                        </button>
+                                        <>
+                                            <PeopleIcon
+                                                className="navbarNotifications"
+                                                onClick={(e) =>
+                                                    onLinkNotifications(e)
+                                                }
+                                            />
+                                            <Work
+                                                className="navbarNotifications"
+                                                onClick={(e) =>
+                                                    onDirectorNotifications(e)
+                                                }
+                                            />
+                                            <Notifications
+                                                className="navbarNotifications"
+                                                onClick={(e) =>
+                                                    onPlayerNotifications(e)
+                                                }
+                                            />
+                                        </>
                                     )}
                                     <Link
                                         className="navbarRightLink"
@@ -122,21 +190,6 @@ export const Navbar = () => {
                                     >
                                         Logout
                                     </Link>
-                                    {logoutWindow && (
-                                        <LogoutConfirmation
-                                            isOpen={logoutWindow}
-                                            onConfirm={confirmLogout}
-                                            onCancel={cancelLogout}
-                                        />
-                                    )}
-                                    {showUsersSearch && userSearchResults && (
-                                        <UserSearchModal
-                                            users={userSearchResults}
-                                            onClose={() =>
-                                                setShowUsersSearch(false)
-                                            }
-                                        />
-                                    )}
                                 </>
                             ) : (
                                 <Link className="navbarRightLink" to="/login">
@@ -147,12 +200,41 @@ export const Navbar = () => {
                     </div>
                 </div>
             </div>
-            {notifiacationsModalOpen && (
+            {playerNotificationsModalOpen && (
                 <PlayerRequests
-                    requests={notificationsResult}
-                    setRequests={setNotificationsResult}
-                    onClose={closeMotificationsModal}
+                    requests={playerNotificationsResult}
+                    setRequests={setPlayerNotificationsResult}
+                    onClose={closePlayerNotifications}
                     token={token}
+                />
+            )}
+            {directorNotificacationsModalOpen && (
+                <DirectorRequests
+                    requests={directorNotificationsResult}
+                    setRequests={setDirectorNotificationsResult}
+                    onClose={closeDirectorNotifications}
+                    token={token}
+                />
+            )}
+            {linkNotificationsModalOpen && (
+                <LinkPlayerRequests
+                    requests={linkNotificationsResult}
+                    setRequests={setLinkNotificationsResult}
+                    onClose={closeLinkNotifications}
+                    token={token}
+                />
+            )}
+            {showUsersSearch && (
+                <UserSearchModal
+                    users={userSearchResults}
+                    onClose={() => setShowUsersSearch(false)}
+                />
+            )}
+            {logoutWindow && (
+                <LogoutConfirmation
+                    isOpen={logoutWindow}
+                    onConfirm={confirmLogout}
+                    onCancel={cancelLogout}
                 />
             )}
         </>

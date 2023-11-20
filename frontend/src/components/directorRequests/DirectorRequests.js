@@ -1,21 +1,21 @@
-import "./playerRequests.scss";
+import "./directorRequests.scss";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PROFILE } from "../../routes/routes";
 import {
-    acceptPlayerRequest,
-    rejectPlayerRequest,
+    acceptDirectorRequest,
+    rejectDirectorRequest,
 } from "../../services/requestService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
 
-export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
+export const DirectorRequests = ({ requests, setRequests, onClose, token }) => {
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
 
     const onAccept = async (requestId) => {
         try {
-            const result = await acceptPlayerRequest(requestId, token);
+            const result = await acceptDirectorRequest(requestId, token);
             setError(null);
             setSuccess(result);
             updateStatus(requestId, "accepted");
@@ -27,9 +27,9 @@ export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
 
     const onReject = async (requestId) => {
         try {
-            const result = await rejectPlayerRequest(requestId, token);
+            await rejectDirectorRequest(requestId, token);
             setError(null);
-            setSuccess(result);
+            setSuccess("User rejected");
             updateStatus(requestId, "rejected");
         } catch (error) {
             setError(error.response.data.detail);
@@ -45,29 +45,21 @@ export const PlayerRequests = ({ requests, setRequests, onClose, token }) => {
     };
 
     return (
-        <div className="playerRequests">
-            <div className="playerRequestsWrapper">
-                <h2>Player Requests</h2>
+        <div className="directorRequests">
+            <div className="directorRequestsWrapper">
+                <h2>Director Requests</h2>
                 <ul>
                     {requests?.map((request) => (
                         <li key={request.id}>
                             <div>
-                                <strong>Full Name:</strong>{" "}
+                                <strong>Email:</strong>{" "}
                                 <Link
                                     className="link"
                                     onClick={onClose}
-                                    to={`${PROFILE}/${request.requester_id}`}
+                                    to={`${PROFILE}/${request.user_id}`}
                                 >
-                                    {request.full_name}
+                                    {request.email}
                                 </Link>
-                            </div>
-                            <div>
-                                <strong>Country:</strong>{" "}
-                                {request.country || "N/A"}
-                            </div>
-                            <div>
-                                <strong>Sports Club:</strong>{" "}
-                                {request.sports_club || "N/A"}
                             </div>
                             <div>
                                 <strong>Status:</strong> {request.status}

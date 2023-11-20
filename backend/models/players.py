@@ -7,14 +7,17 @@ class PlayerProfile(BaseModel):
     full_name: str
     country: str | None = None
     sports_club: str | None = None
+    user_id: Optional[int] = None
 
     @classmethod
-    def from_query_result(cls, id, full_name, country=None, sports_club=None):
+    def from_query_result(cls, id, full_name, country=None, sports_club=None, user_id=None):
         return cls(
             id=id,
             full_name=full_name,
             country=country,
-            sports_club=sports_club)
+            sports_club=sports_club,
+            user_id=user_id
+        )
 
 
 class PlayerCreate(BaseModel):
