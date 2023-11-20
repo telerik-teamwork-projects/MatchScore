@@ -1,24 +1,25 @@
-from database.database import insert_query, read_query 
-from models.players import PlayerCreate, PlayerRequest, PlayerProfile
+from database.database import insert_query, read_query
+from models.players import PlayerCreate, PlayerRequest, PlayerProfile, PlayerProfileImg
 from models.enums import Request
 from models.users import User
 from common.exceptions import NotFound
-from common.responses import RequestCreate, RequestOK
+from common.responses import RequestCreate
+
 
 def send_player_request(
-    user_id: int, 
-    player_data: PlayerCreate
+        user_id: int,
+        player_data: PlayerCreate
 ):
     sql = """
         INSERT INTO players_requests (requester_id, full_name, country, sports_club, status)
         VALUES (?, ?, ?, ?, ?);
     """
     sql_params = (
-        user_id, 
+        user_id,
         player_data.full_name,
         player_data.country,
         player_data.sports_club,
-        Request.PENDING.value                
+        Request.PENDING.value
     )
 
     insert_query(sql, sql_params)
@@ -48,10 +49,9 @@ def get_all_player_requests():
     return player_requests
 
 
-def accept_player_request(request_id:int):
-
+def accept_player_request(request_id: int):
     player_request = get_player_request_by_id(request_id)
-    
+
     if not player_request:
         raise NotFound("Player request not found")
 
@@ -62,20 +62,19 @@ def accept_player_request(request_id:int):
     insert_player(player_request.requester_id, **player_info)
 
 
-
 def reject_player_request(request_id: int):
     player_request = get_player_request_by_id(request_id)
 
     if not player_request:
         raise NotFound("Player request not found")
-    
+
     update_player_request_status(request_id, Request.REJECTED.value)
 
 
 def create_tournament_join_request_no_player(
-    tournament_id: int, 
-    player_data: PlayerCreate,
-    current_user: User
+        tournament_id: int,
+        player_data: PlayerCreate,
+        current_user: User
 ):
     sql = """
         INSERT INTO tournament_requests 
@@ -94,8 +93,8 @@ def create_tournament_join_request_no_player(
 
 
 def create_tournament_join_request_with_player(
-    tournament_id: int, 
-    player_data: PlayerProfile,
+        tournament_id: int,
+        player_data: PlayerProfile,
 ):
     sql = """
         INSERT INTO tournament_requests 
@@ -131,7 +130,7 @@ def get_player_request_by_id(request_id: int):
             sports_club=result[4],
             status=result[5]
         )
-    
+
 
 def get_player_info_from_request(player_request: PlayerRequest):
     return {
@@ -160,7 +159,7 @@ def insert_player(user_id: int, full_name: str, country: str, sports_club: str):
     return insert_query(sql, sql_params)
 
 
-def get_player_by_user_id(user_id:int):
+def get_player_by_user_id(user_id: int):
     sql = "SELECT id, full_name, country, sports_club FROM players WHERE user_id = ?;"
     sql_params = (user_id,)
 
@@ -172,17 +171,22 @@ def get_player_by_user_id(user_id:int):
         return PlayerProfile.from_query_result(
             id, full_name, country, sports_club
         )
-    
-def get_player_by_id(player_id:int):
-    sql = "SELECT id, full_name, country, sports_club FROM players WHERE id = ?;"
-    sql_params = (player_id,)
 
-    result = read_query(sql, sql_params)
 
-    if result:
-        id, full_name, country, sports_club = result[0]
+def get_by_id(id: int):
+    data = read_query('SELECT id, full_name, country, sports_club, profile_img FROM players WHERE id = ?', (id,))
+    return next((PlayerProfileImg.from_query_result(*row) for row in data), None)
 
-        return PlayerProfile.from_query_result(
-            id, full_name, country, sports_club
-        )
-    
+
+def count():
+    data = read_query('SELECT COUNT(*) FROM players')
+    return data[0][0]
+
+
+def all(parameters: tuple):
+    offset, limit = parameters
+
+    data = read_query('''SELECT id, full_name, country, sports_club, profile_img
+                                FROM players LIMIT ? OFFSET ?''', (limit, offset))
+
+    return (PlayerProfileImg.from_query_result(*row) for row in data)

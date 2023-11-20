@@ -502,7 +502,7 @@ def update_players(tournament: DbTournament, players_update: List[TournamentPlay
             participants = []
             for p in players_update:
                 tournament_players_ids.remove(p.player_id)
-                cursor.execute('SELECT * FROM players WHERE full_name = ?', (p.player,))
+                cursor.execute('SELECT id FROM players WHERE full_name = ?', (p.player,))
                 player = cursor.fetchone()
                 if player is None:
                     cursor.execute('INSERT INTO players(full_name) VALUES(?)', (p.player,))

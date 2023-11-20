@@ -18,8 +18,8 @@ _JWT_ALGORITHM = os.environ['algorithm']
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login/", auto_error=False)
 
-
 active_sessions = {}
+
 
 def create_token(user: User) -> str:
     current_time = datetime.utcnow()
@@ -36,8 +36,8 @@ def create_token(user: User) -> str:
 
     token = jwt.encode(payload, _JWT_SECRET, algorithm=_JWT_ALGORITHM)
 
-
     return token
+
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -63,7 +63,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
     except PyJWTError:
         raise exceptions.Unauthorized("Could not validate credentials")
-    
+
 
 def refresh_token(old_token: str) -> str:
     try:

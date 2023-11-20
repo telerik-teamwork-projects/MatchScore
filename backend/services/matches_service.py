@@ -19,7 +19,7 @@ def create(match: Match):
             participants = []
             score = []
             for p in match.participants:
-                cursor.execute('SELECT * FROM players WHERE full_name = ?', (p.full_name,))
+                cursor.execute('SELECT id FROM players WHERE full_name = ?', (p.full_name,))
                 player = cursor.fetchone()
                 if player is None:
                     cursor.execute('INSERT INTO players(full_name) VALUES(?)', (p.full_name,))

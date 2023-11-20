@@ -8,6 +8,7 @@ from models.enums import Role
 from models.users import User
 
 UPLOAD_DIR = "media"
+LIMIT = 10
 
 
 def is_admin(user: User):
@@ -47,3 +48,15 @@ def is_power_of_two(n):
         return False
 
     return 2 ** int(math.log(n, 2)) == n
+
+
+def manage_pages(page: int, items: int):
+    total_pages = (items + LIMIT - 1) // LIMIT
+    if page < 1:
+        page = 1
+    elif page > total_pages > 0:
+        page = total_pages
+
+    offset = (page - 1) * LIMIT
+
+    return (offset, LIMIT), (page, total_pages)
