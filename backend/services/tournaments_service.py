@@ -41,6 +41,7 @@ def _manage_knockout_matches(cursor: Cursor, id: int, data: TournamentKnockoutCr
         m_count = int(m_count / 2)
         if m_count < 1 and data.third_place:
             m_count = 1
+        date = date + timedelta(days=1)
     # update matches with link to their next match
     m_next = rounds
     if data.third_place:
