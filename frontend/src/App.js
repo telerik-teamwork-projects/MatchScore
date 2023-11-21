@@ -9,12 +9,20 @@ import { ProfileUpdate } from "./pages/profileUpdate/ProfileUpdate";
 import { Layout } from "./components/layout/Layout";
 import { AuthProvider } from "./contexts/authContext";
 
-import { HOME, LOGIN, PROFILE, REGISTER, TOURNAMENTS } from "./routes/routes";
+import {
+    HOME,
+    LOGIN,
+    PROFILE,
+    REGISTER,
+    TOURNAMENTS,
+    PLAYERS,
+} from "./routes/routes";
 
 import { AuthRouteGuard } from "./routeGuards/authRouteGuard";
 import { NoAuthRouteGuard } from "./routeGuards/noAuthRouteGuard";
 import { Tournament } from "./pages/tournaments/Tournament";
 import { TournamentDetails } from "./components/tournaments/tournamentDetails/TournamentDetails";
+import { PlayerProfile } from "./components/playerProfile/PlayerProfile";
 
 function App() {
     return (
@@ -31,6 +39,11 @@ function App() {
                     <Route
                         path={`${TOURNAMENTS}/:tournamentId`}
                         element={<TournamentDetails />}
+                    />
+
+                    <Route
+                        path={`${PLAYERS}/:playerId`}
+                        element={<PlayerProfile />}
                     />
 
                     <Route element={<AuthRouteGuard />}>

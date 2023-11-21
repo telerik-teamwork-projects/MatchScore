@@ -4,3 +4,4 @@ export const REGISTER = "/register";
 export const PROFILE = "/profile";
 
 export const TOURNAMENTS = "/tournaments"
+export const PLAYERS = "/players"

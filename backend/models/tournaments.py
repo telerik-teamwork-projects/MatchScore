@@ -6,7 +6,7 @@ from typing import Optional, List
 from models.enums import TournamentStatus, TournamentFormat, MatchFormat, Request
 from models.matches import MatchScore
 from models.players import PlayerProfile
-
+from models.pagination import Pagination
 
 class TournamentCreate(BaseModel):
     format: TournamentFormat = TournamentFormat.KNOCKOUT
@@ -58,9 +58,26 @@ class Tournament(BaseModel):
     third_place: bool
     status: TournamentStatus = TournamentStatus.OPEN
     location: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
     owner: Owner
+
+    @classmethod
+    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, status, location, start_date, end_date, owner):
+        return cls(
+            id=id,
+            format=format,
+            title=title,
+            description=description,
+            match_format=match_format,
+            rounds=rounds,
+            third_place=third_place,
+            status=status,
+            location=location,
+            start_date=start_date,
+            end_date=end_date,
+            owner=owner
+        )
 
 
 class TournamentRequestCreate(BaseModel):
@@ -87,8 +104,27 @@ class TournamentWithoutOwner(BaseModel):
     third_place: bool
     status: TournamentStatus = TournamentStatus.OPEN
     location: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    owner_id: Optional[int] = None
+
+    @classmethod
+    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, status, location, start_date, end_date, owner_id):
+        return cls(
+            id=id,
+            format=format,
+            title=title,
+            description=description,
+            match_format=match_format,
+            rounds=rounds,
+            third_place=third_place,
+            status=status,
+            location=location,
+            start_date=start_date,
+            end_date=end_date,
+            owner_id=owner_id
+        )
+
 
 
 class TournamentLeagueCreate(BaseModel):
@@ -254,3 +290,8 @@ class TournamentPlayerUpdate(BaseModel):
     player_id: int | None = None
     player: str
     player_prev: str
+
+
+class TournamentPagination(BaseModel):
+    tournaments: List[Tournament]
+    pagination: Pagination

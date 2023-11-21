@@ -13,7 +13,6 @@ router = APIRouter()
 def get_players(page: int = Query(default=1)):
     total_players = players_service.count()
     params, (page, total_pages) = manage_pages(page, total_players)
-
     result = players_service.all(params)
 
     return PaginatedPlayers(players=list(result),

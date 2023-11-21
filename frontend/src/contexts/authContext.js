@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
         };
 
         checkTokenExpiration();
-    }, []);
+    }, [auth?.token]);
 
     const userLogin = async (userData) => {
         try {

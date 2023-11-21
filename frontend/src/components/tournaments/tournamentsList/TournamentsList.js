@@ -6,8 +6,14 @@ import { Link } from "react-router-dom";
 import { BASE_PATH } from "../../../routes/paths";
 import { useState } from "react";
 import { RequestJoinTournament } from "../../requestModal/requestJoinTournament/RequestJoinTournament";
+import { Pagination } from "../../pagination/Pagination";
 
-export const TournamentsList = ({ user, token, tournaments }) => {
+export const TournamentsList = ({
+    user,
+    token,
+    handlePageChange,
+    tournamentsData,
+}) => {
     const [requestWindow, setRequestWindow] = useState(false);
     const [selectedTournament, setSelectedTournament] = useState(null);
 
@@ -23,7 +29,7 @@ export const TournamentsList = ({ user, token, tournaments }) => {
 
     return (
         <>
-            {tournaments?.map((tournament) => (
+            {tournamentsData?.tournaments.map((tournament) => (
                 <div className="tournamentList" key={tournament.id}>
                     <div className="tournamentWrapper">
                         <div className="tournamentTop">
@@ -92,6 +98,12 @@ export const TournamentsList = ({ user, token, tournaments }) => {
                     </div>
                 </div>
             ))}
+            {tournamentsData && (
+                <Pagination
+                    handlePageChange={handlePageChange}
+                    dataToFetch={tournamentsData}
+                />
+            )}
             {requestWindow && (
                 <RequestJoinTournament
                     userId={user?.id}

@@ -68,31 +68,6 @@ def user_delete(
     return RequestOK(f"Successfully deleted user: {target_user.username}")
 
 
-def get_users(username):
-    if username:
-        sql = "SELECT * FROM users WHERE username LIKE ?"
-        sql_params = ("%" + username + "%",)
-    else:
-        sql = "SELECT * FROM users"
-        sql_params = ()
-
-    result = read_query(sql, sql_params)
-
-    user_data = []
-    for row in result:
-        user = users.User(
-            id=row[0],
-            username=row[1],
-            email=row[2],
-            role=row[4],
-            bio=row[5],
-            profile_img=row[6],
-            cover_img=row[7],
-        )
-        user_data.append(user)
-    return user_data
-
-
 def get_user_with_player(user_id):
     sql = """
         SELECT u.id, u.username, u.email, u.role, u.bio, u.profile_img, u.cover_img, p.id as player_id, p.full_name, p.country, p.sports_club

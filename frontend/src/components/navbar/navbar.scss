@@ -18,6 +18,7 @@
 
         .navbarCenter {
             flex: 4;
+            display: flex;
 
             .searchbar {
                 width: 100%;
@@ -26,23 +27,39 @@
                 border-radius: 30px;
                 display: flex;
                 align-items: center;
-            }
+                justify-content: space-between;
 
-            .searchIcon {
-                font-size: 25px !important;
-                margin-left: 10px;
-                color: #13579a;
-            }
+                .searchGroup {
+                    display: flex;
+                    align-items: center;
+                    margin-right: 10px;
+                    flex: 1;
 
-            .searchInput {
-                border: none;
-                font-size: 18px;
-                width: 100%;
-                border-radius: 30px;
-            }
+                    .searchIcon {
+                        margin-left: 10px;
+                    }
 
-            .searchInput:focus {
-                outline: none;
+                    .searchInput {
+                        flex: 1;
+                        min-width: 0;
+                        border: none;
+                        outline: none;
+                        height: 100%;
+                        border-radius: 30px;
+                        font-size: 16px;
+                        :focus {
+                            outline: none;
+                        }
+                    }
+
+                    .searchCategory {
+                        height: 100%;
+                        border: none;
+                        border-radius: 30px;
+                        font-size: 14px;
+                        text-align: center;
+                    }
+                }
             }
         }
 

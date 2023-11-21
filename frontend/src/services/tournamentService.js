@@ -19,9 +19,11 @@ export const create = async (tournamentData, token) => {
     }
 };
 
-export const getAll = async () => {
+export const getAll = async (page) => {
     try {
-        const response = await axios.get(`${BASE_PATH}/tournaments/`);
+        const response = await axios.get(`${BASE_PATH}/tournaments/`, {
+            params: { page: page },
+        });
         return response.data;
     } catch (error) {
         throw error;

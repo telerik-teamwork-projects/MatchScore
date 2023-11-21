@@ -9,6 +9,7 @@ from routers.matches_router import router as matches_router
 from routers.tournaments_router import router as tournaments_router
 from routers.players_router import router as players_router
 from routers.requests_router import router as requests_router
+from routers.search_router import router as search_router
 
 
 app = FastAPI()
@@ -17,7 +18,7 @@ app.include_router(matches_router, prefix='/matches')
 app.include_router(tournaments_router, prefix='/tournaments')
 app.include_router(players_router, prefix="/players")
 app.include_router(requests_router, prefix="/requests")
-
+app.include_router(search_router, prefix="/search")
 
 app.add_middleware(
     CORSMiddleware,

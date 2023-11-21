@@ -1,8 +1,8 @@
 from fastapi import APIRouter, UploadFile, Form, File, Depends
 from common import exceptions, hashing, authorization, responses
-from models import users, requests
+from models import users
 from services import users_service
-from typing import List, Union
+from typing import Union
 
 router = APIRouter()
 
@@ -67,15 +67,6 @@ def user_get(
         raise exceptions.NotFound(f"User with id {user_id} doesn't exist")
 
     return target_user
-
-@router.get('/', response_model=List[users.User])
-def users_get(
-    search: str
-):
-    try:
-        return users_service.get_users(search)
-    except Exception:
-        raise exceptions.InternalServerError("Loading users failed")
 
 
 @router.put("/{user_id}/", response_model=users.User)

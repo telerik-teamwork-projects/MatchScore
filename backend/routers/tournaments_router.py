@@ -4,10 +4,11 @@ from typing import List
 
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound, Forbidden
-from common.utils import is_admin, is_director, is_power_of_two
+from common.utils import is_admin, is_director, is_power_of_two, manage_pages
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
     TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate, DbTournament, TournamentDateUpdate, \
-    TournamentPlayerUpdate
+    TournamentPlayerUpdate, TournamentPagination
+from models.pagination import Pagination
 from models.users import User
 from services import tournaments_service
 
@@ -26,12 +27,17 @@ def create_tournament(tournament_data: TournamentCreate, current_user: User = De
         raise InternalServerError("Creating tournament failed")
 
 
-@router.get("/", response_model=List[Tournament])
-def get_tournaments():
-    try:
-        return tournaments_service.get_all()
-    except Exception:
-        raise InternalServerError("Retrieving tournaments failed")
+@router.get("/", response_model=TournamentPagination)
+def get_tournaments(page: int = 1):
+    # try:
+    tournaments_count = tournaments_service.count()
+    params, (page, total_pages) = manage_pages(page, tournaments_count)
+    result = tournaments_service.get_all(params)
+
+    return TournamentPagination(tournaments=list(result),
+                                pagination=Pagination(page=page, items_per_page=params[-1], total_pages=total_pages))
+    # except Exception:
+        # raise InternalServerError("Retrieving tournaments failed")
 
 
 @router.get("/{tournament_id}", response_model=Tournament)

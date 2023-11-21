@@ -8,7 +8,33 @@ import { getAll } from "../../services/tournamentService";
 
 export const TournamentFeed = () => {
     const { user, token } = useContext(AuthContext);
-    const [tournaments, setTournaments] = useState(null);
+    const [tournamentsData, setTournamentsData] = useState({
+        tournaments: [],
+        pagination: {
+            page: 1,
+            items_per_page: 10,
+            total_pages: 1,
+        },
+    });
+
+    const fetchData = async (page) => {
+        try {
+            const tournamentsResponse = await getAll(page);
+            setTournamentsData(tournamentsResponse);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData(tournamentsData.pagination.page);
+    }, []);
+
+    const handlePageChange = (pageNumber) => {
+        fetchData(pageNumber);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
     const openCreateModal = () => {
@@ -18,18 +44,6 @@ export const TournamentFeed = () => {
     const closeCreateModal = () => {
         setCreateModalOpen(false);
     };
-
-    useEffect(() => {
-        try {
-            const fetchData = async () => {
-                const result = await getAll();
-                setTournaments(result);
-            };
-            fetchData();
-        } catch (error) {
-            console.error(error);
-        }
-    }, []);
 
     return (
         <div className="tournamentFeed">
@@ -52,13 +66,14 @@ export const TournamentFeed = () => {
                 <TournamentsList
                     user={user}
                     token={token}
-                    tournaments={tournaments}
+                    handlePageChange={handlePageChange}
+                    tournamentsData={tournamentsData}
                 />
                 {createModalOpen && (
                     <CreateTournamentModal
                         user={user}
                         token={token}
-                        setTournaments={setTournaments}
+                        setTournaments={setTournamentsData.tournaments}
                         onClose={closeCreateModal}
                     />
                 )}

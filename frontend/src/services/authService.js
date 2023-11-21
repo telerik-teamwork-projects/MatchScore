@@ -101,14 +101,3 @@ export const getUser = async (userId, token) => {
         throw error;
     }
 };
-
-export const getUsers = async (searchQ) => {
-    try {
-        const response = await axios.get(`${BASE_PATH}/users/`, {
-            params: searchQ,
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};

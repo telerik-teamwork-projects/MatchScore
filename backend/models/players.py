@@ -44,15 +44,17 @@ class PlayerProfileImg(BaseModel):
     country: str | None = None
     sports_club: str | None = None
     profile_img: Optional[str] = None
+    user_id: Optional[int] = None
 
     @classmethod
-    def from_query_result(cls, id, full_name, country=None, sports_club=None, profile_img=None):
+    def from_query_result(cls, id, full_name, country=None, sports_club=None, profile_img=None, user_id=None):
         return cls(
             id=id,
             full_name=full_name,
             country=country,
             sports_club=sports_club,
-            profile_img=profile_img
+            profile_img=profile_img,
+            user_id=user_id
         )
 
 
