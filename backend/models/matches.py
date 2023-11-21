@@ -15,10 +15,10 @@ class MatchScore(BaseModel):
     @classmethod
     def from_query_result(cls, id, player, score=0, points=0):
         return cls(
-            id=int(id) if id else None,
+            id=int(id) if id is not None else None,
             player=player,
-            score=int(score) if score else None,
-            points=int(points) if points else None)
+            score=int(score) if score is not None else None,
+            points=int(points) if points is not None else None)
 
 
 class MatchDateUpdate(BaseModel):

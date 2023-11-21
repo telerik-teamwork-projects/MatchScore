@@ -7,17 +7,16 @@ from typing import List
 from common.exceptions import InternalServerError, NotFound, BadRequest
 from models import tournaments, requests, players
 from services import players_service
-from database.database import insert_query, read_query, get_connection, update_query
+from database.database import insert_query, read_query, get_connection
 from models.enums import TournamentStatus, TournamentFormat
 from models.users import User
 from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
     TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse, TournamentDateUpdate, \
     TournamentPlayerUpdate
-from mariadb import Error
-from mariadb.connections import Connection
+from mariadb import Error, Cursor
 
 
-def _manage_knockout_matches(cursor: Connection, id: int, data: TournamentKnockoutCreate,
+def _manage_knockout_matches(cursor: Cursor, id: int, data: TournamentKnockoutCreate,
                              participants: list[int], rounds: int):
     rand.shuffle(participants)
     # table of participants
@@ -58,7 +57,7 @@ def _manage_knockout_matches(cursor: Connection, id: int, data: TournamentKnocko
                                (matches[r + 1][i - 1], matches[r][m]))
 
 
-def _manage_league_matches(cursor: Connection, id: int, data: TournamentLeagueCreate,
+def _manage_league_matches(cursor: Cursor, id: int, data: TournamentLeagueCreate,
                            participants: list[int], rounds: int):
     rand.shuffle(participants)
     # matches per round

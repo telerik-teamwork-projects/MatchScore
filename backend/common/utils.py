@@ -9,6 +9,7 @@ from models.users import User
 
 UPLOAD_DIR = "media"
 LIMIT = 10
+LIMIT_MATCH = 20
 
 
 def is_admin(user: User):
@@ -50,13 +51,17 @@ def is_power_of_two(n):
     return 2 ** int(math.log(n, 2)) == n
 
 
-def manage_pages(page: int, items: int):
-    total_pages = (items + LIMIT - 1) // LIMIT
+def manage_pages(page: int, items: int, match_limit=False):
+    if match_limit:
+        limit = LIMIT_MATCH
+    else:
+        limit = LIMIT
+    total_pages = (items + limit - 1) // limit
     if page < 1:
         page = 1
     elif page > total_pages > 0:
         page = total_pages
 
-    offset = (page - 1) * LIMIT
+    offset = (page - 1) * limit
 
-    return (offset, LIMIT), (page, total_pages)
+    return (offset, limit), (page, total_pages)

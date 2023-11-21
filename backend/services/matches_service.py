@@ -1,11 +1,13 @@
 import logging
 from typing import List
 
-from common.exceptions import InternalServerError
+from common.exceptions import InternalServerError, BadRequest
 from models.matches import Match, MatchResponse, MatchBase, MatchScoreUpdate, MatchDateUpdate, MatchPlayerUpdate, \
     MatchTournamentResponse
 from database.database import get_connection, read_query, update_query
-from mariadb import Error
+from mariadb import Error, Cursor
+
+from models.tournaments import DbTournament
 
 
 def create(match: Match):
@@ -68,7 +70,7 @@ def find_participants(id: int, match_update: List[MatchPlayerUpdate] | List[Matc
         return participants
 
 
-def update_score(match: MatchBase, participants: List[MatchScoreUpdate]):
+def update_score(match: MatchBase, participants: List[MatchScoreUpdate], tournament=None):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -117,9 +119,14 @@ def update_score(match: MatchBase, participants: List[MatchScoreUpdate]):
                 for p in data:
                     participants_updated.append([*p[0:2]])
                     score_updated.append([*p])
+            if tournament is not None:
+                manage_knockout_match(match, score_updated, tournament, cursor)
             conn.commit()
             return MatchResponse.from_query_result(match.id, match.date, match.format, participants_updated,
                                                    score_updated)
+        except BadRequest as err:
+            conn.rollback()
+            raise err
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)
@@ -209,3 +216,36 @@ def all(parameters: tuple):
     return (MatchTournamentResponse.from_query_result(*row[:5],
                                                       [tuple(x.split(',')) for x in row[5].split(';') if row[5] != ''])
             for row in data)
+
+
+def manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournament: DbTournament, cursor: Cursor):
+    winner_id = score_updated[0][0]
+    loser_id = score_updated[1][0]
+    next_match_id = match.next_match
+    if next_match_id:
+        # manage case when match score was previously updated
+        manage_previous_update(next_match_id, winner_id, loser_id, cursor)
+        # insert winner as participant in the next tournament match
+        cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                       (winner_id, next_match_id))
+    # manage third place match
+    if tournament.third_place and match.round == tournament.rounds - 2:
+        cursor.execute('SELECT id FROM matches WHERE tournaments_id = ? AND round = ?',
+                       (tournament.id, tournament.rounds))
+        match_third_place_id = cursor.fetchone()[0]
+        # manage case when match score was previously updated
+        manage_previous_update(match_third_place_id, winner_id, loser_id, cursor)
+        # insert loser as participant in the third-place match
+        cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                       (loser_id, match_third_place_id))
+
+
+def manage_previous_update(match_id: int, w_id: int, l_id: int, cursor: Cursor):
+    cursor.execute('SELECT player_id, score FROM players_matches WHERE match_id = ?', (match_id,))
+    data = list(cursor)
+    existing_player_ids = [i[0] for i in data]
+    scores = [i[1] for i in data if i[1] > 0]
+    if (w_id in existing_player_ids) or (l_id in existing_player_ids):
+        if scores:
+            raise BadRequest(f'Scores for the next match {match_id} of this tournament are already entered!')
+        cursor.execute(f'DELETE FROM players_matches WHERE match_id = ? AND player_id in {(w_id, l_id)}', (match_id,))
