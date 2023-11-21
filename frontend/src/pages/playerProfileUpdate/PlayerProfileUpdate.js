@@ -1,47 +1,43 @@
-import "./profileUpdate.scss";
+import "./playerProfileUpdate.scss";
 import { ErrorMessage } from "../../components/responseMessages/errorMessages/ErrorMessages";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../contexts/authContext";
-import { getUser } from "../../services/authService";
-import { PROFILE } from "../../routes/routes";
+import { getOne, playerUpdate } from "../../services/playerService";
+import { PLAYERS } from "../../routes/routes";
 
-export const ProfileUpdate = () => {
+export const PlayerProfileUpdate = () => {
     const navigate = useNavigate();
 
-    const { userId } = useParams();
-    const { userUpdate, user, token } = useContext(AuthContext);
+    const { playerId } = useParams();
+    const { token } = useContext(AuthContext);
 
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
-        username: "",
-        email: "",
-        bio: "",
-        role: "",
+        full_name: "",
+        country: "",
+        sports_club: "",
         profile_img: null,
-        cover_img: null,
     });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userData = await getUser(userId);
+                const playerData = await getOne(playerId);
                 setFormData({
-                    username: userData.username || "",
-                    email: userData.email || "",
-                    bio: userData.bio || "",
-                    role: userData.role || "",
-                    profile_img: userData.profile_img || "",
-                    cover_img: userData.cover_img || "",
+                    full_name: playerData.full_name || "",
+                    country: playerData.country || "",
+                    sports_club: playerData.sports_club || "",
+                    profile_img: playerData.profile_img || "",
                 });
             } catch (error) {
                 setError(error);
             }
         };
         fetchData();
-    }, [userId]);
+    }, [playerId]);
 
-    const { username, email, bio, role } = formData;
+    const { full_name, country, sports_club } = formData;
 
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,16 +46,11 @@ export const ProfileUpdate = () => {
         setFormData({ ...formData, profile_img: e.target.files[0] || null });
     };
 
-    const handleCoverPictureChange = (e) => {
-        setFormData({ ...formData, cover_img: e.target.files[0] || null });
-    };
-
     const onSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            await userUpdate(formData, userId, token);
-            navigate(`/profile/${userId}`);
+            await playerUpdate(playerId, token, formData);
+            navigate(`${PLAYERS}/${playerId}`);
         } catch (error) {
             setError(error.response.data.detail);
         }
@@ -70,9 +61,11 @@ export const ProfileUpdate = () => {
             <div className="profileUpdate">
                 <div className="profileUpdateWrapper">
                     <div className="profileUpdateLeft">
-                        <h3 className="profileUpdateLogo">Profile Update</h3>
+                        <h3 className="profileUpdateLogo">
+                            Player Profile Update
+                        </h3>
                         <span className="profileUpdateDesc">
-                            Let people know more about you
+                            Update your player profile
                         </span>
                     </div>
                     <div className="profileUpdateRight">
@@ -83,48 +76,37 @@ export const ProfileUpdate = () => {
                             encType="multipart/form-data"
                         >
                             <input
-                                placeholder="Username"
+                                placeholder="Full Name"
                                 className="profileUpdateInput"
                                 type="text"
-                                name="username"
-                                value={username}
-                                onChange={(e) => onChange(e)}
-                                autoComplete="username"
-                            />
-
-                            <input
-                                placeholder="Email"
-                                className="profileUpdateInput"
-                                type="email"
-                                name="email"
-                                value={email}
-                                onChange={(e) => onChange(e)}
-                                autoComplete="email"
-                            />
-
-                            <input
-                                placeholder="Bio"
-                                className="profileUpdateInput"
-                                type="text"
-                                name="bio"
-                                value={bio}
+                                name="full_name"
+                                value={full_name}
                                 onChange={(e) => onChange(e)}
                                 autoComplete="text"
                             />
-                            {user?.role === "admin" && (
-                                <input
-                                    placeholder="Role"
-                                    className="profileUpdateInput"
-                                    type="text"
-                                    name="role"
-                                    value={role}
-                                    onChange={(e) => onChange(e)}
-                                    autoComplete="text"
-                                />
-                            )}
+
+                            <input
+                                placeholder="Country"
+                                className="profileUpdateInput"
+                                type="text"
+                                name="country"
+                                value={country}
+                                onChange={(e) => onChange(e)}
+                                autoComplete="country"
+                            />
+
+                            <input
+                                placeholder="Sports Club"
+                                className="profileUpdateInput"
+                                type="text"
+                                name="sports_club"
+                                value={sports_club}
+                                onChange={(e) => onChange(e)}
+                                autoComplete="text"
+                            />
 
                             <label htmlFor="profile_img">
-                                Profile Picture:
+                                Player Profile Picture:
                                 <input
                                     type="file"
                                     id="profile_img"
@@ -135,17 +117,6 @@ export const ProfileUpdate = () => {
                                 />
                             </label>
 
-                            <label htmlFor="cover_img">
-                                Cover Picture:
-                                <input
-                                    type="file"
-                                    id="cover_img"
-                                    name="cover_img"
-                                    onChange={(e) => {
-                                        handleCoverPictureChange(e);
-                                    }}
-                                />
-                            </label>
                             <ErrorMessage message={error} />
 
                             <button className="profileUpdateButton">
@@ -153,9 +124,9 @@ export const ProfileUpdate = () => {
                             </button>
                             <Link
                                 className="linkLogin"
-                                to={`${PROFILE}/${userId}`}
+                                to={`${PLAYERS}/${playerId}`}
                             >
-                                Back to Profile
+                                Back to Player Profile
                             </Link>
                         </form>
                     </div>

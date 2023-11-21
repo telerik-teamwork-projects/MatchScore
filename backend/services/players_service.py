@@ -1,10 +1,10 @@
-from database.database import insert_query, read_query
+from database.database import insert_query, read_query, update_query
 from models.players import PlayerCreate, PlayerRequest, PlayerProfile, PlayerProfileImg
 from models.enums import Request
 from models.users import User
 from common.exceptions import NotFound
 from common.responses import RequestCreate
-
+from common.utils import save_image
 
 def send_player_request(
         user_id: int,
@@ -174,8 +174,37 @@ def get_player_by_user_id(user_id: int):
 
 
 def get_by_id(id: int):
-    data = read_query('SELECT id, full_name, country, sports_club, profile_img FROM players WHERE id = ?', (id,))
+    data = read_query('SELECT * FROM players WHERE id = ?', (id,))
     return next((PlayerProfileImg.from_query_result(*row) for row in data), None)
+
+
+def update(
+        target_player: PlayerProfileImg,
+        full_name: str,
+        country: str,
+        sports_club: str,
+        profile_img_path: str
+):
+    
+
+    sql = """
+        UPDATE players
+        SET full_name = ?, country = ?, sports_club = ?, profile_img = ?
+        WHERE id = ?
+    """
+    sql_params = (
+        full_name,
+        country,
+        sports_club,
+        profile_img_path,
+        target_player.id
+    )
+
+    update_query(sql, sql_params)
+
+    return get_by_id(target_player.id)
+
+
 
 
 def count():
@@ -190,3 +219,24 @@ def all(parameters: tuple):
                                 FROM players ORDER BY id LIMIT ? OFFSET ?''', (limit, offset))
 
     return (PlayerProfileImg.from_query_result(*row) for row in data)
+
+
+def get_player_by_full_name(full_name: str):
+    sql = """SELECT *
+            FROM players 
+            WHERE full_name = ?    
+        """
+    sql_params = (full_name,)
+
+    result = read_query(sql, sql_params)
+    if result:
+        return PlayerProfileImg.from_query_result(*result[0])
+
+
+def handle_profile_image(profile_image):
+    if isinstance(profile_image, str):
+        profile_image_path = profile_image
+    else:
+        profile_image_path = save_image(profile_image, "players_pics")
+
+    return profile_image_path

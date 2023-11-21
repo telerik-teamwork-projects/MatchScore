@@ -1,14 +1,17 @@
 import "./playerProfile.scss";
 
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { Leftbar } from "../../components/home/leftbar/Leftbar";
 import { getOne } from "../../services/playerService";
 import { BASE_PATH } from "../../routes/paths";
 import { Rightbar } from "../home/rightbar/Rightbar";
+import { AuthContext } from "../../contexts/authContext";
+import { PLAYERS, PROFILE } from "../../routes/routes";
 
 export const PlayerProfile = () => {
     const { playerId } = useParams();
+    const { user } = useContext(AuthContext);
     const [playerProfile, setPlayerProfile] = useState(null);
 
     useEffect(() => {
@@ -50,7 +53,30 @@ export const PlayerProfile = () => {
                                 />
                             )}
                         </div>
-
+                        {(playerProfile?.user_id === user?.id ||
+                            user?.role === "admin") && (
+                            <div className="playerProfileBtns">
+                                <Link
+                                    to={`${PLAYERS}/${playerId}/update`}
+                                    className="playerProfileEditBtn"
+                                >
+                                    Edit
+                                </Link>
+                                <Link
+                                    className="playerProfileDeleteBtn"
+                                    // onClick={onDelete}
+                                >
+                                    Delete
+                                </Link>
+                            </div>
+                        )}
+                        <div className="playerProfileViewUserBtns">
+                            <Link to={`${PROFILE}/${playerProfile?.user_id}`}>
+                                <button className="playerProfileViewUserBtn">
+                                    View User Profile
+                                </button>
+                            </Link>
+                        </div>
                         <div className="playerProfileInfo">
                             <h4 className="playerProfileInfoName">
                                 {playerProfile?.full_name}

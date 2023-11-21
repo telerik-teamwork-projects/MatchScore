@@ -10,7 +10,7 @@ import {
     searchUsers,
     searchPlayers,
     searchTournaments,
-} from "../../services/search";
+} from "../../services/searchService";
 import {
     getDirectorRequests,
     getLinkPlayerRequests,
@@ -89,7 +89,6 @@ export const Navbar = () => {
         e.preventDefault();
         if (searchData.category === "users") {
             try {
-                console.log(searchData);
                 const fetchedSearchData = await searchUsers(searchData.search);
                 setUsersSearchResults(fetchedSearchData);
                 setShowUsersSearch(true);

@@ -6,7 +6,7 @@ import { AuthContext } from "../../contexts/authContext";
 import { Leftbar } from "../../components/home/leftbar/Leftbar";
 import { Rightbar } from "../../components/home/rightbar/Rightbar";
 import { getUser, deleteUser } from "../../services/authService";
-import { HOME, PROFILE } from "../../routes/routes";
+import { HOME, PLAYERS, PROFILE } from "../../routes/routes";
 import { BASE_PATH } from "../../routes/paths";
 import { DeleteUserConfirmation } from "../../components/userDelete/DeleteUserConfirmation";
 import { RequestBecomePlayer } from "../../components/requestModal/requestBecomePlayer/RequestBecomePlayer";
@@ -176,10 +176,15 @@ export const Profile = () => {
                                     <div className="playerMain">
                                         <div className="playerMainFullName">
                                             <p>Full Name:</p>
-                                            <span>
-                                                {profile?.player.full_name ||
-                                                    "N/A"}
-                                            </span>
+                                            <Link
+                                                className="playerMainFullNameLink"
+                                                to={`${PLAYERS}/${profile.player.id}`}
+                                            >
+                                                <span>
+                                                    {profile?.player
+                                                        .full_name || "N/A"}
+                                                </span>
+                                            </Link>
                                         </div>
                                         <div className="playerMainCountry">
                                             <p>Country:</p>

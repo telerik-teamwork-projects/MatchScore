@@ -23,6 +23,7 @@ import { NoAuthRouteGuard } from "./routeGuards/noAuthRouteGuard";
 import { Tournament } from "./pages/tournaments/Tournament";
 import { TournamentDetails } from "./components/tournaments/tournamentDetails/TournamentDetails";
 import { PlayerProfile } from "./components/playerProfile/PlayerProfile";
+import { PlayerProfileUpdate } from "./pages/playerProfileUpdate/PlayerProfileUpdate";
 
 function App() {
     return (
@@ -44,6 +45,10 @@ function App() {
                     <Route
                         path={`${PLAYERS}/:playerId`}
                         element={<PlayerProfile />}
+                    />
+                    <Route
+                        path={`${PLAYERS}/:playerId/update`}
+                        element={<PlayerProfileUpdate />}
                     />
 
                     <Route element={<AuthRouteGuard />}>
