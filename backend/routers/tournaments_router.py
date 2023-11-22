@@ -5,9 +5,10 @@ from typing import List
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound, Forbidden
 from common.utils import is_admin, is_director, is_power_of_two, manage_pages
+from models.enums import TournamentFormat
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
     TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate, DbTournament, TournamentDateUpdate, \
-    TournamentPlayerUpdate, TournamentPagination
+    TournamentPlayerUpdate, TournamentPagination, TournamentPointsResponse
 from models.pagination import Pagination
 from models.users import User
 from services import tournaments_service
@@ -91,6 +92,17 @@ def view_rounds(id: int):
     return tournaments_service.view_tournament(tournament)
 
 
+@router.get('/{id}/points', response_model=TournamentPointsResponse)
+def view_points(id: int):
+    tournament = tournaments_service.find(id)
+    if tournament is None:
+        raise NotFound(f'Tournament {id} does not exist!')
+    if tournament.format != TournamentFormat.LEAGUE.value:
+        raise BadRequest(f'Tournament {id} is not league!')
+
+    return tournaments_service.view_points(id)
+
+
 @router.put('/{id}/date', response_model=DbTournament)
 def update_date(id: int, tournament_date: TournamentDateUpdate, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
@@ -99,9 +111,9 @@ def update_date(id: int, tournament_date: TournamentDateUpdate, current_user: Us
     if tournament is None:
         raise NotFound(f'Tournament {id} does not exist!')
     if tournament.start_date <= datetime.utcnow():
-        raise Forbidden('The tournament has already started!')
+        raise BadRequest('The tournament has already started!')
     if tournament_date.date < datetime.utcnow():
-        raise Forbidden('The new tournament start date should be in the future!')
+        raise BadRequest('The new tournament start date should be in the future!')
 
     if tournament.start_date == tournament_date.date:
         return tournament
@@ -116,16 +128,16 @@ def update_players(id: int, players: List[TournamentPlayerUpdate], current_user:
     if tournament is None:
         raise NotFound(f'Tournament {id} does not exist!')
     if tournament.start_date <= datetime.utcnow():
-        raise Forbidden('The tournament has already started!')
+        raise BadRequest('The tournament has already started!')
     p_count = len({p.player for p in players})
     p_prev_count = len({p.player_prev for p in players})
     if (p_count != len(players)) or (p_prev_count != len(players)):
         raise BadRequest("Participants should be unique!")
     participants = tournaments_service.find_participants(id, players)
     if participants is not None:
-        raise Forbidden('The participants provided already play in this tournament!')
+        raise BadRequest('The participants provided already play in this tournament!')
     participants_prev = tournaments_service.find_participants(id, players, prev=True)
     if participants_prev is None:
-        raise Forbidden('The participants to be updated do not play in this match!')
+        raise BadRequest('The participants to be updated do not play in this match!')
 
     return tournaments_service.update_players(tournament, participants_prev)

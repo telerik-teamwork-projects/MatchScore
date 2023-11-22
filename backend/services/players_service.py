@@ -216,7 +216,7 @@ def all(parameters: tuple):
     offset, limit = parameters
 
     data = read_query('''SELECT id, full_name, country, sports_club, profile_img
-                                FROM players ORDER BY id LIMIT ? OFFSET ?''', (limit, offset))
+                                FROM players ORDER BY full_name LIMIT ? OFFSET ?''', (limit, offset))
 
     return (PlayerProfileImg.from_query_result(*row) for row in data)
 
