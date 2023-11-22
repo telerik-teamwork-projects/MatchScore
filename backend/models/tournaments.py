@@ -8,6 +8,7 @@ from models.matches import MatchScore
 from models.players import PlayerProfile
 from models.pagination import Pagination
 
+
 class TournamentCreate(BaseModel):
     format: TournamentFormat = TournamentFormat.KNOCKOUT
     title: str
@@ -63,7 +64,8 @@ class Tournament(BaseModel):
     owner: Owner
 
     @classmethod
-    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, status, location, start_date, end_date, owner):
+    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, status, location,
+                          start_date, end_date, owner):
         return cls(
             id=id,
             format=format,
@@ -109,7 +111,8 @@ class TournamentWithoutOwner(BaseModel):
     owner_id: Optional[int] = None
 
     @classmethod
-    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, status, location, start_date, end_date, owner_id):
+    def from_query_result(cls, id, format, title, description, match_format, rounds, third_place, status, location,
+                          start_date, end_date, owner_id):
         return cls(
             id=id,
             format=format,
@@ -124,7 +127,6 @@ class TournamentWithoutOwner(BaseModel):
             end_date=end_date,
             owner_id=owner_id
         )
-
 
 
 class TournamentLeagueCreate(BaseModel):
@@ -295,3 +297,40 @@ class TournamentPlayerUpdate(BaseModel):
 class TournamentPagination(BaseModel):
     tournaments: List[Tournament]
     pagination: Pagination
+
+
+class TournamentPlayerPoints(BaseModel):
+    player_id: int
+    full_name: str
+    matches_played: int
+    wins: int
+    draws: int
+    losses: int
+    score_diff: int
+    points: int
+
+    @classmethod
+    def from_query_result(cls, player_id, full_name, matches_played, wins, draws, losses, score_diff, points):
+        return cls(player_id=player_id,
+                   full_name=full_name,
+                   matches_played=matches_played,
+                   wins=wins,
+                   draws=draws,
+                   losses=losses,
+                   score_diff=score_diff,
+                   points=points)
+
+
+class TournamentPointsResponse(BaseModel):
+    id: int
+    players: List[TournamentPlayerPoints]
+
+    @classmethod
+    def from_query_result(cls, id, players):
+        if players == '' or players is None:
+            players = []
+        else:
+            players = list(TournamentPlayerPoints.from_query_result(*row) for row in players)
+        return cls(
+            id=id,
+            players=players)

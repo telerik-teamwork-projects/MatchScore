@@ -1,7 +1,7 @@
 import logging
 import math
 import random as rand
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import List, Tuple
 
 from common.exceptions import InternalServerError, NotFound, BadRequest
@@ -12,7 +12,7 @@ from models.enums import TournamentStatus, TournamentFormat
 from models.users import User
 from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
     TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse, TournamentDateUpdate, \
-    TournamentPlayerUpdate
+    TournamentPlayerUpdate, TournamentPointsResponse
 from mariadb import Error, Cursor
 
 
@@ -132,7 +132,7 @@ def get_all(params: Tuple):
             SELECT t.*, u.username, u.profile_img
             FROM tournaments t
             JOIN users u ON t.owner_id = u.id
-            ORDER BY t.start_date
+            ORDER BY t.start_date DESC
             LIMIT ? OFFSET ?;
         """
     sql_params = (limit, offset)
@@ -547,3 +547,46 @@ def update_players(tournament: DbTournament, players_update: List[TournamentPlay
 def count():
     data = read_query('SELECT COUNT(*) FROM players')
     return data[0][0]
+
+
+def view_points(id: int):
+    date = datetime.utcnow()
+    data = read_query('''SELECT pm.player_id, p.full_name, 
+                                COUNT(pm.match_id) AS matches_played,
+                                COALESCE(w.wins, 0) AS wins, 
+                                COALESCE(d.draws, 0) AS draws, 
+                                COALESCE(l.losses, 0) AS losses,
+                                SUM(pm.score) - sc.score_concede AS score_diff, 
+                                SUM(pm.points) AS points
+                             FROM players_matches pm
+                                LEFT JOIN players p ON p.id = pm.player_id
+                                LEFT JOIN
+                                    (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS wins
+                                    FROM players_matches pm, players p
+                                    WHERE p.id = pm.player_id AND pm.points = 2
+                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                    GROUP BY pm.player_id) AS w ON pm.player_id = w.player_id
+                                LEFT JOIN
+                                    (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS draws
+                                    FROM players_matches pm, players p
+                                    WHERE p.id = pm.player_id AND pm.points = 1
+                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                    GROUP BY pm.player_id) AS d ON pm.player_id = d.player_id
+                                LEFT JOIN
+                                    (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS losses
+                                    FROM players_matches pm, players p
+                                    WHERE p.id = pm.player_id AND pm.points = 0
+                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                    GROUP BY pm.player_id) AS l ON pm.player_id = l.player_id
+                                LEFT JOIN
+                                    (SELECT pm.player_id, p.full_name, SUM(pm1.score) AS score_concede
+                                    FROM players_matches pm, players_matches pm1, players p
+                                    WHERE p.id = pm.player_id AND pm.match_id = pm1.match_id 
+                                       AND pm.player_id != pm1.player_id
+                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                    GROUP BY pm.player_id) AS sc ON pm.player_id = sc.player_id
+                             WHERE pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                             GROUP BY pm.player_id ORDER BY points DESC, score_diff''',
+                      (id, date, id, date, id, date, id, date, id, date))
+
+    return TournamentPointsResponse.from_query_result(id, data)

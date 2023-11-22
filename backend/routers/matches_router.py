@@ -47,9 +47,10 @@ def update_score(id: int, match_score: List[MatchScoreUpdate], current_user: Use
         raise BadRequest('Please fill the score for all participants!')
     if match.tournaments_id:
         tournament = tournaments_service.find(match.tournaments_id)
-        if tournament.format == TournamentFormat.KNOCKOUT.value and match_score[0].score == match_score[1].score:
-            raise BadRequest('There are no draws in knockout tournaments!')
-        return matches_service.update_score(match, participants, tournament)
+        if tournament.format == TournamentFormat.KNOCKOUT.value:
+            if match_score[0].score == match_score[1].score:
+                raise BadRequest('There are no draws in knockout tournaments!')
+            return matches_service.update_score(match, participants, tournament)
 
     return matches_service.update_score(match, participants)
 

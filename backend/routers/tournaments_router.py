@@ -5,9 +5,10 @@ from typing import List
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound, Forbidden
 from common.utils import is_admin, is_director, is_power_of_two, manage_pages
+from models.enums import TournamentFormat
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
     TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate, DbTournament, TournamentDateUpdate, \
-    TournamentPlayerUpdate, TournamentPagination
+    TournamentPlayerUpdate, TournamentPagination, TournamentPointsResponse
 from models.pagination import Pagination
 from models.users import User
 from services import tournaments_service
@@ -37,7 +38,7 @@ def get_tournaments(page: int = 1):
     return TournamentPagination(tournaments=list(result),
                                 pagination=Pagination(page=page, items_per_page=params[-1], total_pages=total_pages))
     # except Exception:
-        # raise InternalServerError("Retrieving tournaments failed")
+    # raise InternalServerError("Retrieving tournaments failed")
 
 
 @router.get("/{tournament_id}", response_model=Tournament)
@@ -89,6 +90,17 @@ def view_rounds(id: int):
         raise NotFound(f'Tournament {id} does not exist!')
 
     return tournaments_service.view_tournament(tournament)
+
+
+@router.get('/{id}/points', response_model=TournamentPointsResponse)
+def view_points(id: int):
+    tournament = tournaments_service.find(id)
+    if tournament is None:
+        raise NotFound(f'Tournament {id} does not exist!')
+    if tournament.format != TournamentFormat.LEAGUE.value:
+        raise BadRequest(f'Tournament {id} is not league!')
+
+    return tournaments_service.view_points(id)
 
 
 @router.put('/{id}/date', response_model=DbTournament)
