@@ -295,3 +295,7 @@ class TournamentPlayerUpdate(BaseModel):
 class TournamentPagination(BaseModel):
     tournaments: List[Tournament]
     pagination: Pagination
+
+
+class TournamentScore(BaseModel):
+    score: int

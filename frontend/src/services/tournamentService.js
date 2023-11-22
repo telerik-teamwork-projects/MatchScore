@@ -40,3 +40,14 @@ export const getOne = async (tournamentId) => {
         throw error;
     }
 };
+
+export const getKnockoutRounds = async (tournamentId) => {
+    try {
+        const response = await axios.get(
+            `${BASE_PATH}/tournaments/${tournamentId}/rounds`
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

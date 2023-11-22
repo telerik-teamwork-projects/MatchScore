@@ -29,15 +29,15 @@ def create_tournament(tournament_data: TournamentCreate, current_user: User = De
 
 @router.get("/", response_model=TournamentPagination)
 def get_tournaments(page: int = 1):
-    # try:
-    tournaments_count = tournaments_service.count()
-    params, (page, total_pages) = manage_pages(page, tournaments_count)
-    result = tournaments_service.get_all(params)
+    try:
+        tournaments_count = tournaments_service.count()
+        params, (page, total_pages) = manage_pages(page, tournaments_count)
+        result = tournaments_service.get_all(params)
 
-    return TournamentPagination(tournaments=list(result),
-                                pagination=Pagination(page=page, items_per_page=params[-1], total_pages=total_pages))
-    # except Exception:
-        # raise InternalServerError("Retrieving tournaments failed")
+        return TournamentPagination(tournaments=list(result),
+                                    pagination=Pagination(page=page, items_per_page=params[-1], total_pages=total_pages))
+    except Exception:
+        raise InternalServerError("Retrieving tournaments failed")
 
 
 @router.get("/{tournament_id}", response_model=Tournament)

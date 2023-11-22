@@ -1,335 +1,148 @@
+import React, { useEffect, useState } from "react";
+import { getKnockoutRounds } from "../../../services/tournamentService";
 import "./tournamentKnockoutTree.scss";
+import { updateMatchScore } from "../../../services/matchesService";
 
-export const TournamentKnockoutTree = () => {
+export const TournamentKnockoutTree = ({ tournamentId, token }) => {
+    const [tournamentData, setTournamentData] = useState([]);
+
+    useEffect(() => {
+        const fetchTournamentData = async () => {
+            try {
+                const response = await getKnockoutRounds(tournamentId);
+                setTournamentData(response.rounds || []);
+            } catch (error) {
+                console.error("Error fetching tournament data:", error);
+            }
+        };
+
+        fetchTournamentData();
+    }, [tournamentId]);
+
+    const updateScore = (
+        roundIndex,
+        matchIndex,
+        participantIndex,
+        newScore
+    ) => {
+        setTournamentData((prevData) => {
+            const newData = [...prevData];
+            newData[roundIndex].matches[matchIndex].participants[
+                participantIndex
+            ].score = newScore;
+            return newData;
+        });
+    };
+
+    const handleScoreChange = (e, roundIndex, matchIndex, participantIndex) => {
+        const newScore = e.target.value;
+        updateScore(roundIndex, matchIndex, participantIndex, newScore);
+    };
+
+    const handleUpdateScore = async (
+        roundIndex,
+        matchIndex,
+        participant1,
+        participant2
+    ) => {
+        const matchId = tournamentData[roundIndex].matches[matchIndex].match_id;
+        const matchScores = {
+            matches: [
+                {
+                    participants: [
+                        {
+                            player_id: participant1.id,
+                            player: participant1.player,
+                            score: Number(participant1.score),
+                        },
+                        {
+                            player_id: participant2.id,
+                            player: participant2.player,
+                            score: Number(participant2.score),
+                        },
+                    ],
+                },
+            ],
+        };
+
+        try {
+            await updateMatchScore(matchId, matchScores.matches, token);
+        } catch (error) {
+            console.error("Error updating match score:", error);
+        }
+    };
+
     return (
         <div id="bracket">
-            <div className="container">
-                <div className="split split-one">
-                    <div className="round round-one current">
-                        <div className="round-details">
-                            Round 1<br />
-                            <span className="date">March 16</span>
-                        </div>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Duke<span className="score">76</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Virginia<span className="score">82</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Wake Forest<span className="score">64</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Clemson<span className="score">56</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                North Carolina
-                                <span className="score">68</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Florida State
-                                <span className="score">54</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                NC State<span className="score">74</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Maryland<span className="score">92</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Georgia Tech
-                                <span className="score">78</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Georgia<span className="score">80</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Auburn<span className="score">64</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Florida<span className="score">63</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Kentucky<span className="score">70</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Alabama<span className="score">59</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Vanderbilt<span className="score">64</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Gonzaga<span className="score">68</span>
-                            </li>
-                        </ul>
+            {tournamentData.map((round, roundIndex) => (
+                <div key={roundIndex} className={`round round-${round.round}`}>
+                    <div className="round-details">
+                        Round {round.round}
+                        <br />
                     </div>
 
-                    <div className="round round-two">
-                        <div className="round-details">
-                            Round 2<br />
-                            <span className="date">March 18</span>
-                        </div>
-                        <ul className="matchup">
+                    {round.matches.map((match, matchIndex) => (
+                        <ul key={match.match_id} className="matchup">
                             <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
+                                {match.participants[0] && (
+                                    <>
+                                        {match.participants[0].player}
+                                        <input
+                                            type="number"
+                                            value={
+                                                match.participants[0].score ||
+                                                ""
+                                            }
+                                            onChange={(e) =>
+                                                handleScoreChange(
+                                                    e,
+                                                    roundIndex,
+                                                    matchIndex,
+                                                    0
+                                                )
+                                            }
+                                        />
+                                    </>
+                                )}
                             </li>
                             <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
+                                {match.participants[1] && (
+                                    <>
+                                        {match.participants[1].player}
+                                        <input
+                                            type="number"
+                                            value={
+                                                match.participants[1].score ||
+                                                ""
+                                            }
+                                            onChange={(e) =>
+                                                handleScoreChange(
+                                                    e,
+                                                    roundIndex,
+                                                    matchIndex,
+                                                    1
+                                                )
+                                            }
+                                        />
+                                    </>
+                                )}
                             </li>
+                            <button
+                                onClick={() =>
+                                    handleUpdateScore(
+                                        roundIndex,
+                                        matchIndex,
+                                        match.participants[0],
+                                        match.participants[1]
+                                    )
+                                }
+                            >
+                                Update Score
+                            </button>
                         </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="round round-three">
-                        <div className="round-details">
-                            Round 3<br />
-                            <span className="date">March 22</span>
-                        </div>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                    </div>
+                    ))}
                 </div>
-
-                <div className="champion">
-                    <div className="semis-l">
-                        <div className="round-details">
-                            west semifinals <br />
-                            <span className="date">March 26-28</span>
-                        </div>
-                        <ul className="matchup championship">
-                            <li className="team team-top">
-                                &nbsp;
-                                <span className="vote-count">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;
-                                <span className="vote-count">&nbsp;</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="final">
-                        <i className="fa fa-trophy"></i>
-                        <div className="round-details">
-                            championship <br />
-                            <span className="date">March 30 - Apr. 1</span>
-                        </div>
-                        <ul className="matchup championship">
-                            <li className="team team-top">
-                                &nbsp;
-                                <span className="vote-count">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;
-                                <span className="vote-count">&nbsp;</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="semis-r">
-                        <div className="round-details">
-                            east semifinals <br />
-                            <span className="date">March 26-28</span>
-                        </div>
-                        <ul className="matchup championship">
-                            <li className="team team-top">
-                                &nbsp;
-                                <span className="vote-count">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;
-                                <span className="vote-count">&nbsp;</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div className="split split-two">
-                    <div className="round round-three">
-                        <div className="round-details">
-                            Round 3<br />
-                            <span className="date">March 22</span>
-                        </div>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="round round-two">
-                        <div className="round-details">
-                            Round 2<br />
-                            <span className="date">March 18</span>
-                        </div>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                            <li className="team team-bottom">
-                                &nbsp;<span className="score">&nbsp;</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="round round-one current">
-                        <div className="round-details">
-                            Round 1<br />
-                            <span className="date">March 16</span>
-                        </div>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Minnesota<span className="score">62</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Northwestern
-                                <span className="score">54</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Michigan<span className="score">68</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Iowa<span className="score">66</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Illinois<span className="score">64</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Wisconsin<span className="score">56</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Purdue<span className="score">36</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Boise State<span className="score">40</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Penn State<span className="score">38</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Indiana<span className="score">44</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Ohio State<span className="score">52</span>
-                            </li>
-                            <li className="team team-bottom">
-                                VCU<span className="score">80</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                USC<span className="score">58</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Cal<span className="score">59</span>
-                            </li>
-                        </ul>
-                        <ul className="matchup">
-                            <li className="team team-top">
-                                Virginia Tech
-                                <span className="score">74</span>
-                            </li>
-                            <li className="team team-bottom">
-                                Dartmouth<span className="score">111</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            ))}
         </div>
     );
 };
