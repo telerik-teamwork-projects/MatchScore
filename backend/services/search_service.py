@@ -8,7 +8,7 @@ def get_users(username):
         sql = "SELECT id, username, email, role, bio, profile_img, cover_img FROM users WHERE username LIKE ?"
         sql_params = ("%" + username + "%",)
     else:
-        sql = "SELECT * FROM users"
+        sql = "SELECT id, username, email, role, bio, profile_img, cover_img FROM users"
         sql_params = ()
 
     result = read_query(sql, sql_params)

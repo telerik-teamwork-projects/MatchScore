@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
                     await authService.verifyToken(auth.token);
                 }
             } catch (error) {
-                console.error(error);
                 setAuth(null);
             }
         };

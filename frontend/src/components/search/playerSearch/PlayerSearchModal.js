@@ -5,34 +5,34 @@ import { BASE_PATH } from "../../../routes/paths";
 
 export const PlayerSearchModal = ({ searchResults, onClose }) => {
     return (
-        <div className="user-search-results-modal">
+        <div className="player-search-results-modal">
             <div className="modalContent">
                 <h2>Players Search</h2>
                 <ul>
                     {searchResults?.map((player) => (
                         <li key={player.id}>
-                            <div className="modalUserInfo">
-                                <div className="modalUserInfoLeft">
-                                    <div className="modalUserData">
+                            <div className="modalplayerInfo">
+                                <div className="modalplayerInfoLeft">
+                                    <div className="modalplayerData">
                                         {player.profile_img ? (
                                             <img
                                                 src={`${BASE_PATH}${player.profile_img}`}
                                                 alt={player.full_name}
-                                                className="modalUserImage"
+                                                className="modalplayerImage"
                                             />
                                         ) : (
                                             <img
                                                 src="/images/avatar/default.jpg"
                                                 alt={player.full_name}
-                                                className="modalUserImage"
+                                                className="modalplayerImage"
                                             />
                                         )}
                                     </div>
-                                    <span className="modalUserUsername">
+                                    <span className="modalplayerplayername">
                                         {player.full_name}
                                     </span>
                                 </div>
-                                <div className="modalUserInfoRight">
+                                <div className="modalplayerInfoRight">
                                     <Link
                                         to={`${PLAYERS}/${player.id}`}
                                         onClick={onClose}

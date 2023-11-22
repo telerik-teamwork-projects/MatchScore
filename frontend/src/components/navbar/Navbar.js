@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { LogoutConfirmation } from "../logout/LogoutConfirmation";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/authContext";
-import { LOGIN } from "../../routes/routes";
+import { LOGIN, PROFILE } from "../../routes/routes";
 import { Search } from "@mui/icons-material";
 import {
     searchUsers,
@@ -235,7 +235,7 @@ export const Navbar = () => {
                                     )}
                                     <Link
                                         className="navbarRightLink"
-                                        to={`/profile/${user.id}`}
+                                        to={`${PROFILE}/${user?.id}`}
                                     >
                                         Profile
                                     </Link>
@@ -282,18 +282,24 @@ export const Navbar = () => {
             {showUsersSearch && (
                 <UserSearchModal
                     searchResults={usersSearchResults}
+                    setSearchResults={setUsersSearchResults}
+                    searchhWord={searchData.search}
                     onClose={() => setShowUsersSearch(false)}
                 />
             )}
             {showPlayersSearch && (
                 <PlayerSearchModal
                     searchResults={playersSearchResults}
+                    setSearchResults={setPlayersSearchResults}
+                    searchhWord={searchData.search}
                     onClose={() => setShowPlayersSearch(false)}
                 />
             )}
             {showTournamentsSearch && (
                 <TournamentSearchModal
                     searchResults={tournamentsSearchResults}
+                    setSearchResults={setTournamentsSearchResults}
+                    searchhWord={searchData.search}
                     onClose={() => setShowTournamentsSearch(false)}
                 />
             )}

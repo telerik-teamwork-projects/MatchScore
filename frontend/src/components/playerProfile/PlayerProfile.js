@@ -70,13 +70,17 @@ export const PlayerProfile = () => {
                                 </Link>
                             </div>
                         )}
-                        <div className="playerProfileViewUserBtns">
-                            <Link to={`${PROFILE}/${playerProfile?.user_id}`}>
-                                <button className="playerProfileViewUserBtn">
-                                    View User Profile
-                                </button>
-                            </Link>
-                        </div>
+                        {playerProfile?.user_id && (
+                            <div className="playerProfileViewUserBtns">
+                                <Link
+                                    to={`${PROFILE}/${playerProfile?.user_id}`}
+                                >
+                                    <button className="playerProfileViewUserBtn">
+                                        View User Profile
+                                    </button>
+                                </Link>
+                            </div>
+                        )}
                         <div className="playerProfileInfo">
                             <h4 className="playerProfileInfoName">
                                 {playerProfile?.full_name}

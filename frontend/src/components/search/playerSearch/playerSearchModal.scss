@@ -1,4 +1,4 @@
-.user-search-results-modal {
+.player-search-results-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -46,20 +46,20 @@
                 font-size: 18px;
                 margin: 10px 0;
 
-                .modalUserInfo {
+                .modalplayerInfo {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
 
-                    .modalUserInfoLeft {
+                    .modalplayerInfoLeft {
                         display: flex;
                         align-items: center;
                         gap: 10px;
 
-                        .modalUserData {
+                        .modalplayerData {
                             text-decoration: none;
 
-                            .modalUserImage {
+                            .modalplayerImage {
                                 width: 50px;
                                 height: 50px;
                                 border-radius: 50%;
@@ -67,7 +67,7 @@
                         }
                     }
 
-                    .modalUserInfoRight {
+                    .modalplayerInfoRight {
                         a {
                             background: #007bff;
                             text-decoration: none;
@@ -83,7 +83,7 @@
                             transition: background-color 0.3s;
                         }
 
-                        .modalUserView:hover {
+                        .modalplayerView:hover {
                             background: #0056b3;
                         }
                     }

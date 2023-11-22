@@ -24,7 +24,7 @@ def players_search(search: str):
 
 @router.get("/tournaments-search/", response_model=List[tournaments.TournamentWithoutOwner])
 def tournaments_search(search: str):
-    # try:
-    return search_service.get_tournaments(search)
-    # except Exception:
-        # raise InternalServerError("Loading users failed")     
+    try:
+        return search_service.get_tournaments(search)
+    except Exception:
+        raise InternalServerError("Loading users failed")     
