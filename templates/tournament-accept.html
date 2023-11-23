@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{ body.title }}</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .container {
+                width: 100%;
+                background: #efefef;
+                border-radius: 10px;
+                padding: 10px;
+            }
+
+            .content {
+                margin: 0 auto;
+                width: 90%;
+                text-align: center;
+            }
+
+            .header {
+                background-color: rgba(0, 53, 102, 1);
+                padding: 5px 10px;
+                border-radius: 5px;
+                color: white;
+            }
+
+            .card {
+                margin: 30px auto;
+                background: white;
+                width: 60%;
+                border-radius: 10px;
+                padding: 50px;
+                text-align: center;
+            }
+
+            .greeting {
+                margin-bottom: 20px;
+                font-size: 24px;
+            }
+
+            .message {
+                margin-bottom: 30px;
+            }
+
+            .cta-button {
+                display: block;
+                margin: 0 auto;
+                border: none;
+                background-color: rgba(255, 214, 10, 1);
+                color: white;
+                width: 200px;
+                line-height: 24px;
+                padding: 10px;
+                font-size: 18px;
+                border-radius: 10px;
+                cursor: pointer;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="content">
+                <h1 class="header">{{ body.title }}</h1>
+                <div class="card">
+                    <h3 class="greeting">{{ body.name }}</h3>
+                    <p class="message">
+                        Congratulations! We are delighted to inform you that
+                        your application to participate in our upcoming
+                        tournament has been accepted. Welcome to the
+                        competition! As a valued member of our gaming community,
+                        you now have the exciting opportunity to showcase your
+                        skills, connect with fellow players, and experience the
+                        thrill of competitive gaming. Get ready for an
+                        adrenaline-packed tournament filled with exciting
+                        matches and the chance to emerge victorious. We look
+                        forward to seeing you on the battlefield! Best of luck,
+                        and may the games be ever in your favor.
+                    </p>
+                    <a
+                        class="cta-button"
+                        href="{{ body.ctaLink }}"
+                        target="_blank"
+                        >Let's Go</a
+                    >
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

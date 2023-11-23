@@ -1,6 +1,6 @@
 from database.database import read_query, insert_query, update_query
 
-from models import users, players
+from models import users
 from models.enums import Role
 from common.hashing import hash_password
 from common.authorization import create_token
@@ -126,7 +126,7 @@ def get_user_by_email(email):
         return user
 
 
-def get_user_by_id(user_id):
+def get_user_by_id(user_id: int):
     sql = "SELECT * from users WHERE id = ?"
     sql_params = (user_id,)
 

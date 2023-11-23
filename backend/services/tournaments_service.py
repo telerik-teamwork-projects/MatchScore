@@ -14,6 +14,9 @@ from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueRe
     TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse, TournamentDateUpdate, \
     TournamentPlayerUpdate, TournamentPointsResponse
 from mariadb import Error, Cursor
+from services.users_service import get_user_by_id
+from emails.send_emails import send_tournament_accept_email_async
+
 
 
 def _manage_knockout_matches(cursor: Cursor, id: int, data: TournamentKnockoutCreate,
@@ -201,7 +204,7 @@ def get_tournament_requests(tournament_id: int):
     return requests_list
 
 
-def accept_player_to_tournament(request_id: int):
+async def accept_player_to_tournament(request_id: int):
     tournament_request = get_tournament_request_by_id(request_id)
     if not tournament_request:
         raise NotFound("Tournament requests not found")
@@ -236,6 +239,17 @@ def accept_player_to_tournament(request_id: int):
     """
     sql_params = (tournament_id, player_id)
     insert_query(sql, sql_params)
+    if user_id:
+        user_data = get_user_by_id(user_id)
+
+        subject = "Tournament Acceptance Notification"
+        email_to = user_data.email
+        body = {
+            "title": "Congratulations! You've been accepted to the tournament.",
+            "name": user_data.username,
+            "ctaLink": f"http://localhost:3000/tournaments/{tournament_id}"
+        }
+        await send_tournament_accept_email_async(subject, email_to, body)
 
 
 def reject_player_from_tournament(request_id: int):

@@ -5,6 +5,9 @@ from models.users import User
 from common.exceptions import NotFound
 from common.responses import RequestCreate
 from common.utils import save_image
+from services.users_service import get_user_by_id
+from emails.send_emails import send_player_accept_email_async
+
 
 def send_player_request(
         user_id: int,
@@ -49,7 +52,7 @@ def get_all_player_requests():
     return player_requests
 
 
-def accept_player_request(request_id: int):
+async def accept_player_request(request_id: int):
     player_request = get_player_request_by_id(request_id)
 
     if not player_request:
@@ -60,6 +63,17 @@ def accept_player_request(request_id: int):
     player_info = get_player_info_from_request(player_request)
 
     insert_player(player_request.requester_id, **player_info)
+    
+    user_data = get_user_by_id(player_request.requester_id)
+
+    subject = "Tournament Acceptance Notification"
+    email_to = user_data.email
+    body = {
+        "title": "Congratulations! You're now a player.",
+        "name": user_data.username,
+        "ctaLink": f"http://localhost:3000/tournaments/"
+    }
+    await send_player_accept_email_async(subject, email_to, body)
 
 
 def reject_player_request(request_id: int):

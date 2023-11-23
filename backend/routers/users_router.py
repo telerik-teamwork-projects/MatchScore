@@ -3,7 +3,7 @@ from common import exceptions, hashing, authorization, responses
 from models import users
 from services import users_service
 from typing import Union
-from emails.send_emails import send_email_async
+from emails.send_emails import send_welcome_email_async
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ async def user_register(
             "name": user_data.username,
             "ctaLink": "http://localhost:3000/",
         }
-        await send_email_async(subject, email_to, body)
+        await send_welcome_email_async(subject, email_to, body)
 
         return registered_user
     except Exception:

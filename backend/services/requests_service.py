@@ -4,7 +4,8 @@ from models import users, players, requests
 from common.exceptions import NotFound, BadRequest
 
 from services import players_service
-
+from services.users_service import get_user_by_id
+from emails.send_emails import send_director_accept_email_async
 
 def send_director_request(current_user: users.User):
     sql = """
@@ -33,7 +34,7 @@ def get_director_requests():
     return director_requests
 
 
-def accept_director_request(request_id: int):
+async def accept_director_request(request_id: int):
     director_request = get_director_request_by_id(request_id)
     if not director_request:
         raise NotFound("Director request not found")
@@ -41,6 +42,17 @@ def accept_director_request(request_id: int):
     update_director_request_status(request_id, "accepted")
     update_user_to_player(director_request.user_id, "director")
     
+    user_data = get_user_by_id(director_request.user_id)
+
+    subject = "Director Acceptance Notification"
+    email_to = user_data.email
+    body = {
+        "title": "Congratulations! You're now a Director.",
+        "name": user_data.username,
+        "ctaLink": f"http://localhost:3000/"
+    }
+    await send_director_accept_email_async(subject, email_to, body)
+
 
 def reject_director_request(request_id: int):
     player_request = get_director_request_by_id(request_id)

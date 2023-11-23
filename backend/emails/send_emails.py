@@ -33,12 +33,69 @@ conf = ConnectionConfig(
 )
 
 
-async def send_email_async(subject: str, email_to: str, body: dict):
+async def send_welcome_email_async(subject: str, email_to: str, body: dict):
     title = str(body.get("title", ""))
     name = str(body.get("name", ""))
     cta_link = str(body.get("ctaLink", ""))
 
-    template = jinja_env.get_template('email.html')
+    template = jinja_env.get_template('welcome-email.html')
+    rendered_body = template.render(title=title, name=name, cta_link=cta_link, body=body)
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[email_to],
+        body=rendered_body,
+        subtype='html',
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+
+async def send_tournament_accept_email_async(subject: str, email_to: str, body: dict):
+    title = str(body.get("title", ""))
+    name = str(body.get("name", ""))
+    cta_link = str(body.get("ctaLink", ""))
+
+    template = jinja_env.get_template('tournament-accept.html')
+    rendered_body = template.render(title=title, name=name, cta_link=cta_link, body=body)
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[email_to],
+        body=rendered_body,
+        subtype='html',
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+
+async def send_player_accept_email_async(subject: str, email_to: str, body: dict):
+    title = str(body.get("title", ""))
+    name = str(body.get("name", ""))
+    cta_link = str(body.get("ctaLink", ""))
+
+    template = jinja_env.get_template('player-accept.html')
+    rendered_body = template.render(title=title, name=name, cta_link=cta_link, body=body)
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[email_to],
+        body=rendered_body,
+        subtype='html',
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+
+async def send_director_accept_email_async(subject: str, email_to: str, body: dict):
+    title = str(body.get("title", ""))
+    name = str(body.get("name", ""))
+    cta_link = str(body.get("ctaLink", ""))
+
+    template = jinja_env.get_template('director-accept.html')
     rendered_body = template.render(title=title, name=name, cta_link=cta_link, body=body)
 
     message = MessageSchema(

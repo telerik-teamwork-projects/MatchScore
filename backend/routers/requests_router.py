@@ -33,14 +33,14 @@ def get_director_requests(
 
 
 @router.post("/director-requests/accept/{request_id}/")
-def accept_director_request(
+async def accept_director_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
 ):
     if current_user.role.value != "admin":
         raise exceptions.Unauthorized("You are not authorized")
     
-    requests_service.accept_director_request(request_id)
+    await requests_service.accept_director_request(request_id)
     return responses.RequestOK("Director request accepted")
 
 @router.post("/director-requests/reject/{request_id}/")
@@ -118,14 +118,14 @@ def get_player_requests(
 
 
 @router.post("/player-requests/accept/{request_id}/")
-def accept_player_request(
+async def accept_player_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
 ):
     if current_user.role.value != "admin":
         raise exceptions.Unauthorized("You are not authorized")
     
-    players_service.accept_player_request(request_id)
+    await players_service.accept_player_request(request_id)
     return responses.RequestOK("Player request accepted")
 
 
@@ -147,14 +147,12 @@ def send_tournament_request_no_player(
     player_data: players.PlayerCreate, 
     current_user: users.User = Depends(authorization.get_current_user)
 ):
+    player_profile = players_service.get_player_by_user_id(current_user.id)
+    if player_profile:
+        raise exceptions.BadRequest("User already have a player profile")
+
     try:
-        player_profile = players_service.get_player_by_user_id(current_user.id)
-        if player_profile:
-            raise exceptions.BadRequest("User already have a player profile")
-
         players_service.create_tournament_join_request_no_player(tournament_id, player_data, current_user)
-        
-
         return responses.RequestOK("Tournament request sent successfully")
 
     except Exception:
@@ -166,16 +164,15 @@ def send_tournament_request_with_player(
     tournament_id: int, 
     current_user: users.User = Depends(authorization.get_current_user)
 ):
+    player_profile = players_service.get_player_by_user_id(current_user.id)
+    if not player_profile:
+        raise exceptions.BadRequest("User does not have a player profile")
+    
     try:
-        player_profile = players_service.get_player_by_user_id(current_user.id)
-        if not player_profile:
-            raise exceptions.BadRequest("User does not have a player profile")
-        
         players_service.create_tournament_join_request_with_player(
             tournament_id, 
             player_profile
         )
-        
         return responses.RequestOK("Tournament request sent successfully")
 
     except Exception:
@@ -192,14 +189,14 @@ def get_tournament_requests(tournament_id: int):
 
 
 @router.post("/tournament-requests/accept/{request_id}/")
-def accept_tournament_request(
+async def accept_tournament_request(
         request_id: int,
         current_user: users.User = Depends(authorization.get_current_user)
 ):
     if current_user.role.value not in ["admin", "director"]:
         raise exceptions.Unauthorized("You are not authorized")
 
-    tournaments_service.accept_player_to_tournament(request_id)
+    await tournaments_service.accept_player_to_tournament(request_id)
     return responses.RequestOK("Player accepted in tournament")
 
 

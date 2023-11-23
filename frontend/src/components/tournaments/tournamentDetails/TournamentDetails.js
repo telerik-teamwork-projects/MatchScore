@@ -99,7 +99,8 @@ export const TournamentDetails = () => {
                         {tournament?.end_date.slice(0, 10)}
                     </span>
                 </div>
-                {user?.id === tournament?.owner.id && (
+                {(user?.id === tournament?.owner.id ||
+                    user?.role === "admin") && (
                     <div className="requestsBtns">
                         <button
                             className="openRequestsbtn"

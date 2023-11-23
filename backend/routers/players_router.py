@@ -53,13 +53,13 @@ def player_update(
         
     profile_image_path = players_service.handle_profile_image(profile_img) 
 
-    # try:
-    return players_service.update(
-        target_player,
-        full_name,
-        country,
-        sports_club,
-        profile_image_path            
-    )
-    # except Exception:
-        # raise InternalServerError("Updating user failed")
+    try:
+        return players_service.update(
+            target_player,
+            full_name,
+            country,
+            sports_club,
+            profile_image_path            
+        )
+    except Exception:
+        raise InternalServerError("Updating user failed")
