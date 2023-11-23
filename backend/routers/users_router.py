@@ -3,12 +3,13 @@ from common import exceptions, hashing, authorization, responses
 from models import users
 from services import users_service
 from typing import Union
+from emails.send_emails import send_email_async
 
 router = APIRouter()
 
 
 @router.post("/", response_model=users.User)
-def user_register(
+async def user_register(
     user_data: users.UserCreate
 ):
     if users_service.get_user_by_username(user_data.username):
@@ -19,8 +20,20 @@ def user_register(
 
     if not users_service.passwords_match(user_data.password, user_data.password2):
         raise exceptions.BadRequest("Passwords do not match")
+        
     try:
-        return users_service.register(user_data)
+        registered_user = users_service.register(user_data)
+
+        subject = "Welcome to MatchScore"
+        email_to = user_data.email
+        body = {
+            "title": "Welcome to MatchScore",
+            "name": user_data.username,
+            "ctaLink": "http://localhost:3000/",
+        }
+        await send_email_async(subject, email_to, body)
+
+        return registered_user
     except Exception:
         raise exceptions.InternalServerError("Registration failed")
 

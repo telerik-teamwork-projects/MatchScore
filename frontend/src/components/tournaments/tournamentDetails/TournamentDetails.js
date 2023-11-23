@@ -121,7 +121,10 @@ export const TournamentDetails = () => {
             )}
             {tournament?.format === "league" && (
                 <div>
-                    <TournamentLeagueTree tournament={tournament} />
+                    <TournamentLeagueTree
+                        tournamentId={tournament?.id}
+                        token={token}
+                    />
                 </div>
             )}
 
