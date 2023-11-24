@@ -18,7 +18,6 @@ from services.users_service import get_user_by_id
 from emails.send_emails import send_tournament_accept_email_async
 
 
-
 def _manage_knockout_matches(cursor: Cursor, id: int, data: TournamentKnockoutCreate,
                              participants: list[int], rounds: int):
     rand.shuffle(participants)
@@ -578,28 +577,29 @@ def view_points(id: int):
                                     (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS wins
                                     FROM players_matches pm, players p
                                     WHERE p.id = pm.player_id AND pm.points = 2
-                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
                                     GROUP BY pm.player_id) AS w ON pm.player_id = w.player_id
                                 LEFT JOIN
                                     (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS draws
                                     FROM players_matches pm, players p
                                     WHERE p.id = pm.player_id AND pm.points = 1
-                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
                                     GROUP BY pm.player_id) AS d ON pm.player_id = d.player_id
                                 LEFT JOIN
                                     (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS losses
-                                    FROM players_matches pm, players p
-                                    WHERE p.id = pm.player_id AND pm.points = 0
-                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                    FROM players_matches pm, players_matches pm1, players p
+                                    WHERE p.id = pm.player_id AND pm.points = 0 
+                                      AND pm.match_id = pm1.match_id AND pm1.points = 2
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
                                     GROUP BY pm.player_id) AS l ON pm.player_id = l.player_id
                                 LEFT JOIN
                                     (SELECT pm.player_id, p.full_name, SUM(pm1.score) AS score_concede
                                     FROM players_matches pm, players_matches pm1, players p
                                     WHERE p.id = pm.player_id AND pm.match_id = pm1.match_id 
                                        AND pm.player_id != pm1.player_id
-                                       AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
                                     GROUP BY pm.player_id) AS sc ON pm.player_id = sc.player_id
-                             WHERE pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                             WHERE pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
                              GROUP BY pm.player_id ORDER BY points DESC, score_diff''',
                       (id, date, id, date, id, date, id, date, id, date))
 
