@@ -8,7 +8,7 @@ from common.exceptions import InternalServerError, NotFound, BadRequest
 from models import tournaments, requests, players
 from services import players_service
 from database.database import insert_query, read_query, get_connection
-from models.enums import TournamentStatus, TournamentFormat
+from models.enums import TournamentStatus, TournamentFormat, KnockoutRounds
 from models.users import User
 from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
     TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse, TournamentDateUpdate, \
@@ -403,6 +403,11 @@ def view_tournament(tournament: DbTournament):
                                 LEFT JOIN players p ON p.id = pm.player_id
                                 WHERE m.tournaments_id = ?
                                 ORDER BY m.round, m.id''', (tournament.id,))
+
+    if tournament.format == TournamentFormat.KNOCKOUT.value:
+        start = 5 - tournament.rounds
+        if not tournament.third_place:
+            start -= 1
     rounds = []
     for r in range(1, tournament.rounds + 1):
         matches = []
@@ -415,7 +420,11 @@ def view_tournament(tournament: DbTournament):
                         matches.append([*el[1:3], [el[3:]]])
                     else:
                         matches.append([*el[1:3], []])
-        rounds.append([r, matches])
+        if tournament.format == TournamentFormat.LEAGUE.value:
+            rounds.append([f'Round {r}', matches])
+        else:
+            phase = KnockoutRounds.from_int(start + r)
+            rounds.append([phase, matches])
 
     return TournamentRoundResponse.from_query_result(tournament.id, rounds)
 

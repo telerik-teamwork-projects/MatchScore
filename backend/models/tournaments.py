@@ -184,7 +184,7 @@ class TournamentMatch(BaseModel):
 
 
 class TournamentRound(BaseModel):
-    round: int
+    round: str
     matches: List[TournamentMatch]
 
     @classmethod
