@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import List
 
 from common.exceptions import InternalServerError, BadRequest
@@ -187,24 +188,39 @@ def get_by_id(id: int):
         return MatchTournamentResponse.from_query_result(*data[0][:5], scores)
 
 
-def count():
-    data = read_query('SELECT COUNT(*) FROM matches')
+def count(from_dt: datetime | None = None):
+    if from_dt is None:
+        data = read_query('SELECT COUNT(*) FROM matches')
+    else:
+        data = read_query('SELECT COUNT(*) FROM matches WHERE date >= ?', (from_dt,))
     return data[0][0]
 
 
-def all(parameters: tuple):
+def all(parameters: tuple, from_dt: datetime | None = None):
     offset, limit = parameters
-
-    data = read_query('''SELECT m.id, m.date, m.format, t.id, t.title, 
-                                GROUP_CONCAT(CONCAT_WS(
-                                                ',',p.id, p.full_name, pm.score, pm.points) SEPARATOR ';') as scores
-                                FROM matches m 
-                                LEFT JOIN players_matches pm ON pm.match_id = m.id 
-                                LEFT JOIN players p ON p.id = pm.player_id
-                                LEFT JOIN tournaments t ON m.tournaments_id = t.id
-                                GROUP BY m.id, m.date, m.format, t.id, t.title
-                                ORDER BY m.date, m.id, m.tournaments_id
-                                LIMIT ? OFFSET ?''', (limit, offset))
+    if from_dt is None:
+        data = read_query('''SELECT m.id, m.date, m.format, t.id, t.title, 
+                                    GROUP_CONCAT(CONCAT_WS(
+                                                    ',',p.id, p.full_name, pm.score, pm.points) SEPARATOR ';') as scores
+                                    FROM matches m 
+                                    LEFT JOIN players_matches pm ON pm.match_id = m.id 
+                                    LEFT JOIN players p ON p.id = pm.player_id
+                                    LEFT JOIN tournaments t ON m.tournaments_id = t.id
+                                    GROUP BY m.id, m.date, m.format, t.id, t.title
+                                    ORDER BY m.date, m.id, m.tournaments_id
+                                    LIMIT ? OFFSET ?''', (limit, offset))
+    else:
+        data = read_query('''SELECT m.id, m.date, m.format, t.id, t.title, 
+                                    GROUP_CONCAT(CONCAT_WS(
+                                                    ',',p.id, p.full_name, pm.score, pm.points) SEPARATOR ';') as scores
+                                    FROM matches m 
+                                    LEFT JOIN players_matches pm ON pm.match_id = m.id 
+                                    LEFT JOIN players p ON p.id = pm.player_id
+                                    LEFT JOIN tournaments t ON m.tournaments_id = t.id
+                                    WHERE m.date >= ?
+                                    GROUP BY m.id, m.date, m.format, t.id, t.title
+                                    ORDER BY m.date, m.id, m.tournaments_id
+                                    LIMIT ? OFFSET ?''', (from_dt, limit, offset))
 
     return (MatchTournamentResponse.from_query_result(*row[:5],
                                                       [tuple(x.split(',')) for x in row[5].split(';') if row[5] != ''])

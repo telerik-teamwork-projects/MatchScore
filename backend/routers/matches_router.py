@@ -106,11 +106,11 @@ def get_match_by_id(id: int):
 
 
 @router.get('/', response_model=PaginatedMatch)
-def get_matches(page: int = Query(default=1)):
-    total_players = matches_service.count()
-    params, (page, total_pages) = manage_pages(page, total_players, match_limit=True)
+def get_matches(page: int = Query(default=1), from_dt: datetime | None = None):
+    total_matches = matches_service.count(from_dt)
+    params, (page, total_pages) = manage_pages(page, total_matches, match_limit=True)
 
-    result = matches_service.all(params)
+    result = matches_service.all(params, from_dt)
 
-    return PaginatedMatch(players=list(result),
+    return PaginatedMatch(matches=list(result),
                           pagination=Pagination(page=page, items_per_page=params[-1], total_pages=total_pages))

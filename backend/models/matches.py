@@ -124,5 +124,5 @@ class MatchTournamentResponse(BaseModel):
 
 
 class PaginatedMatch(BaseModel):
-    players: list[MatchTournamentResponse]
+    matches: list[MatchTournamentResponse]
     pagination: Pagination

@@ -9,7 +9,7 @@ from models.users import User
 
 UPLOAD_DIR = "media"
 LIMIT = 10
-LIMIT_MATCH = 20
+LIMIT_MATCH = 40
 
 
 def is_admin(user: User):
