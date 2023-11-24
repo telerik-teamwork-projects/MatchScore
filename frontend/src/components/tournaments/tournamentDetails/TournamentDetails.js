@@ -112,6 +112,7 @@ export const TournamentDetails = () => {
                     </div>
                 )}
             </div>
+
             {tournament?.format === "knockout" && (
                 <div>
                     <TournamentKnockoutTree
