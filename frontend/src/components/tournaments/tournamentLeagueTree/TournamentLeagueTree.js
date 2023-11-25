@@ -1,31 +1,62 @@
 import "./tournamentLeagueTree.scss";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { getLeagueStandings } from "../../../services/tournamentService";
+import { getMatchesByTournamentId } from "../../../services/matchesService";
+
 import { Link } from "react-router-dom";
 import { PLAYERS } from "../../../routes/routes";
+import { Pagination } from "../../pagination/Pagination";
+import { Match } from "../../match/Match";
 
 export const TournamentLeagueTree = ({ tournamentId }) => {
     const [standings, setStandings] = useState(null);
+    const [matchesData, setMatchesData] = useState({
+        matches: [],
+        pagination: {
+            page: 1,
+            items_per_page: 10,
+            total_pages: 1,
+        },
+    });
 
     const [showStandings, setShowStandings] = useState(null);
     const [showMatches, setShowMatches] = useState(null);
 
     const openShowStandings = async () => {
         try {
-            const pointsData = await getLeagueStandings(tournamentId);
-            setStandings(pointsData);
+            const standingsData = await getLeagueStandings(tournamentId);
+            setStandings(standingsData);
         } catch (error) {
-            throw error;
+            console.log(error);
         }
         setShowStandings(true);
         setShowMatches(false);
     };
 
-    const openShowMatches = async () => {
+    const openShowMatches = async (page) => {
+        try {
+            const pageNumber = typeof page === "object" ? 1 : page;
+            const matchesData = await getMatchesByTournamentId(
+                pageNumber,
+                tournamentId
+            );
+            setMatchesData(matchesData);
+        } catch (error) {
+            console.log(error);
+        }
         setShowStandings(false);
         setShowMatches(true);
+    };
+
+    useEffect(() => {
+        openShowMatches(matchesData.pagination.page);
+    }, [matchesData.pagination.page]);
+
+    const handlePageChange = (pageNumber) => {
+        openShowMatches(pageNumber);
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     return (
@@ -38,6 +69,25 @@ export const TournamentLeagueTree = ({ tournamentId }) => {
                     Standings
                 </button>
             </div>
+            {showMatches && (
+                <div className="matchesContainer">
+                    {matchesData?.matches ? (
+                        <>
+                            <div className="match">
+                                {matchesData?.matches.map((match) => (
+                                    <Match match={match} key={match.id} />
+                                ))}
+                            </div>
+                            <Pagination
+                                handlePageChange={handlePageChange}
+                                dataToFetch={matchesData}
+                            />
+                        </>
+                    ) : (
+                        <p>Loading matches...</p>
+                    )}
+                </div>
+            )}
 
             {showStandings && (
                 <div className="ptable">

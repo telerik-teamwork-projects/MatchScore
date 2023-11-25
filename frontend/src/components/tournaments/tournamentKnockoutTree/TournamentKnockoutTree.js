@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { getKnockoutRounds } from "../../../services/tournamentService";
 import "./tournamentKnockoutTree.scss";
 import { updateMatchScore } from "../../../services/matchesService";
+import { AuthContext } from "../../../contexts/authContext";
 
 export const TournamentKnockoutTree = ({ tournamentId, token }) => {
+    const { user } = useContext(AuthContext);
+
     const [tournamentData, setTournamentData] = useState([]);
 
     useEffect(() => {
@@ -77,7 +80,7 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
             {tournamentData.map((round, roundIndex) => (
                 <div key={roundIndex} className={`round round-${round.round}`}>
                     <div className="round-details">
-                        Round {round.round}
+                        {round.round}
                         <br />
                     </div>
 
@@ -87,21 +90,28 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                                 {match.participants[0] && (
                                     <>
                                         {match.participants[0].player}
-                                        <input
-                                            type="number"
-                                            value={
-                                                match.participants[0].score ||
-                                                ""
-                                            }
-                                            onChange={(e) =>
-                                                handleScoreChange(
-                                                    e,
-                                                    roundIndex,
-                                                    matchIndex,
-                                                    0
-                                                )
-                                            }
-                                        />
+                                        {user?.role === "admin" ||
+                                        user?.role === "director" ? (
+                                            <input
+                                                type="number"
+                                                value={
+                                                    match.participants[0]
+                                                        .score || ""
+                                                }
+                                                onChange={(e) =>
+                                                    handleScoreChange(
+                                                        e,
+                                                        roundIndex,
+                                                        matchIndex,
+                                                        0
+                                                    )
+                                                }
+                                            />
+                                        ) : (
+                                            <span>
+                                                {match.participants[0].score}
+                                            </span>
+                                        )}
                                     </>
                                 )}
                             </li>
@@ -109,36 +119,46 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                                 {match.participants[1] && (
                                     <>
                                         {match.participants[1].player}
-                                        <input
-                                            type="number"
-                                            value={
-                                                match.participants[1].score ||
-                                                ""
-                                            }
-                                            onChange={(e) =>
-                                                handleScoreChange(
-                                                    e,
-                                                    roundIndex,
-                                                    matchIndex,
-                                                    1
-                                                )
-                                            }
-                                        />
+                                        {user?.role === "admin" ||
+                                        user?.role === "director" ? (
+                                            <input
+                                                type="number"
+                                                value={
+                                                    match.participants[1]
+                                                        .score || ""
+                                                }
+                                                onChange={(e) =>
+                                                    handleScoreChange(
+                                                        e,
+                                                        roundIndex,
+                                                        matchIndex,
+                                                        0
+                                                    )
+                                                }
+                                            />
+                                        ) : (
+                                            <span>
+                                                {match.participants[1].score}
+                                            </span>
+                                        )}
                                     </>
                                 )}
                             </li>
-                            <button
-                                onClick={() =>
-                                    handleUpdateScore(
-                                        roundIndex,
-                                        matchIndex,
-                                        match.participants[0],
-                                        match.participants[1]
-                                    )
-                                }
-                            >
-                                Update Score
-                            </button>
+                            {user?.role === "admin" ||
+                                (user?.role === "director" && (
+                                    <button
+                                        onClick={() =>
+                                            handleUpdateScore(
+                                                roundIndex,
+                                                matchIndex,
+                                                match.participants[0],
+                                                match.participants[1]
+                                            )
+                                        }
+                                    >
+                                        Update Score
+                                    </button>
+                                ))}
                         </ul>
                     ))}
                 </div>
