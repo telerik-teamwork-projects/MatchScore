@@ -66,7 +66,7 @@ async def accept_player_request(request_id: int):
     
     user_data = get_user_by_id(player_request.requester_id)
 
-    subject = "Tournament Acceptance Notification"
+    subject = "Player Acceptance Notification"
     email_to = user_data.email
     body = {
         "title": "Congratulations! You're now a player.",

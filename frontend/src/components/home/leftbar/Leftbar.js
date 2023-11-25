@@ -26,7 +26,7 @@ export const Leftbar = () => {
 
     useEffect(() => {
         fetchData(tournamentsData.pagination.page);
-    }, []);
+    }, [tournamentsData.pagination.page]);
 
     const handlePageChange = (pageNumber) => {
         fetchData(pageNumber);

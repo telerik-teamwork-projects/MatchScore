@@ -1,91 +1,79 @@
-.match {
-    width: 100%;
+.matchBox {
+    width: calc(50% - 50px);
     border-radius: 10px;
-    -webkit-box-shadow: 0 0 16px -8px rgba(0, 0, 0, 0.68);
-    box-shadow: 0 0 16px -8px rgba(0, 0, 0, 0.68);
-    margin: 30px 0;
-}
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.68);
+    margin: 15px 7.5px;
+    padding: 15px;
 
-.matchWrapper {
-    padding: 20px;
-    background-color: #f1f1f1;
-}
+    .matchHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
 
-.matchContainer {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
+        .matchHeaderLeft {
+            span {
+                color: rgb(207, 29, 29);
+                text-transform: uppercase;
+                font-size: 12px;
+                font-weight: 700;
+            }
+        }
+    }
 
-    .matchBox {
-        width: calc(50% - 15px);
-        border-radius: 10px;
-        box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.68);
-        margin: 15px 0;
-        padding: 15px;
+    .matchMain {
+        display: flex;
+        flex-direction: column;
 
-        .matchHeader {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            .matchHeaderLeft {
-                span {
-                    color: rgb(207, 29, 29);
-                    text-transform: uppercase;
-                    font-size: 12px;
-                    font-weight: 700;
-                }
+        .matchTitle {
+            font-size: 20px;
+            &:hover {
+                color: #7e7c7c;
             }
         }
 
-        .matchMain {
+        .matchTeam {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
 
-            .matchTeam {
+            .teamInfo {
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
+                padding: 5px;
 
-                .teamInfo {
-                    display: flex;
-                    align-items: center;
-                    padding: 5px;
-
-                    span {
-                        font-size: 18px;
-                        font-weight: bold;
-                    }
-
-                    img {
-                        height: 40px;
-                        width: 45px;
-                        margin-right: 10px;
-                    }
-                }
-                .teamScore {
+                span {
                     font-size: 18px;
                     font-weight: bold;
                 }
+
+                img {
+                    height: 40px;
+                    width: 45px;
+                    margin-right: 10px;
+                }
+            }
+            .teamScore {
+                font-size: 18px;
+                font-weight: bold;
             }
         }
+    }
 
-        .matchBottom {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 12px 0 4px 0;
-            background-color: #f1f1f1;
+    .matchBottom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 12px 0 4px 0;
+        background-color: #f1f1f1;
 
-            .actionButton {
-                background-color: #1775ee;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-            }
+        .actionButton {
+            background-color: #1775ee;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
         }
     }
 }

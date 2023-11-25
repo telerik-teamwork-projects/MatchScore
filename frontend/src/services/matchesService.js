@@ -19,3 +19,14 @@ export const updateMatchScore = async (matchId, matchScores, token) => {
         throw error;
     }
 };
+
+export const getMatches = async (page, currentDate) => {
+    try {
+        const response = await axios.get(`${BASE_PATH}/matches/`, {
+            params: { page: page, from_dt: currentDate },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

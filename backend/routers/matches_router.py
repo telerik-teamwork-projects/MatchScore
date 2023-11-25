@@ -107,6 +107,8 @@ def get_match_by_id(id: int):
 
 @router.get('/', response_model=PaginatedMatch)
 def get_matches(page: int = Query(default=1), from_dt: datetime | None = None):
+    print(from_dt)
+
     total_matches = matches_service.count(from_dt)
     params, (page, total_pages) = manage_pages(page, total_matches, match_limit=True)
 

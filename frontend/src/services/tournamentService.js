@@ -51,3 +51,14 @@ export const getKnockoutRounds = async (tournamentId) => {
         throw error;
     }
 };
+
+export const getLeagueStandings = async (tournamentId) => {
+    try {
+        const response = await axios.get(
+            `${BASE_PATH}/tournaments/${tournamentId}/points`
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
