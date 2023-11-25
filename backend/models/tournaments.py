@@ -339,3 +339,18 @@ class TournamentPointsResponse(BaseModel):
         return cls(
             id=id,
             players=players)
+
+
+class TournamentMatches(BaseModel):
+    id: int
+    matches: List[TournamentMatch]
+
+    @classmethod
+    def from_query_result(cls, id, matches):
+        if matches == '' or matches is None:
+            matches = []
+        else:
+            matches = list(TournamentMatch.from_query_result(*row) for row in matches)
+        return cls(
+            id=id,
+            matches=matches)

@@ -5,14 +5,12 @@ from datetime import timedelta, datetime
 from typing import List, Tuple
 
 from common.exceptions import InternalServerError, NotFound, BadRequest
-from models import tournaments, requests, players
+from models import requests, players
 from services import players_service
 from database.database import insert_query, read_query, get_connection
 from models.enums import TournamentStatus, TournamentFormat, KnockoutRounds
 from models.users import User
-from models.tournaments import Owner, TournamentLeagueCreate, TournamentLeagueResponse, DbTournament, \
-    TournamentRoundResponse, TournamentKnockoutCreate, TournamentKnockoutResponse, TournamentDateUpdate, \
-    TournamentPlayerUpdate, TournamentPointsResponse
+import models.tournaments as t
 from mariadb import Error, Cursor
 from services.users_service import get_user_by_id
 from emails.send_emails import send_tournament_accept_email_async
@@ -60,7 +58,7 @@ def _manage_knockout_matches(cursor: Cursor, id: int, start_date: datetime, matc
                                (matches[r + 1][i - 1], matches[r][m]))
 
 
-def _manage_league_matches(cursor: Cursor, id: int, data: TournamentLeagueCreate,
+def _manage_league_matches(cursor: Cursor, id: int, data: t.TournamentLeagueCreate,
                            participants: list[int], rounds: int):
     rand.shuffle(participants)
     # matches per round
@@ -84,50 +82,6 @@ def _manage_league_matches(cursor: Cursor, id: int, data: TournamentLeagueCreate
         date = date + timedelta(days=1)
 
 
-def create(
-        tournament_data: tournaments.TournamentCreate,
-        current_user: User
-):
-    sql = """
-        INSERT INTO tournaments (format, title, description, match_format, rounds, third_place, status, location, 
-        start_date, end_date, owner_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-    """
-
-    sql_params = (
-        tournament_data.format.value,
-        tournament_data.title,
-        tournament_data.description,
-        tournament_data.match_format.value,
-        tournament_data.rounds,
-        tournament_data.third_place,
-        tournament_data.status.value,
-        tournament_data.location,
-        tournament_data.start_date,
-        tournament_data.end_date,
-        current_user.id
-    )
-
-    created_tournament_id = insert_query(sql, sql_params)
-    owner = get_owner_data_by_id(current_user.id)
-    response_data = tournaments.Tournament(
-        id=created_tournament_id,
-        format=tournament_data.format,
-        title=tournament_data.title,
-        description=tournament_data.description,
-        match_format=tournament_data.match_format,
-        rounds=tournament_data.rounds,
-        third_place=tournament_data.third_place,
-        status=tournament_data.status,
-        location=tournament_data.location,
-        start_date=tournament_data.start_date,
-        end_date=tournament_data.end_date,
-        owner=owner
-    )
-
-    return response_data
-
-
 def get_all(params: Tuple):
     offset, limit = params
     sql = """
@@ -143,8 +97,8 @@ def get_all(params: Tuple):
     tournaments_data = []
     for row in result:
         tournament_data = row[0:11]
-        owner = Owner.from_query_result(*row[11:])
-        tournament = tournaments.Tournament.from_query_result(
+        owner = t.Owner.from_query_result(*row[11:])
+        tournament = t.Tournament.from_query_result(
             *tournament_data,
             owner=owner
         )
@@ -167,8 +121,8 @@ def get_one(tournament_id):
 
     if result:
         result = result[0]
-        owner = Owner(id=result[11], username=result[12], profile_img=result[13])
-        tournament = tournaments.Tournament(
+        owner = t.Owner(id=result[11], username=result[12], profile_img=result[13])
+        tournament = t.Tournament(
             id=result[0],
             format=result[1],
             title=result[2],
@@ -268,7 +222,7 @@ def get_owner_data_by_id(owner_id):
 
     result = read_query(sql, sql_params)
     if result:
-        user = Owner(
+        user = t.Owner(
             id=owner_id,
             username=result[0][0],
             profile_img=result[0][1]
@@ -278,7 +232,7 @@ def get_owner_data_by_id(owner_id):
 
 def find(id: int):
     data = read_query('SELECT * FROM tournaments WHERE id = ?', (id,))
-    return next((DbTournament.from_query_result(*row) for row in data), None)
+    return next((t.DbTournament.from_query_result(*row) for row in data), None)
 
 
 def get_tournament_by_id(tournament_id):
@@ -289,7 +243,7 @@ def get_tournament_by_id(tournament_id):
 
     if result:
         result = result[0]
-        tournament = tournaments.TournamentWithoutOwner(
+        tournament = t.TournamentWithoutOwner(
             id=result[0],
             format=result[1],
             title=result[2],
@@ -313,7 +267,7 @@ def is_user_accepted(tournament_id: int, user_id: int):
     return len(read_query(sql, sql_params)) > 0
 
 
-def create_league(data: TournamentLeagueCreate, user: User):
+def create_league(data: t.TournamentLeagueCreate, user: User):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -343,16 +297,17 @@ def create_league(data: TournamentLeagueCreate, user: User):
 
             _manage_league_matches(cursor, tournament_id, data, participants, rounds)
             conn.commit()
-            return TournamentLeagueResponse.from_query_result(tournament_id, TournamentFormat.LEAGUE.value, data.title,
-                                                              data.description, data.match_format.value, rounds,
-                                                              data.location, data.start_date, end_date, owner)
+            return t.TournamentLeagueResponse.from_query_result(tournament_id, TournamentFormat.LEAGUE.value,
+                                                                data.title,
+                                                                data.description, data.match_format.value, rounds,
+                                                                data.location, data.start_date, end_date, owner)
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)
             raise InternalServerError("Something went wrong")
 
 
-def create_knockout(data: TournamentKnockoutCreate, user: User):
+def create_knockout(data: t.TournamentKnockoutCreate, user: User):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -393,17 +348,17 @@ def create_knockout(data: TournamentKnockoutCreate, user: User):
                 _manage_knockout_matches(cursor, tournament_id, data.start_date, data.match_format.value,
                                          data.third_place, participants, rounds)
             conn.commit()
-            return TournamentKnockoutResponse.from_query_result(tournament_id, TournamentFormat.KNOCKOUT.value,
-                                                                data.title, data.description, data.match_format.value,
-                                                                rounds, data.third_place, data.location,
-                                                                data.start_date, end_date, owner)
+            return t.TournamentKnockoutResponse.from_query_result(tournament_id, TournamentFormat.KNOCKOUT.value,
+                                                                  data.title, data.description, data.match_format.value,
+                                                                  rounds, data.third_place, data.location,
+                                                                  data.start_date, end_date, owner)
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)
             raise InternalServerError("Something went wrong")
 
 
-def view_tournament(tournament: DbTournament):
+def view_tournament(tournament: t.DbTournament):
     data = read_query('''SELECT m.round, m.id, m.next_match, p.id, p.full_name, pm.score, pm.points
                                 FROM matches m 
                                 LEFT JOIN players_matches pm ON pm.match_id = m.id 
@@ -433,7 +388,7 @@ def view_tournament(tournament: DbTournament):
             phase = KnockoutRounds.from_int(start + r)
             rounds.append([phase, matches])
 
-    return TournamentRoundResponse.from_query_result(tournament.id, rounds)
+    return t.TournamentRoundResponse.from_query_result(tournament.id, rounds)
 
 
 def update_tournament_request_status(request_id: int, status: str):
@@ -469,7 +424,7 @@ def get_tournament_request_by_id(request_id: int):
         )
 
 
-def update_date(tournament: DbTournament, tournament_date: TournamentDateUpdate):
+def update_date(tournament: t.DbTournament, tournament_date: t.TournamentDateUpdate):
     end_date = tournament_date.date + timedelta(days=tournament.rounds - 1)
     with get_connection() as conn:
         cursor = conn.cursor()
@@ -493,7 +448,7 @@ def update_date(tournament: DbTournament, tournament_date: TournamentDateUpdate)
             raise InternalServerError("Something went wrong")
 
 
-def check_participants(id: int, players: List[TournamentPlayerUpdate], prev=False):
+def check_participants(id: int, players: List[t.TournamentPlayerUpdate], prev=False):
     participants = []
     for item in players:
         if prev:
@@ -512,7 +467,7 @@ def check_participants(id: int, players: List[TournamentPlayerUpdate], prev=Fals
         return participants
 
 
-def update_players(tournament: DbTournament, players_update: List[TournamentPlayerUpdate]):
+def update_players(tournament: t.DbTournament, players_update: List[t.TournamentPlayerUpdate]):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -619,7 +574,7 @@ def view_points(id: int):
                              GROUP BY pm.player_id ORDER BY points DESC, score_diff''',
                       (id, date, id, date, id, date, id, date, id, date))
 
-    return TournamentPointsResponse.from_query_result(id, data)
+    return t.TournamentPointsResponse.from_query_result(id, data)
 
 
 def find_participants(id: int):
@@ -627,7 +582,7 @@ def find_participants(id: int):
     return [i[0] for i in data]
 
 
-def start_knockout(tournament: DbTournament, participants: list[int], user: User):
+def start_knockout(tournament: t.DbTournament, participants: list[int], user: User):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -642,11 +597,33 @@ def start_knockout(tournament: DbTournament, participants: list[int], user: User
             _manage_knockout_matches(cursor, tournament.id, tournament.start_date, tournament.match_format,
                                      tournament.third_place, participants, rounds)
             conn.commit()
-            return TournamentKnockoutResponse.from_query_result(tournament.id, tournament.format, tournament.title,
-                                                                tournament.description, tournament.match_format, rounds,
-                                                                tournament.third_place, tournament.location,
-                                                                tournament.start_date, end_date, owner)
+            return t.TournamentKnockoutResponse.from_query_result(tournament.id, tournament.format, tournament.title,
+                                                                  tournament.description, tournament.match_format,
+                                                                  rounds,
+                                                                  tournament.third_place, tournament.location,
+                                                                  tournament.start_date, end_date, owner)
         except Error as err:
             conn.rollback()
             logging.exception(err.msg)
             raise InternalServerError("Something went wrong")
+
+
+def view_matches(id: int):
+    data = read_query('''SELECT m.id, m.next_match, p.id, p.full_name, pm.score, pm.points
+                                    FROM matches m 
+                                    LEFT JOIN players_matches pm ON pm.match_id = m.id 
+                                    LEFT JOIN players p ON p.id = pm.player_id
+                                    WHERE m.tournaments_id = ?
+                                    ORDER BY m.round, m.id''', (id,))
+
+    matches = []
+    for el in data:
+        if matches and matches[-1][0] == el[0]:
+            matches[-1][2].append(el[2:])
+        else:
+            if el[2]:
+                matches.append([*el[:2], [el[2:]]])
+            else:
+                matches.append([*el[:2], []])
+
+    return t.TournamentMatches.from_query_result(id, matches)
