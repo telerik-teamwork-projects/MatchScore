@@ -223,8 +223,8 @@ class DbTournament(BaseModel):
     third_place: bool
     status: str
     location: str | None = None
-    start_date: datetime
-    end_date: datetime
+    start_date: datetime | None = None
+    end_date: datetime | None = None
     owner_id: int
 
     @classmethod
@@ -249,8 +249,9 @@ class TournamentKnockoutCreate(BaseModel):
     description: str | None = None
     match_format: MatchFormat = MatchFormat.TIME
     third_place: bool
+    status: TournamentStatus = TournamentStatus.OPEN
     location: str | None = None
-    start_date: datetime
+    start_date: datetime | None = None
     participants: List[PlayerProfile]
 
 
@@ -263,8 +264,8 @@ class TournamentKnockoutResponse(BaseModel):
     rounds: int
     third_place: bool
     location: str | None = None
-    start_date: datetime
-    end_date: datetime
+    start_date: datetime | None = None
+    end_date: datetime | None = None
     owner: Owner
 
     @classmethod
@@ -301,6 +302,7 @@ class TournamentPagination(BaseModel):
 
 class TournamentScore(BaseModel):
     score: int
+
 
 class TournamentPlayerPoints(BaseModel):
     player_id: int

@@ -18,7 +18,7 @@ from services.users_service import get_user_by_id
 from emails.send_emails import send_tournament_accept_email_async
 
 
-def _manage_knockout_matches(cursor: Cursor, id: int, data: TournamentKnockoutCreate,
+def _manage_knockout_matches(cursor: Cursor, id: int, start_date: datetime, match_format: str, third_place: bool,
                              participants: list[int], rounds: int):
     rand.shuffle(participants)
     # table of participants
@@ -27,12 +27,12 @@ def _manage_knockout_matches(cursor: Cursor, id: int, data: TournamentKnockoutCr
     # matches per round
     m_count = int(len(participants) / 2)
     # generate matches along with the rounds they belong to, link the participants for the first round
-    date = data.start_date
+    date = start_date
     for r in range(rounds):
         matches.append([])
         for m in range(m_count):
             cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
-                           (date, data.match_format.value, id, r + 1))
+                           (date, match_format, id, r + 1))
             match_id = cursor.lastrowid
             matches[r].append(match_id)
             if r == 0:
@@ -41,22 +41,22 @@ def _manage_knockout_matches(cursor: Cursor, id: int, data: TournamentKnockoutCr
                 cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
                                (t.pop(), match_id))
         m_count = int(m_count / 2)
-        if m_count < 1 and data.third_place:
+        if m_count < 1 and third_place:
             m_count = 1
         date = date + timedelta(days=1)
     # update matches with link to their next match
     m_next = rounds
-    if data.third_place:
+    if third_place:
         m_next -= 1
     for r in range(m_next - 1):
         i = 0
         for m in range(len(matches[r])):
             if m == 0 or m % 2 == 0:
-                cursor.execute('''UPDATE matches SET next_match = ? WHERE id = ?''',
+                cursor.execute('UPDATE matches SET next_match = ? WHERE id = ?',
                                (matches[r + 1][i], matches[r][m]))
                 i += 1
             else:
-                cursor.execute('''UPDATE matches SET next_match = ? WHERE id = ?''',
+                cursor.execute('UPDATE matches SET next_match = ? WHERE id = ?',
                                (matches[r + 1][i - 1], matches[r][m]))
 
 
@@ -356,18 +356,23 @@ def create_knockout(data: TournamentKnockoutCreate, user: User):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
-            p_count = len(data.participants)
-            rounds = int(math.log(p_count, 2))
-            if data.third_place:
-                rounds += 1
-            end_date = data.start_date + timedelta(days=rounds - 1)
+            if data.status == TournamentStatus.OPEN:
+                rounds = 0
+                end_date = None
+            else:
+                rounds = int(math.log(len(data.participants), 2))
+                if data.third_place:
+                    rounds += 1
+                end_date = data.start_date + timedelta(days=rounds - 1)
+
             cursor.execute('''INSERT INTO tournaments (format, title, description, match_format, rounds, third_place, 
                                                         status, location, start_date, end_date, owner_id)
                                                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)''',
                            (TournamentFormat.KNOCKOUT.value, data.title, data.description, data.match_format.value,
-                            rounds, data.third_place, TournamentStatus.CLOSED.value, data.location, data.start_date,
+                            rounds, data.third_place, data.status.value, data.location, data.start_date,
                             end_date, user.id))
             tournament_id = cursor.lastrowid
+
             cursor.execute('SELECT id, username, profile_img FROM users WHERE id = ?', (user.id,))
             owner = cursor.fetchone()
 
@@ -384,7 +389,9 @@ def create_knockout(data: TournamentKnockoutCreate, user: User):
                                (player_id, tournament_id))
                 participants.append(player_id)
 
-            _manage_knockout_matches(cursor, tournament_id, data, participants, rounds)
+            if data.status == TournamentStatus.CLOSED:
+                _manage_knockout_matches(cursor, tournament_id, data.start_date, data.match_format.value,
+                                         data.third_place, participants, rounds)
             conn.commit()
             return TournamentKnockoutResponse.from_query_result(tournament_id, TournamentFormat.KNOCKOUT.value,
                                                                 data.title, data.description, data.match_format.value,
@@ -486,7 +493,7 @@ def update_date(tournament: DbTournament, tournament_date: TournamentDateUpdate)
             raise InternalServerError("Something went wrong")
 
 
-def find_participants(id: int, players: List[TournamentPlayerUpdate], prev=False):
+def check_participants(id: int, players: List[TournamentPlayerUpdate], prev=False):
     participants = []
     for item in players:
         if prev:
@@ -613,3 +620,33 @@ def view_points(id: int):
                       (id, date, id, date, id, date, id, date, id, date))
 
     return TournamentPointsResponse.from_query_result(id, data)
+
+
+def find_participants(id: int):
+    data = read_query('SELECT player_id FROM players_tournaments WHERE tournament_id = ?', (id,))
+    return [i[0] for i in data]
+
+
+def start_knockout(tournament: DbTournament, participants: list[int], user: User):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        try:
+            rounds = int(math.log(len(participants), 2))
+            if tournament.third_place:
+                rounds += 1
+            end_date = tournament.start_date + timedelta(days=rounds - 1)
+            cursor.execute('UPDATE tournaments SET start_date = ?, end_date = ?, status = ?, rounds = ? WHERE id = ?',
+                           (tournament.start_date, end_date, tournament.status, rounds, tournament.id))
+            cursor.execute('SELECT id, username, profile_img FROM users WHERE id = ?', (user.id,))
+            owner = cursor.fetchone()
+            _manage_knockout_matches(cursor, tournament.id, tournament.start_date, tournament.match_format,
+                                     tournament.third_place, participants, rounds)
+            conn.commit()
+            return TournamentKnockoutResponse.from_query_result(tournament.id, tournament.format, tournament.title,
+                                                                tournament.description, tournament.match_format, rounds,
+                                                                tournament.third_place, tournament.location,
+                                                                tournament.start_date, end_date, owner)
+        except Error as err:
+            conn.rollback()
+            logging.exception(err.msg)
+            raise InternalServerError("Something went wrong")

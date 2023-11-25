@@ -5,7 +5,7 @@ from typing import List
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound, Forbidden
 from common.utils import is_admin, is_director, is_power_of_two, manage_pages
-from models.enums import TournamentFormat
+from models.enums import TournamentFormat, TournamentStatus
 from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
     TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate, DbTournament, TournamentDateUpdate, \
     TournamentPlayerUpdate, TournamentPagination, TournamentPointsResponse
@@ -18,14 +18,14 @@ MAX_PARTICIPANTS = 16
 MIN_PARTICIPANTS = 4
 
 
-@router.post('/', response_model=Tournament, status_code=201)
-def create_tournament(tournament_data: TournamentCreate, current_user: User = Depends(get_current_user)):
-    if not is_admin(current_user) and not is_director(current_user):
-        raise Unauthorized("You are not authorized")
-    try:
-        return tournaments_service.create(tournament_data, current_user)
-    except Exception:
-        raise InternalServerError("Creating tournament failed")
+# @router.post('/', response_model=Tournament, status_code=201)
+# def create_tournament(tournament_data: TournamentCreate, current_user: User = Depends(get_current_user)):
+#     if not is_admin(current_user) and not is_director(current_user):
+#         raise Unauthorized("You are not authorized")
+#     try:
+#         return tournaments_service.create(tournament_data, current_user)
+#     except Exception:
+#         raise InternalServerError("Creating tournament failed")
 
 
 @router.get("/", response_model=TournamentPagination)
@@ -36,7 +36,8 @@ def get_tournaments(page: int = 1):
         result = tournaments_service.get_all(params)
 
         return TournamentPagination(tournaments=list(result),
-                                    pagination=Pagination(page=page, items_per_page=params[-1], total_pages=total_pages))
+                                    pagination=Pagination(page=page, items_per_page=params[-1],
+                                                          total_pages=total_pages))
     except Exception:
         raise InternalServerError("Retrieving tournaments failed")
 
@@ -73,6 +74,11 @@ def create_knockout_tournament(tournament: TournamentKnockoutCreate, current_use
     p_count = len({p.full_name for p in tournament.participants})
     if p_count != len(tournament.participants):
         raise BadRequest("Participants should be unique!")
+
+    # create tournament open for player join requests
+    if tournament.status == TournamentStatus.OPEN and len(tournament.participants) < MAX_PARTICIPANTS:
+        return tournaments_service.create_knockout(tournament, current_user)
+
     if p_count > MAX_PARTICIPANTS or p_count < MIN_PARTICIPANTS:
         raise BadRequest(f'Participants must be between {MIN_PARTICIPANTS} and {MAX_PARTICIPANTS}!')
     if not is_power_of_two(p_count):
@@ -80,6 +86,7 @@ def create_knockout_tournament(tournament: TournamentKnockoutCreate, current_use
     if tournament.start_date <= datetime.utcnow():
         raise BadRequest("Tournament start date should be in the future!")
 
+    tournament.status = TournamentStatus.CLOSED
     return tournaments_service.create_knockout(tournament, current_user)
 
 
@@ -114,6 +121,8 @@ def update_date(id: int, tournament_date: TournamentDateUpdate, current_user: Us
         raise BadRequest('The tournament has already started!')
     if tournament_date.date < datetime.utcnow():
         raise BadRequest('The new tournament start date should be in the future!')
+    if tournament.status == TournamentStatus.OPEN.value:
+        raise BadRequest(f'Tournament status should be {str(TournamentStatus.CLOSED)}')
 
     if tournament.start_date == tournament_date.date:
         return tournament
@@ -133,11 +142,36 @@ def update_players(id: int, players: List[TournamentPlayerUpdate], current_user:
     p_prev_count = len({p.player_prev for p in players})
     if (p_count != len(players)) or (p_prev_count != len(players)):
         raise BadRequest("Participants should be unique!")
-    participants = tournaments_service.find_participants(id, players)
+    participants = tournaments_service.check_participants(id, players)
     if participants is not None:
         raise BadRequest('The participants provided already play in this tournament!')
-    participants_prev = tournaments_service.find_participants(id, players, prev=True)
+    participants_prev = tournaments_service.check_participants(id, players, prev=True)
     if participants_prev is None:
         raise BadRequest('The participants to be updated do not play in this match!')
+    if tournament.status == TournamentStatus.OPEN.value:
+        raise BadRequest(f'Tournament status should be {str(TournamentStatus.CLOSED)}')
 
     return tournaments_service.update_players(tournament, participants_prev)
+
+
+@router.put('/{id}/knockout_start', response_model=TournamentKnockoutResponse)
+def start_knockout_tournament(id: int, tournament_date: TournamentDateUpdate, user: User = Depends(get_current_user)):
+    if not is_admin(user) and not is_director(user):
+        raise Unauthorized("User has insufficient privileges")
+    tournament = tournaments_service.find(id)
+    if tournament is None:
+        raise NotFound(f'Tournament {id} does not exist!')
+    if tournament.status == TournamentStatus.CLOSED.value:
+        raise BadRequest('The tournament has already started!')
+    participants = tournaments_service.find_participants(id)
+    p_count = len(participants)
+    if p_count > MAX_PARTICIPANTS or p_count < MIN_PARTICIPANTS:
+        raise BadRequest(f'Participants must be between {MIN_PARTICIPANTS} and {MAX_PARTICIPANTS}!')
+    if not is_power_of_two(p_count):
+        raise BadRequest("Number of participants for knockout tournament is not correct!")
+    if tournament_date.date <= datetime.utcnow():
+        raise BadRequest("Tournament start date should be in the future!")
+
+    tournament.status = TournamentStatus.CLOSED.value
+    tournament.start_date = tournament_date.date
+    return tournaments_service.start_knockout(tournament, participants, user)
