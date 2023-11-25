@@ -30,3 +30,17 @@ export const getMatches = async (page, currentDate) => {
         throw error;
     }
 };
+
+export const getMatchesByTournamentId = async (page, tournamentId) => {
+    try {
+        const response = await axios.get(
+            `${BASE_PATH}/matches/tournaments/${tournamentId}`,
+            {
+                params: { page: page },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

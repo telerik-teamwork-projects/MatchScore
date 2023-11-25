@@ -196,6 +196,10 @@ def count(from_dt: datetime | None = None):
     return data[0][0]
 
 
+def count_by_tournament(tournament_id: int):
+    data = read_query('SELECT COUNT(*) FROM matches WHERE tournaments_id = ?', (tournament_id,))
+    return data[0][0]
+
 def all(parameters: tuple, from_dt: datetime | None = None):
     offset, limit = parameters
     if from_dt is None:
@@ -226,6 +230,24 @@ def all(parameters: tuple, from_dt: datetime | None = None):
                                                       [tuple(x.split(',')) for x in row[5].split(';') if row[5] != ''])
             for row in data)
 
+
+def get_by_tournament(params: tuple, tournament_id: int):
+    offset, limit = params
+    data = read_query('''SELECT m.id, m.date, m.format, t.id, t.title, 
+                                GROUP_CONCAT(CONCAT_WS(
+                                                ',',p.id, p.full_name, pm.score, pm.points) SEPARATOR ';') as scores
+                                FROM matches m 
+                                LEFT JOIN players_matches pm ON pm.match_id = m.id 
+                                LEFT JOIN players p ON p.id = pm.player_id
+                                LEFT JOIN tournaments t ON m.tournaments_id = t.id
+                                WHERE m.tournaments_id = ?
+                                GROUP BY m.id, m.date, m.format, t.id, t.title
+                                ORDER BY m.date, m.id, m.tournaments_id
+                                LIMIT ? OFFSET ?''', (tournament_id, limit, offset))
+
+    return (MatchTournamentResponse.from_query_result(*row[:5],
+                                                      [tuple(x.split(',')) for x in row[5].split(';') if row[5] != ''])
+            for row in data)
 
 def manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournament: DbTournament, cursor: Cursor):
     winner_id = score_updated[0][0]
