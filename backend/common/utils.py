@@ -10,7 +10,7 @@ from models.users import User
 UPLOAD_DIR = "media"
 LIMIT = 10
 LIMIT_MATCH = 40
-
+LIMIT_MATCH_TOURNAMENT = 20
 
 def is_admin(user: User):
     if user.role == Role.ADMIN:
@@ -51,9 +51,11 @@ def is_power_of_two(n):
     return 2 ** int(math.log(n, 2)) == n
 
 
-def manage_pages(page: int, items: int, match_limit=False):
+def manage_pages(page: int, items: int, match_limit=False, match_tournament_limit=False):
     if match_limit:
         limit = LIMIT_MATCH
+    elif match_tournament_limit:
+        limit = LIMIT_MATCH_TOURNAMENT
     else:
         limit = LIMIT
     total_pages = (items + limit - 1) // limit
