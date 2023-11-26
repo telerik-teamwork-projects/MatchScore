@@ -111,7 +111,25 @@
 
         .requestsBtns {
             margin-top: 10px;
-            .openRequestsbtn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            .openRequestsBtn {
+                background: #007bff;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                padding: 6px 12px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+
+                &:hover {
+                    background: #0056b3;
+                }
+            }
+            .startTournamentBtn {
                 background: #007bff;
                 color: #fff;
                 border: none;

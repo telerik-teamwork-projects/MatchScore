@@ -19,6 +19,24 @@ export const createKnockout = async (tournamentData, token) => {
     }
 };
 
+export const createLeague = async (tournamentData, token) => {
+    try {
+        const response = await axios.post(
+            `${BASE_PATH}/tournaments/league`,
+            JSON.stringify(tournamentData),
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const getAll = async (page) => {
     try {
         const response = await axios.get(`${BASE_PATH}/tournaments/`, {
@@ -45,6 +63,27 @@ export const getKnockoutRounds = async (tournamentId) => {
     try {
         const response = await axios.get(
             `${BASE_PATH}/tournaments/${tournamentId}/rounds`
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const startKnockoutTournament = async (
+    tournamentId,
+    token,
+    startDate
+) => {
+    try {
+        const response = await axios.put(
+            `${BASE_PATH}/tournaments/${tournamentId}/knockout_start`,
+            startDate,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
         );
         return response.data;
     } catch (error) {

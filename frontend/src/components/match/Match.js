@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import "./match.scss";
-import { TOURNAMENTS } from "../../routes/routes";
+import { PLAYERS, TOURNAMENTS } from "../../routes/routes";
 
 import { BASE_PATH } from "../../routes/paths";
 
@@ -51,22 +51,36 @@ export const Match = ({ match }) => {
                 <div className="matchTeam">
                     <div className="teamInfo">
                         {match?.score[0].profile_img ? (
-                            <img src = {`${BASE_PATH}${match?.score[0].profile_img}`} alt="" />
-                            ):(
-                            <img src = "/images/teams/manchester-city.png" alt="team1" />
-                            )}
-                        <span className="Team1">{match?.score[0].player}</span>
+                            <img
+                                src={`${BASE_PATH}${match?.score[0].profile_img}`}
+                                alt=""
+                            />
+                        ) : (
+                            <img src="/images/avatar/default.jpg" alt="team1" />
+                        )}
+                        <Link className="link" to={`${PLAYERS}/${match?.score[0].player_id}`}>
+                            <span className="Team1">
+                                {match?.score[0].player}
+                            </span>
+                        </Link>
                     </div>
                     <span className="teamScore">{match?.score[0].score}</span>
                 </div>
                 <div className="matchTeam">
                     <div className="teamInfo">
                         {match?.score[1].profile_img ? (
-                            <img src={`${BASE_PATH}${match?.score[1].profile_img}`} alt="" />
-                            ):(
-                            <img src="/images/teams/liverpool.png" alt="team2" />
-                            )}
-                        <span>{match?.score[1].player}</span>
+                            <img
+                                src={`${BASE_PATH}${match?.score[1].profile_img}`}
+                                alt=""
+                            />
+                        ) : (
+                            <img src="/images/avatar/default.jpg" alt="team2" />
+                        )}
+                        <Link className="link" to={`${PLAYERS}/${match?.score[1].player_id}`}>
+                            <span className="Team1">
+                                {match?.score[1].player}
+                            </span>
+                        </Link>
                     </div>
                     <span className="teamScore">{match?.score[1].score}</span>
                 </div>

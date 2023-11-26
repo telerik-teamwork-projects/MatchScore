@@ -61,10 +61,30 @@
                 align-items: center;
                 gap: 5px;
 
+                p {
+                    margin: 0;
+                }
+
                 span {
                     font-weight: 700;
                 }
             }
+
+
+            .tournamentFormat {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                p {
+                    margin: 0;
+                }
+
+                span {
+                    font-weight: 700;
+                }
+            }
+            
 
             .tournamentStatus {
                 display: flex;

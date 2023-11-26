@@ -1,10 +1,11 @@
 import "./tournamentFeed.scss";
 
-import { CreateTournamentModal } from "./createTournamentModal/CreateTournamentModal";
+import { CreateKnockoutModal } from "./createTournamentModal/CreateKnockoutModal";
 import { TournamentsList } from "./tournamentsList/TournamentsList";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/authContext";
 import { getAll } from "../../services/tournamentService";
+import { CreateLeagueModal } from "./createTournamentModal/CreateLeagueModal";
 
 export const TournamentFeed = () => {
     const { user, token } = useContext(AuthContext);
@@ -35,14 +36,24 @@ export const TournamentFeed = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [createKnockoutModalOpen, setCreateKnockoutModalOpen] =
+        useState(false);
+    const [createLeagueModalOpen, setCreateLeagueModalOpen] = useState(false);
 
-    const openCreateModal = () => {
-        setCreateModalOpen(true);
+    const openKnockoutCreateModal = () => {
+        setCreateKnockoutModalOpen(true);
     };
 
-    const closeCreateModal = () => {
-        setCreateModalOpen(false);
+    const openLeagueCreateModal = () => {
+        setCreateLeagueModalOpen(true);
+    };
+
+    const closeKnockoutCreateModal = () => {
+        setCreateKnockoutModalOpen(false);
+    };
+
+    const closeLeagueCreateModal = () => {
+        setCreateLeagueModalOpen(false);
     };
 
     return (
@@ -52,11 +63,18 @@ export const TournamentFeed = () => {
                     <>
                         <div className="tournamentTop">
                             <button
-                                className="createTournamentBtn"
+                                className="createKnockoutBtn"
                                 type="button"
-                                onClick={openCreateModal}
+                                onClick={openKnockoutCreateModal}
                             >
-                                Create Tournament
+                                Create Knockout Tournament
+                            </button>
+                            <button
+                                className="createLeagueBtn"
+                                type="button"
+                                onClick={openLeagueCreateModal}
+                            >
+                                Create League Tournament
                             </button>
                         </div>
                         <hr className="tournamentHr" />
@@ -69,12 +87,21 @@ export const TournamentFeed = () => {
                     handlePageChange={handlePageChange}
                     tournamentsData={tournamentsData}
                 />
-                {createModalOpen && (
-                    <CreateTournamentModal
+                {createKnockoutModalOpen && (
+                    <CreateKnockoutModal
                         user={user}
                         token={token}
                         setTournaments={setTournamentsData.tournaments}
-                        onClose={closeCreateModal}
+                        onClose={closeKnockoutCreateModal}
+                    />
+                )}
+
+                {createLeagueModalOpen && (
+                    <CreateLeagueModal
+                        user={user}
+                        token={token}
+                        setTournaments={setTournamentsData.tournaments}
+                        onClose={closeLeagueCreateModal}
                     />
                 )}
             </div>

@@ -74,7 +74,6 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
             console.error("Error updating match score:", error);
         }
     };
-
     return (
         <div id="bracket">
             {tournamentData.map((round, roundIndex) => (
@@ -144,21 +143,21 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                                     </>
                                 )}
                             </li>
-                            {user?.role === "admin" ||
-                                (user?.role === "director" && (
-                                    <button
-                                        onClick={() =>
-                                            handleUpdateScore(
-                                                roundIndex,
-                                                matchIndex,
-                                                match.participants[0],
-                                                match.participants[1]
-                                            )
-                                        }
-                                    >
-                                        Update Score
-                                    </button>
-                                ))}
+                            {(user?.role === "admin" ||
+                                user?.role === "director") && (
+                                <button
+                                    onClick={() =>
+                                        handleUpdateScore(
+                                            roundIndex,
+                                            matchIndex,
+                                            match.participants[0],
+                                            match.participants[1]
+                                        )
+                                    }
+                                >
+                                    Update Score
+                                </button>
+                            )}
                         </ul>
                     ))}
                 </div>

@@ -132,8 +132,8 @@ def get_one(tournament_id):
             third_place=result[6],
             status=result[7],
             location=result[8],
-            start_date=str(result[9]),
-            end_date=str(result[10]),
+            start_date=str(result[9]) if result[9] else result[9],
+            end_date=str(result[10]) if result[10] else result[10],
             owner=owner
         )
 
@@ -253,8 +253,8 @@ def get_tournament_by_id(tournament_id):
             third_place=result[6],
             status=result[7],
             location=result[8],
-            start_date=str(result[9]),
-            end_date=str(result[10]),
+            start_date=str(result[9]) if result[9] else result[9],
+            end_date=str(result[10]) if result[10] else result[10],
         )
 
         return tournament

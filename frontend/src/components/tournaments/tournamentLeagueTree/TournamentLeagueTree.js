@@ -91,21 +91,21 @@ export const TournamentLeagueTree = ({ tournamentId }) => {
 
             {showStandings && (
                 <div className="ptable">
-                    <table>
-                        <thead className="col">
-                            <tr>
-                                <th>#</th>
-                                <th>Team</th>
-                                <th>GP</th>
-                                <th>W</th>
-                                <th>D</th>
-                                <th>L</th>
-                                <th>GD</th>
-                                <th>PTS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {standings?.players.map((player, index) => (
+                    {standings?.players.map((player, index) => (
+                        <table>
+                            <thead className="col">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Team</th>
+                                    <th>GP</th>
+                                    <th>W</th>
+                                    <th>D</th>
+                                    <th>L</th>
+                                    <th>GD</th>
+                                    <th>PTS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 <tr
                                     key={player.player_id}
                                     className={index % 2 === 0 ? "wpos" : "pos"}
@@ -126,9 +126,9 @@ export const TournamentLeagueTree = ({ tournamentId }) => {
                                     <td>{player.score_diff}</td>
                                     <td>{player.points}</td>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    ))}
                 </div>
             )}
         </>

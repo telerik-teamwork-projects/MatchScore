@@ -26,7 +26,7 @@
     }
 
     .participantSelBtns {
-        margin-top: 20px;
+        margin-top: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -69,6 +69,20 @@
 
         &:hover {
             background-color: #ccc;
+        }
+    }
+
+    .playerNameInput {
+        margin-top: 20px;
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            margin-bottom: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
     }
 }

@@ -2,13 +2,17 @@ import "./tournamentDetails.scss";
 
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getOne } from "../../../services/tournamentService";
+import {
+    getOne,
+    startKnockoutTournament,
+} from "../../../services/tournamentService";
 import { TournamentKnockoutTree } from "../tournamentKnockoutTree/TournamentKnockoutTree";
 import { TournamentLeagueTree } from "../tournamentLeagueTree/TournamentLeagueTree";
 import { PROFILE } from "../../../routes/routes";
 import { TournamentRequest } from "../tournamentRequests/TournamentRequest";
 import { AuthContext } from "../../../contexts/authContext";
 import { getTournamentRequests } from "../../../services/requestService";
+import { StartDateModal } from "../../startDateModal/StartDateModal";
 
 export const TournamentDetails = () => {
     const { tournamentId } = useParams();
@@ -17,6 +21,8 @@ export const TournamentDetails = () => {
 
     const [requestModalOpen, setRequestModalOpen] = useState(false);
     const [requestsResult, setRequestsResult] = useState(null);
+
+    const [startModalOpen, setStartModalOpen] = useState(false);
 
     const closeRequestModal = () => {
         setRequestModalOpen(false);
@@ -35,6 +41,10 @@ export const TournamentDetails = () => {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const openStartModal = () => {
+        setStartModalOpen(true);
     };
 
     useEffect(() => {
@@ -96,18 +106,26 @@ export const TournamentDetails = () => {
                     <p>Date:</p>
                     <span>
                         {tournament?.start_date.slice(0, 10)} -{" "}
-                        {tournament?.end_date.slice(0, 10)}
+                        {tournament?.end_date &&
+                            tournament?.end_date.slice(0, 10)}
                     </span>
                 </div>
                 {(user?.id === tournament?.owner.id ||
                     user?.role === "admin") && (
                     <div className="requestsBtns">
                         <button
-                            className="openRequestsbtn"
+                            className="openRequestsBtn"
                             type="button"
                             onClick={(e) => onRequests(e)}
                         >
                             Show Requests
+                        </button>
+                        <button
+                            onClick={openStartModal}
+                            className="startTournamentBtn"
+                            type="button"
+                        >
+                            Start Tournament
                         </button>
                     </div>
                 )}
@@ -136,6 +154,14 @@ export const TournamentDetails = () => {
                     setRequests={setRequestsResult}
                     onClose={closeRequestModal}
                     token={token}
+                />
+            )}
+
+            {startModalOpen && (
+                <StartDateModal
+                    tournamentId={tournamentId}
+                    token={token}
+                    onClose={() => setStartModalOpen(false)}
                 />
             )}
         </div>

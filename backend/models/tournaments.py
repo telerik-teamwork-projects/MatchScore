@@ -252,7 +252,7 @@ class TournamentKnockoutCreate(BaseModel):
     status: TournamentStatus = TournamentStatus.OPEN
     location: str | None = None
     start_date: datetime | None = None
-    participants: List[int]
+    participants: List[PlayerProfile]
 
 
 class TournamentKnockoutResponse(BaseModel):

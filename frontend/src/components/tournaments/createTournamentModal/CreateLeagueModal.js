@@ -1,57 +1,56 @@
 import "./createTournamentModal.scss";
 import { useState } from "react";
 
-import { createKnockout } from "../../../services/tournamentService";
+import { createLeague } from "../../../services/tournamentService";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
 import { ParticipantSelection } from "../../participantSelection/ParticipantSelection";
 
-export const CreateTournamentModal = ({
-    user,
-    token,
-    setTournaments,
-    onClose,
-}) => {
+export const CreateLeagueModal = ({ user, token, onClose }) => {
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
-        format: "",
         title: "",
         description: "",
         match_format: "",
-        rounds: "",
-        third_place: false,
-        status: "",
         location: "",
         start_date: "",
-        end_date: "",
         participants: [],
     });
 
     const [showParticipantSelection, setShowParticipantSelection] =
         useState(false);
 
-    const handlePlayerSelection = (selectedPlayers) => {
-        setFormData({ ...formData, participants: selectedPlayers });
+    const handlePlayerSelection = (selectedPlayers, newPlayerDetails) => {
+        const updatedParticipants = [
+            ...formData.participants,
+            ...selectedPlayers,
+        ];
+
+        if (newPlayerDetails) {
+            updatedParticipants.push(newPlayerDetails);
+        }
+
+        setFormData({ ...formData, participants: updatedParticipants });
         setShowParticipantSelection(false);
     };
 
     const openParticipantSelection = () => {
         setShowParticipantSelection(true);
     };
-
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = async (e) => {
         e.preventDefault();
+        const formattedStartDate = `${formData.start_date}T00:00:00`;
 
         try {
             const formDataWithUserId = {
                 ...formData,
+                start_date: formattedStartDate,
                 owner_id: user?.id,
             };
 
-            const result = await createKnockout(formDataWithUserId, token);
-            setTournaments((prevTournaments) => [result, ...prevTournaments]);
+            await createLeague(formDataWithUserId, token);
             onClose();
         } catch (error) {
             setError(error.response.data.detail);
@@ -82,15 +81,6 @@ export const CreateTournamentModal = ({
 
                             <input
                                 className="createInput"
-                                placeholder="Rounds"
-                                type="number"
-                                name="rounds"
-                                value={formData.rounds}
-                                onChange={(e) => onChange(e)}
-                            />
-
-                            <input
-                                className="createInput"
                                 placeholder="Location"
                                 type="text"
                                 name="location"
@@ -106,19 +96,6 @@ export const CreateTournamentModal = ({
                                 value={formData.description}
                                 onChange={(e) => onChange(e)}
                             />
-
-                            <select
-                                className="createSelect"
-                                name="format"
-                                value={formData.format}
-                                onChange={(e) => onChange(e)}
-                            >
-                                <option value="" disabled>
-                                    Select Tournament Format
-                                </option>
-                                <option value="knockout">Knockout</option>
-                                <option value="league">League</option>
-                            </select>
                             <select
                                 className="createSelect"
                                 name="match_format"
@@ -130,18 +107,6 @@ export const CreateTournamentModal = ({
                                 </option>
                                 <option value="time">Time</option>
                                 <option value="score">Score</option>
-                            </select>
-                            <select
-                                className="createSelect"
-                                name="status"
-                                value={formData.status}
-                                onChange={(e) => onChange(e)}
-                            >
-                                <option value="" disabled>
-                                    Select Status
-                                </option>
-                                <option value="open">Open</option>
-                                <option value="closed">Closed</option>
                             </select>
                             <label>
                                 <div className="dateInputContainer">
@@ -161,36 +126,7 @@ export const CreateTournamentModal = ({
                                             onChange={(e) => onChange(e)}
                                         />
                                     </label>
-
-                                    <label
-                                        className="dateInputLabel"
-                                        htmlFor="end_date"
-                                    >
-                                        {formData.end_date
-                                            ? "End Date"
-                                            : "Select End Date"}
-                                        <input
-                                            className="createInput dateInput"
-                                            type="date"
-                                            id="end_date"
-                                            name="end_date"
-                                            value={formData.end_date}
-                                            onChange={(e) => onChange(e)}
-                                        />
-                                    </label>
                                 </div>
-                                <input
-                                    type="checkbox"
-                                    name="third_place"
-                                    checked={formData.third_place}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            third_place: e.target.checked,
-                                        })
-                                    }
-                                />
-                                Include Third Place
                             </label>
                             <button
                                 className="participantsSelection"
@@ -213,14 +149,14 @@ export const CreateTournamentModal = ({
                             </button>
                         </div>
                     </div>
-                    {showParticipantSelection && (
-                        <ParticipantSelection
-                            selectedPlayers={formData.participants}
-                            onPlayerSelection={handlePlayerSelection}
-                            onClose={() => setShowParticipantSelection(false)}
-                        />
-                    )}
                 </form>
+            )}
+            {showParticipantSelection && (
+                <ParticipantSelection
+                    selectedPlayers={formData.participants}
+                    onPlayerSelection={handlePlayerSelection}
+                    onClose={() => setShowParticipantSelection(false)}
+                />
             )}
         </div>
     );

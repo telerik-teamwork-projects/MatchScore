@@ -75,6 +75,10 @@ export const TournamentsList = ({
                                 <p>Location:</p>
                                 <span>{tournament.location}</span>
                             </div>
+                            <div className="tournamentFormat">
+                                <p>Format:</p>
+                                <span>{tournament.format}</span>
+                            </div>
                             <div className="tournamentStatus">
                                 <p>Status:</p>
                                 <span>{tournament.status}</span>
@@ -82,8 +86,11 @@ export const TournamentsList = ({
                             <div className="tournamentDate">
                                 <p>Date:</p>
                                 <span>
-                                    {tournament.start_date.slice(0, 10)} -{" "}
-                                    {tournament.end_date.slice(0, 10)}
+                                    {tournament.start_date &&
+                                        tournament.start_date.slice(0, 10)}{" "}
+                                    -{" "}
+                                    {tournament.end_date &&
+                                        tournament.end_date.slice(0, 10)}
                                 </span>
                             </div>
                         </div>
