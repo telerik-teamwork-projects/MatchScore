@@ -1,10 +1,10 @@
 import axios from "axios";
 import { BASE_PATH } from "../routes/paths";
 
-export const create = async (tournamentData, token) => {
+export const createKnockout = async (tournamentData, token) => {
     try {
         const response = await axios.post(
-            `${BASE_PATH}/tournaments/`,
+            `${BASE_PATH}/tournaments/knockout`,
             JSON.stringify(tournamentData),
             {
                 headers: {
