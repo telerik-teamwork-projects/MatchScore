@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import "./match.scss";
 import { TOURNAMENTS } from "../../routes/routes";
 
+import { BASE_PATH } from "../../routes/paths";
+
 export const Match = ({ match }) => {
     if (!match || !match.score || match.score.length < 2) {
         return null;
@@ -48,17 +50,22 @@ export const Match = ({ match }) => {
                 </Link>
                 <div className="matchTeam">
                     <div className="teamInfo">
-                        <img
-                            src="/images/teams/manchester-city.png"
-                            alt="team1"
-                        />
+                        {match?.score[0].profile_img ? (
+                            <img src = {`${BASE_PATH}${match?.score[0].profile_img}`} alt="" />
+                            ):(
+                            <img src = "/images/teams/manchester-city.png" alt="team1" />
+                            )}
                         <span className="Team1">{match?.score[0].player}</span>
                     </div>
                     <span className="teamScore">{match?.score[0].score}</span>
                 </div>
                 <div className="matchTeam">
                     <div className="teamInfo">
-                        <img src="/images/teams/liverpool.png" alt="team2" />
+                        {match?.score[1].profile_img ? (
+                            <img src={`${BASE_PATH}${match?.score[1].profile_img}`} alt="" />
+                            ):(
+                            <img src="/images/teams/liverpool.png" alt="team2" />
+                            )}
                         <span>{match?.score[1].player}</span>
                     </div>
                     <span className="teamScore">{match?.score[1].score}</span>

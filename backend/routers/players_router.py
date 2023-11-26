@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Form, File, UploadFile, Depends
 from typing import Union
 from common.exceptions import NotFound, Unauthorized, BadRequest, InternalServerError
-from common.utils import manage_pages
+from common.utils import manage_pages, is_admin
 from models.pagination import Pagination
 from models.players import PlayerProfileImg, PaginatedPlayers
 from models.users import User
@@ -45,7 +45,8 @@ def player_update(
         raise NotFound(f"Player with id {id} doesn't exist") 
     
     if target_player.user_id != current_user.id:
-        raise Unauthorized("You are not authorized")
+        if not is_admin(current_user):
+            raise Unauthorized("You are not authorized")
     
     if full_name and full_name != target_player.full_name:
         if players_service.get_player_by_full_name(full_name):

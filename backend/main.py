@@ -10,7 +10,7 @@ from routers.tournaments_router import router as tournaments_router
 from routers.players_router import router as players_router
 from routers.requests_router import router as requests_router
 from routers.search_router import router as search_router
-
+from routers.weather_router import router as weather_router
 
 app = FastAPI()
 app.include_router(users_router, prefix='/users')
@@ -19,6 +19,7 @@ app.include_router(tournaments_router, prefix='/tournaments')
 app.include_router(players_router, prefix="/players")
 app.include_router(requests_router, prefix="/requests")
 app.include_router(search_router, prefix="/search")
+app.include_router(weather_router, prefix='/weather')
 
 app.add_middleware(
     CORSMiddleware,

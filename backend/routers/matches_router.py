@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 
 from common.authorization import get_current_user
 from common.exceptions import Unauthorized, NotFound, BadRequest
@@ -11,7 +11,6 @@ from models.matches import Match, MatchResponse, MatchScoreUpdate, MatchBase, Ma
     MatchTournamentResponse, PaginatedMatch
 from models.pagination import Pagination
 from models.users import User
-from fastapi import Depends
 
 from services import matches_service, tournaments_service
 
@@ -117,9 +116,7 @@ def get_matches(page: int = Query(default=1), from_dt: datetime | None = None):
 
 
 @router.get('/tournaments/{tournament_id}')
-def get_matches_by_tournament_id(
-    tournament_id: int, page: int = Query(default=1)
-):
+def get_matches_by_tournament_id(tournament_id: int, page: int = Query(default=1)):
     total_matches = matches_service.count_by_tournament(tournament_id)
     params, (page, total_pages) = manage_pages(page, total_matches, match_limit=False, match_tournament_limit=True)
 

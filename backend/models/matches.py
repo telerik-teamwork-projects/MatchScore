@@ -7,16 +7,18 @@ from models.players import PlayerProfile
 
 
 class MatchScore(BaseModel):
-    id: int | None = None
+    player_id: int | None = None
     player: str | None = None
+    profile_img: str | None = None
     score: int | None = None
     points: int | None = None
 
     @classmethod
-    def from_query_result(cls, id, player, score=0, points=0):
+    def from_query_result(cls, id, player, score=0, points=0, profile_img=None):
         return cls(
-            id=int(id) if id is not None else None,
+            player_id=int(id) if id is not None else None,
             player=player,
+            profile_img=profile_img,
             score=int(score) if score is not None else None,
             points=int(points) if points is not None else None)
 

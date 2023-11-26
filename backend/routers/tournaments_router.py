@@ -3,12 +3,10 @@ from fastapi import APIRouter, Depends
 from typing import List
 
 from common.authorization import get_current_user
-from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound, Forbidden
+from common.exceptions import Unauthorized, InternalServerError, BadRequest, NotFound
 from common.utils import is_admin, is_director, is_power_of_two, manage_pages
 from models.enums import TournamentFormat, TournamentStatus
-from models.tournaments import Tournament, TournamentCreate, TournamentLeagueCreate, TournamentLeagueResponse, \
-    TournamentRoundResponse, TournamentKnockoutResponse, TournamentKnockoutCreate, DbTournament, TournamentDateUpdate, \
-    TournamentPlayerUpdate, TournamentPagination, TournamentPointsResponse
+import models.tournaments as t
 from models.pagination import Pagination
 from models.users import User
 from services import tournaments_service
@@ -18,31 +16,21 @@ MAX_PARTICIPANTS = 16
 MIN_PARTICIPANTS = 4
 
 
-# @router.post('/', response_model=Tournament, status_code=201)
-# def create_tournament(tournament_data: TournamentCreate, current_user: User = Depends(get_current_user)):
-#     if not is_admin(current_user) and not is_director(current_user):
-#         raise Unauthorized("You are not authorized")
-#     try:
-#         return tournaments_service.create(tournament_data, current_user)
-#     except Exception:
-#         raise InternalServerError("Creating tournament failed")
-
-
-@router.get("/", response_model=TournamentPagination)
+@router.get("/", response_model=t.TournamentPagination)
 def get_tournaments(page: int = 1):
     try:
         tournaments_count = tournaments_service.count()
         params, (page, total_pages) = manage_pages(page, tournaments_count)
         result = tournaments_service.get_all(params)
 
-        return TournamentPagination(tournaments=list(result),
-                                    pagination=Pagination(page=page, items_per_page=params[-1],
-                                                          total_pages=total_pages))
+        return t.TournamentPagination(tournaments=list(result),
+                                      pagination=Pagination(page=page, items_per_page=params[-1],
+                                                            total_pages=total_pages))
     except Exception:
         raise InternalServerError("Retrieving tournaments failed")
 
 
-@router.get("/{tournament_id}", response_model=Tournament)
+@router.get("/{tournament_id}", response_model=t.Tournament)
 def get_tournament(tournament_id):
     try:
         return tournaments_service.get_one(tournament_id)
@@ -50,8 +38,8 @@ def get_tournament(tournament_id):
         raise InternalServerError("Retrieving tournament details failed")
 
 
-@router.post('/league', response_model=TournamentLeagueResponse, status_code=201)
-def create_league_tournament(tournament: TournamentLeagueCreate, current_user: User = Depends(get_current_user)):
+@router.post('/league', response_model=t.TournamentLeagueResponse, status_code=201)
+def create_league_tournament(tournament: t.TournamentLeagueCreate, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("User has insufficient privileges")
     p_count = len({p.full_name for p in tournament.participants})
@@ -67,8 +55,8 @@ def create_league_tournament(tournament: TournamentLeagueCreate, current_user: U
     return tournaments_service.create_league(tournament, current_user)
 
 
-@router.post('/knockout', response_model=TournamentKnockoutResponse, status_code=201)
-def create_knockout_tournament(tournament: TournamentKnockoutCreate, current_user: User = Depends(get_current_user)):
+@router.post('/knockout', response_model=t.TournamentKnockoutResponse, status_code=201)
+def create_knockout_tournament(tournament: t.TournamentKnockoutCreate, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("User has insufficient privileges")
     p_count = len({p.full_name for p in tournament.participants})
@@ -90,7 +78,7 @@ def create_knockout_tournament(tournament: TournamentKnockoutCreate, current_use
     return tournaments_service.create_knockout(tournament, current_user)
 
 
-@router.get('/{id}/rounds', response_model=TournamentRoundResponse)
+@router.get('/{id}/rounds', response_model=t.TournamentRoundResponse)
 def view_rounds(id: int):
     tournament = tournaments_service.find(id)
     if tournament is None:
@@ -99,7 +87,7 @@ def view_rounds(id: int):
     return tournaments_service.view_tournament(tournament)
 
 
-@router.get('/{id}/points', response_model=TournamentPointsResponse)
+@router.get('/{id}/points', response_model=t.TournamentPointsResponse)
 def view_points(id: int):
     tournament = tournaments_service.find(id)
     if tournament is None:
@@ -110,8 +98,17 @@ def view_points(id: int):
     return tournaments_service.view_points(id)
 
 
-@router.put('/{id}/date', response_model=DbTournament)
-def update_date(id: int, tournament_date: TournamentDateUpdate, current_user: User = Depends(get_current_user)):
+@router.get('/{id}/matches', response_model=t.TournamentMatches)
+def view_matches(id: int):
+    tournament = tournaments_service.find(id)
+    if tournament is None:
+        raise NotFound(f'Tournament {id} does not exist!')
+
+    return tournaments_service.view_matches(id)
+
+
+@router.put('/{id}/date', response_model=t.DbTournament)
+def update_date(id: int, tournament_date: t.TournamentDateUpdate, current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized('User has insufficient privileges')
     tournament = tournaments_service.find(id)
@@ -129,8 +126,8 @@ def update_date(id: int, tournament_date: TournamentDateUpdate, current_user: Us
     return tournaments_service.update_date(tournament, tournament_date)
 
 
-@router.put('/{id}/players', response_model=TournamentRoundResponse)
-def update_players(id: int, players: List[TournamentPlayerUpdate], current_user: User = Depends(get_current_user)):
+@router.put('/{id}/players', response_model=t.TournamentRoundResponse)
+def update_players(id: int, players: List[t.TournamentPlayerUpdate], current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized('User has insufficient privileges')
     tournament = tournaments_service.find(id)
@@ -154,8 +151,8 @@ def update_players(id: int, players: List[TournamentPlayerUpdate], current_user:
     return tournaments_service.update_players(tournament, participants_prev)
 
 
-@router.put('/{id}/knockout_start', response_model=TournamentKnockoutResponse)
-def start_knockout_tournament(id: int, tournament_date: TournamentDateUpdate, user: User = Depends(get_current_user)):
+@router.put('/{id}/knockout_start', response_model=t.TournamentKnockoutResponse)
+def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUpdate, user: User = Depends(get_current_user)):
     if not is_admin(user) and not is_director(user):
         raise Unauthorized("User has insufficient privileges")
     tournament = tournaments_service.find(id)
