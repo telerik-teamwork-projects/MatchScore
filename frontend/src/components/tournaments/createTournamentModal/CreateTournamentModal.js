@@ -1,8 +1,9 @@
 import "./createTournamentModal.scss";
 import { useState } from "react";
 
-import { create } from "../../../services/tournamentService";
+import { createKnockout } from "../../../services/tournamentService";
 import { ErrorMessage } from "../../responseMessages/errorMessages/ErrorMessages";
+import { ParticipantSelection } from "../../participantSelection/ParticipantSelection";
 
 export const CreateTournamentModal = ({
     user,
@@ -22,7 +23,20 @@ export const CreateTournamentModal = ({
         location: "",
         start_date: "",
         end_date: "",
+        participants: [],
     });
+
+    const [showParticipantSelection, setShowParticipantSelection] =
+        useState(false);
+
+    const handlePlayerSelection = (selectedPlayers) => {
+        setFormData({ ...formData, participants: selectedPlayers });
+        setShowParticipantSelection(false);
+    };
+
+    const openParticipantSelection = () => {
+        setShowParticipantSelection(true);
+    };
 
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,7 +50,7 @@ export const CreateTournamentModal = ({
                 owner_id: user?.id,
             };
 
-            const result = await create(formDataWithUserId, token);
+            const result = await createKnockout(formDataWithUserId, token);
             setTournaments((prevTournaments) => [result, ...prevTournaments]);
             onClose();
         } catch (error) {
@@ -178,6 +192,13 @@ export const CreateTournamentModal = ({
                                 />
                                 Include Third Place
                             </label>
+                            <button
+                                className="participantsSelection"
+                                type="button"
+                                onClick={openParticipantSelection}
+                            >
+                                Select Participants
+                            </button>
                         </div>
                         {error && <ErrorMessage message={error} />}
                         <hr className="createHr" />
@@ -192,6 +213,13 @@ export const CreateTournamentModal = ({
                             </button>
                         </div>
                     </div>
+                    {showParticipantSelection && (
+                        <ParticipantSelection
+                            selectedPlayers={formData.participants}
+                            onPlayerSelection={handlePlayerSelection}
+                            onClose={() => setShowParticipantSelection(false)}
+                        />
+                    )}
                 </form>
             )}
         </div>
