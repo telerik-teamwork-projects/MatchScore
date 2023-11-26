@@ -533,8 +533,13 @@ def count():
     return data[0][0]
 
 
-def view_points(id: int):
-    date = datetime.utcnow()
+def view_points(tournament: t.DbTournament):
+    id = tournament.id
+    date_now = datetime.utcnow()
+    if tournament.start_date is not None and date_now < tournament.start_date:
+        date = tournament.start_date
+    else:
+        date = date_now
     data = read_query('''SELECT pm.player_id, p.full_name, 
                                 COUNT(pm.match_id) AS matches_played,
                                 COALESCE(w.wins, 0) AS wins, 

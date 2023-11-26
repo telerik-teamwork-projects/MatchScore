@@ -2,8 +2,9 @@ from pydantic import BaseModel
 
 
 class Geolocation(BaseModel):
-    lat: float
-    lon: float
+    lat: float | None = None
+    lon: float | None = None
+    city: str | None = None
 
 
 class Weather(BaseModel):

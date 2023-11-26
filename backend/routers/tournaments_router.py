@@ -95,7 +95,7 @@ def view_points(id: int):
     if tournament.format != TournamentFormat.LEAGUE.value:
         raise BadRequest(f'Tournament {id} is not league!')
 
-    return tournaments_service.view_points(id)
+    return tournaments_service.view_points(tournament)
 
 
 @router.get('/{id}/matches', response_model=t.TournamentMatches)

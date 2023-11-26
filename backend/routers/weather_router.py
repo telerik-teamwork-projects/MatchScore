@@ -2,7 +2,7 @@ import os
 
 import geocoder
 from dotenv import load_dotenv
-from fastapi import APIRouter, Request, Header
+from fastapi import APIRouter, Request
 import requests
 
 from common.exceptions import NotFound, Unauthorized, InternalServerError
@@ -24,8 +24,10 @@ CLOUDY = range(801, 900)
 @router.get('/', response_model=Weather)
 def get_weather(request: Request, location: Geolocation | None = None):
     if location is not None:
-        lat = location.lat
-        lon = location.lon
+        if location.city is not None:
+            filters = f'q={location.city}'
+        else:
+            filters = f'lat={location.lat:.4f}&lon={location.lon:.4f}'
     else:
         client = request.client.host
         g = geocoder.ip(client)
@@ -34,7 +36,8 @@ def get_weather(request: Request, location: Geolocation | None = None):
         else:
             g = geocoder.ip('me')
             lat, lon = g.latlng
-    url = f'http://api.openweathermap.org/data/2.5/weather?lat={lat:.4f}&lon={lon:.4f}&units=metric&appid={API_KEY}'
+        filters = f'lat={lat:.4f}&lon={lon:.4f}'
+    url = f'http://api.openweathermap.org/data/2.5/weather?{filters}&units=metric&appid={API_KEY}'
     response = requests.get(url)
 
     if response.status_code == 200:
