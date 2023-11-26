@@ -359,7 +359,7 @@ def create_knockout(data: t.TournamentKnockoutCreate, user: User):
 
 
 def view_tournament(tournament: t.DbTournament):
-    data = read_query('''SELECT m.round, m.id, m.next_match, p.id, p.full_name, pm.score, pm.points
+    data = read_query('''SELECT m.round, m.id, m.next_match, p.id, p.full_name, pm.score, pm.points, p.profile_img
                                 FROM matches m 
                                 LEFT JOIN players_matches pm ON pm.match_id = m.id 
                                 LEFT JOIN players p ON p.id = pm.player_id
@@ -609,7 +609,7 @@ def start_knockout(tournament: t.DbTournament, participants: list[int], user: Us
 
 
 def view_matches(id: int):
-    data = read_query('''SELECT m.id, m.next_match, p.id, p.full_name, pm.score, pm.points
+    data = read_query('''SELECT m.id, m.next_match, p.id, p.full_name, pm.score, pm.points, p.profile_img
                                     FROM matches m 
                                     LEFT JOIN players_matches pm ON pm.match_id = m.id 
                                     LEFT JOIN players p ON p.id = pm.player_id
