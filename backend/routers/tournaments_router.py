@@ -63,7 +63,8 @@ def create_knockout_tournament(tournament: t.TournamentKnockoutCreate, current_u
     p_count = len({p.full_name for p in tournament.participants})
     if p_count != len(tournament.participants):
         raise BadRequest("Participants should be unique!")
-
+    if tournament.start_date is not None and tournament.start_date <= datetime.utcnow():
+        raise BadRequest("Tournament start date should be in the future!")
     # create tournament open for player join requests
     if tournament.status == TournamentStatus.OPEN and len(tournament.participants) < MAX_PARTICIPANTS:
         return tournaments_service.create_knockout(tournament, current_user)
@@ -72,8 +73,6 @@ def create_knockout_tournament(tournament: t.TournamentKnockoutCreate, current_u
         raise BadRequest(f'Participants must be between {MIN_PARTICIPANTS} and {MAX_PARTICIPANTS}!')
     if not is_power_of_two(p_count):
         raise BadRequest("Number of participants for knockout tournament is not correct!")
-    if tournament.start_date <= datetime.utcnow():
-        raise BadRequest("Tournament start date should be in the future!")
 
     tournament.status = TournamentStatus.CLOSED
     return tournaments_service.create_knockout(tournament, current_user)
