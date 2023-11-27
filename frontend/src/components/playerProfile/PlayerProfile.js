@@ -54,7 +54,7 @@ export const PlayerProfile = () => {
                             )}
                         </div>
                         {(playerProfile?.user_id === user?.id ||
-                            user?.role === "admin") && (
+                            user?.role === "admin" || (!playerProfile?.user_id && user?.role === "director")) && (
                             <div className="playerProfileBtns">
                                 <Link
                                     to={`${PLAYERS}/${playerId}/update`}

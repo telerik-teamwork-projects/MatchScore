@@ -63,7 +63,7 @@ async def accept_player_request(request_id: int):
     player_info = get_player_info_from_request(player_request)
 
     insert_player(player_request.requester_id, **player_info)
-    
+
     user_data = get_user_by_id(player_request.requester_id)
 
     subject = "Player Acceptance Notification"
@@ -199,8 +199,6 @@ def update(
         sports_club: str,
         profile_img_path: str
 ):
-    
-
     sql = """
         UPDATE players
         SET full_name = ?, country = ?, sports_club = ?, profile_img = ?
@@ -217,8 +215,6 @@ def update(
     update_query(sql, sql_params)
 
     return get_by_id(target_player.id)
-
-
 
 
 def count():
@@ -254,3 +250,8 @@ def handle_profile_image(profile_image):
         profile_image_path = save_image(profile_image, "players_pics")
 
     return profile_image_path
+
+
+# def get_achievements(id: int):
+#     data = read_query('SELECT * FROM players WHERE id = ?', (id,))
+#     return next((PlayerProfileImg.from_query_result(*row) for row in data), None)

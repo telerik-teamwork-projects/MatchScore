@@ -61,3 +61,21 @@ class PlayerProfileImg(BaseModel):
 class PaginatedPlayers(BaseModel):
     players: list[PlayerProfileImg]
     pagination: Pagination
+
+
+class PlayerAchievements(BaseModel):
+    id: int
+    tournaments_played: int
+    tournaments_won: int
+    matches_played: int
+    matches_won: int
+
+    @classmethod
+    def from_query_result(cls, id, tournaments_played, tournaments_won, matches_played, matches_won):
+        return cls(
+            id=id,
+            tournaments_played=tournaments_played,
+            tournaments_won=tournaments_won,
+            matches_played=matches_played,
+            matches_won=matches_won
+        )

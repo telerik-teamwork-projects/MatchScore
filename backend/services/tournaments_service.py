@@ -538,10 +538,12 @@ def view_points(tournament: t.DbTournament):
     date_now = datetime.utcnow()
     if tournament.start_date is not None and date_now < tournament.start_date:
         date = tournament.start_date
+        matches_played = '0 AS matches_played'
     else:
         date = date_now
-    data = read_query('''SELECT pm.player_id, p.full_name, 
-                                COUNT(pm.match_id) AS matches_played,
+        matches_played = 'COUNT(pm.match_id) AS matches_played'
+    data = read_query(f'''SELECT pm.player_id, p.full_name, 
+                                {matches_played},
                                 COALESCE(w.wins, 0) AS wins, 
                                 COALESCE(d.draws, 0) AS draws, 
                                 COALESCE(l.losses, 0) AS losses,
