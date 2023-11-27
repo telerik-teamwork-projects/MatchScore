@@ -15,7 +15,6 @@ from mariadb import Error, Cursor
 from services.users_service import get_user_by_id
 from emails.send_emails import send_tournament_accept_email_async
 
-
 def _manage_knockout_matches(cursor: Cursor, id: int, start_date: datetime, match_format: str, third_place: bool,
                              participants: list[int], rounds: int):
     rand.shuffle(participants)
@@ -634,3 +633,16 @@ def view_matches(id: int):
                 matches.append([*el[:2], []])
 
     return t.TournamentMatches.from_query_result(id, matches)
+
+
+def get_players_by_tournament_id(id:int):
+    sql = """SELECT players.*
+        FROM players_tournaments
+        JOIN players ON players_tournaments.player_id = players.id
+        WHERE players_tournaments.tournament_id = ?;
+    """
+    sql_params = (id,)
+
+    result = read_query(sql, sql_params)
+
+    return [players.PlayerProfileImg.from_query_result(*row) for row in result]

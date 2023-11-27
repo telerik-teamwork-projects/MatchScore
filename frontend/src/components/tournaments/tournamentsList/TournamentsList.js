@@ -1,7 +1,6 @@
 import "./tournamentList.scss";
 
 import { PROFILE, TOURNAMENTS } from "../../../routes/routes";
-import { MoreVert } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { BASE_PATH } from "../../../routes/paths";
 import { useState } from "react";
@@ -55,11 +54,6 @@ export const TournamentsList = ({
                                         {tournament.owner.username}
                                     </span>
                                 </Link>
-                            </div>
-                            <div className="tournamentTopRight">
-                                {user?.id === tournament.owner.id && (
-                                    <MoreVert />
-                                )}
                             </div>
                         </div>
                         <div className="tournamentCenter">

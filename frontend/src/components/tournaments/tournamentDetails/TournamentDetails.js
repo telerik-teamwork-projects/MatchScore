@@ -2,10 +2,7 @@ import "./tournamentDetails.scss";
 
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-    getOne,
-    startKnockoutTournament,
-} from "../../../services/tournamentService";
+import { getOne } from "../../../services/tournamentService";
 import { TournamentKnockoutTree } from "../tournamentKnockoutTree/TournamentKnockoutTree";
 import { TournamentLeagueTree } from "../tournamentLeagueTree/TournamentLeagueTree";
 import { PROFILE } from "../../../routes/routes";
@@ -13,6 +10,8 @@ import { TournamentRequest } from "../tournamentRequests/TournamentRequest";
 import { AuthContext } from "../../../contexts/authContext";
 import { getTournamentRequests } from "../../../services/requestService";
 import { StartDateModal } from "../../startDateModal/StartDateModal";
+import { EditStartDate } from "../../editStartDate/EditStartDate";
+import { EditTournamentPlayers } from "../../editTournamentPlayers/EditTournamentPlayers";
 
 export const TournamentDetails = () => {
     const { tournamentId } = useParams();
@@ -23,6 +22,9 @@ export const TournamentDetails = () => {
     const [requestsResult, setRequestsResult] = useState(null);
 
     const [startModalOpen, setStartModalOpen] = useState(false);
+
+    const [editPlayersOpen, setEditPlayersOpen] = useState(false);
+    const [editDateOpen, setEditDateOpen] = useState(false);
 
     const closeRequestModal = () => {
         setRequestModalOpen(false);
@@ -43,8 +45,16 @@ export const TournamentDetails = () => {
         }
     };
 
+    const openEditPlayersModal = () => {
+        setEditPlayersOpen(true);
+    };
+
     const openStartModal = () => {
         setStartModalOpen(true);
+    };
+
+    const openEditDate = () => {
+        setEditDateOpen(true);
     };
 
     useEffect(() => {
@@ -127,6 +137,20 @@ export const TournamentDetails = () => {
                         >
                             Start Tournament
                         </button>
+                        <button
+                            className="editPlayersBtn"
+                            type="button"
+                            onClick={openEditPlayersModal}
+                        >
+                            Edit Players
+                        </button>
+                        <button
+                            className="editDateBtn"
+                            type="button"
+                            onClick={openEditDate}
+                        >
+                            Edit Start Date
+                        </button>
                     </div>
                 )}
             </div>
@@ -162,6 +186,22 @@ export const TournamentDetails = () => {
                     tournamentId={tournamentId}
                     token={token}
                     onClose={() => setStartModalOpen(false)}
+                />
+            )}
+
+            {editDateOpen && (
+                <EditStartDate
+                    tournamentId={tournamentId}
+                    token={token}
+                    onClose={() => setEditDateOpen(false)}
+                />
+            )}
+
+            {editPlayersOpen && (
+                <EditTournamentPlayers
+                    tournamentId={tournamentId}
+                    token={token}
+                    onClose={() => setEditPlayersOpen(false)}
                 />
             )}
         </div>

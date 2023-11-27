@@ -54,14 +54,14 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                 {
                     participants: [
                         {
-                            player_id: participant1.id,
-                            player: participant1.player,
-                            score: Number(participant1.score),
+                            player_id: participant1?.id,
+                            player: participant1?.player,
+                            score: Number(participant1?.score),
                         },
                         {
-                            player_id: participant2.id,
-                            player: participant2.player,
-                            score: Number(participant2.score),
+                            player_id: participant2?.id,
+                            player: participant2?.player,
+                            score: Number(participant2?.score),
                         },
                     ],
                 },
@@ -70,6 +70,7 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
 
         try {
             await updateMatchScore(matchId, matchScores.matches, token);
+            window.location.reload();
         } catch (error) {
             console.error("Error updating match score:", error);
         }
@@ -92,10 +93,11 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                                         {user?.role === "admin" ||
                                         user?.role === "director" ? (
                                             <input
+                                                name="score"
                                                 type="number"
                                                 value={
                                                     match.participants[0]
-                                                        .score || ""
+                                                        .score || 0
                                                 }
                                                 onChange={(e) =>
                                                     handleScoreChange(
@@ -121,17 +123,18 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                                         {user?.role === "admin" ||
                                         user?.role === "director" ? (
                                             <input
+                                                name="score"
                                                 type="number"
                                                 value={
                                                     match.participants[1]
-                                                        .score || ""
+                                                        .score || 0
                                                 }
                                                 onChange={(e) =>
                                                     handleScoreChange(
                                                         e,
                                                         roundIndex,
                                                         matchIndex,
-                                                        0
+                                                        1
                                                     )
                                                 }
                                             />

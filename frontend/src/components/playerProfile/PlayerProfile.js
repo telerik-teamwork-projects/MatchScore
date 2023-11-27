@@ -62,12 +62,12 @@ export const PlayerProfile = () => {
                                 >
                                     Edit
                                 </Link>
-                                <Link
+                                {/* <Link
                                     className="playerProfileDeleteBtn"
                                     // onClick={onDelete}
                                 >
                                     Delete
-                                </Link>
+                                </Link> */}
                             </div>
                         )}
                         {playerProfile?.user_id && (
