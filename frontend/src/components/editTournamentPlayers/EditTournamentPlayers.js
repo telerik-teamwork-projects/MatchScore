@@ -38,7 +38,7 @@ export const EditTournamentPlayers = ({ tournamentId, token, onClose }) => {
 
         try {
             await updatePlayers(tournamentId, token, [formData]);
-            onClose();
+            window.location.reload();
         } catch (error) {
             console.error(error);
         }
