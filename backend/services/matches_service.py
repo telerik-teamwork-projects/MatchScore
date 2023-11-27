@@ -3,12 +3,14 @@ from datetime import datetime
 from typing import List
 
 from common.exceptions import InternalServerError, BadRequest
+from models.enums import TournamentFormat
 from models.matches import Match, MatchResponse, MatchBase, MatchScoreUpdate, MatchDateUpdate, MatchPlayerUpdate, \
     MatchTournamentResponse
 from database.database import get_connection, read_query, update_query
 from mariadb import Error, Cursor
 
 from models.tournaments import DbTournament
+from services import tournaments_service
 
 
 def create(match: Match):
@@ -114,8 +116,11 @@ def update_score(match: MatchBase, scores: List[MatchScoreUpdate], tournament=No
                                (p[2], p[3], match.id, p[0]))
                 p_updated.append((p[0], p[1]))
                 s_updated.append(p)
+            conn.commit()
             if tournament is not None:
-                manage_knockout_match(match, s_updated, tournament, cursor)
+                if tournament.format == TournamentFormat.KNOCKOUT.value:
+                    _manage_knockout_match(match, s_updated, tournament, cursor)
+                _manage_winner(match, s_updated, tournament, cursor)
             conn.commit()
             return MatchResponse.from_query_result(match.id, match.date, match.format, p_updated, s_updated)
         except BadRequest as err:
@@ -253,13 +258,13 @@ def get_by_tournament(params: tuple, tournament_id: int):
             for row in data)
 
 
-def manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournament: DbTournament, cursor: Cursor):
+def _manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournament: DbTournament, cursor: Cursor):
     winner_id = score_updated[0][0]
     loser_id = score_updated[1][0]
     next_match_id = match.next_match
     if next_match_id:
         # manage case when match score was previously updated
-        manage_previous_update(next_match_id, winner_id, loser_id, cursor)
+        _manage_previous_update(next_match_id, winner_id, loser_id, cursor)
         # insert winner as participant in the next tournament match
         cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
                        (winner_id, next_match_id))
@@ -269,13 +274,13 @@ def manage_knockout_match(match: MatchBase, score_updated: list[tuple], tourname
                        (tournament.id, tournament.rounds))
         match_third_place_id = cursor.fetchone()[0]
         # manage case when match score was previously updated
-        manage_previous_update(match_third_place_id, winner_id, loser_id, cursor)
+        _manage_previous_update(match_third_place_id, winner_id, loser_id, cursor)
         # insert loser as participant in the third-place match
         cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
                        (loser_id, match_third_place_id))
 
 
-def manage_previous_update(match_id: int, w_id: int, l_id: int, cursor: Cursor):
+def _manage_previous_update(match_id: int, w_id: int, l_id: int, cursor: Cursor):
     cursor.execute('SELECT player_id, score FROM players_matches WHERE match_id = ?', (match_id,))
     data = list(cursor)
     existing_player_ids = [i[0] for i in data]
@@ -284,3 +289,34 @@ def manage_previous_update(match_id: int, w_id: int, l_id: int, cursor: Cursor):
         if scores:
             raise BadRequest(f'Scores for the next match {match_id} of this tournament are already entered!')
         cursor.execute(f'DELETE FROM players_matches WHERE match_id = ? AND player_id in {(w_id, l_id)}', (match_id,))
+
+
+def _manage_winner(match: MatchBase, score_updated: list[tuple], tournament: DbTournament, cursor: Cursor):
+    id = tournament.id
+    if tournament.format == TournamentFormat.KNOCKOUT.value:
+        if tournament.third_place:
+            final = tournament.rounds - 1
+        else:
+            final = tournament.rounds
+        if match.round == final:
+            cursor.execute('UPDATE players_tournaments SET won = 1 WHERE tournament_id = ? AND player_id = ?',
+                           (id, score_updated[0][0]))
+            cursor.execute('UPDATE players_tournaments SET won = 0 WHERE tournament_id = ? AND player_id != ?',
+                           (id, score_updated[0][0]))
+    else:
+        if tournament.end_date < datetime.utcnow():
+            rankings = tournaments_service.view_points(tournament)
+            players = rankings.players
+            winner_temp = players[0]
+            winners = [i.player_id for i in players if
+                       i.points == winner_temp.points and i.score_diff == winner_temp.score_diff]
+            if len(winners) == 1:
+                cursor.execute('UPDATE players_tournaments SET won = 1 WHERE tournament_id = ? AND player_id = ?',
+                               (id, winners[0]))
+                cursor.execute('UPDATE players_tournaments SET won = 0 WHERE tournament_id = ? AND player_id != ?',
+                               (id, winners[0]))
+            else:
+                cursor.execute(f'''UPDATE players_tournaments SET won = 1 
+                                                WHERE tournament_id = ? AND player_id in {tuple(winners)}''', (id,))
+                cursor.execute(f'''UPDATE players_tournaments SET won = 0
+                                                WHERE tournament_id = ? AND player_id not in {tuple(winners)}''', (id,))

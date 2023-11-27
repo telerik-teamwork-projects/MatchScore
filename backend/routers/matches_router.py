@@ -42,6 +42,9 @@ def update_score(id: int, match_score: List[MatchScoreUpdate], current_user: Use
     participants = matches_service.find_participants(id, match_score)
     if participants is None:
         raise NotFound(f'The participants provided do not play in this match')
+    negative_scores = [i for i in match_score if i.score < 0]
+    if negative_scores:
+        raise BadRequest('Match score cannot be negative!')
     if len(match_score) < 2:
         raise BadRequest('Please fill the score for all participants!')
     if match.tournaments_id:
@@ -49,7 +52,7 @@ def update_score(id: int, match_score: List[MatchScoreUpdate], current_user: Use
         if tournament.format == TournamentFormat.KNOCKOUT.value:
             if match_score[0].score == match_score[1].score:
                 raise BadRequest('There are no draws in knockout tournaments!')
-            return matches_service.update_score(match, participants, tournament)
+        return matches_service.update_score(match, participants, tournament)
 
     return matches_service.update_score(match, participants)
 

@@ -3,7 +3,7 @@ from typing import Union
 from common.exceptions import NotFound, Unauthorized, BadRequest, InternalServerError
 from common.utils import manage_pages, is_admin, is_director
 from models.pagination import Pagination
-from models.players import PlayerProfileImg, PaginatedPlayers
+from models.players import PlayerProfileImg, PaginatedPlayers, PlayerAchievements
 from models.users import User
 from common.authorization import get_current_user
 from services import players_service
@@ -67,11 +67,11 @@ def player_update(
         raise InternalServerError("Updating user failed")
 
 
-# @router.get('/{id}/achievements', response_model=PlayerProfileImg)
-# def get_achievements_by_id(id: int):
-#     player = players_service.get_achievements(id)
-#
-#     if player:
-#         return player
-#
-#     raise NotFound(f'Player {id} does not exist')
+@router.get('/{id}/achievements', response_model=PlayerAchievements)
+def get_achievements_by_id(id: int):
+    player = players_service.get_achievements(id)
+
+    if player:
+        return player
+
+    raise NotFound(f'Player {id} does not exist')

@@ -291,7 +291,7 @@ def create_league(data: t.TournamentLeagueCreate, user: User):
                     player_id = cursor.lastrowid
                 else:
                     player_id = player[0]
-                cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id)VALUES(?,?)',
+                cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id) VALUES(?,?)',
                                (player_id, tournament_id))
                 participants.append(player_id)
 
@@ -340,7 +340,7 @@ def create_knockout(data: t.TournamentKnockoutCreate, user: User):
                     player_id = cursor.lastrowid
                 else:
                     player_id = player[0]
-                cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id)VALUES(?,?)',
+                cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id) VALUES(?,?)',
                                (player_id, tournament_id))
                 participants.append(player_id)
 
@@ -485,11 +485,13 @@ def update_players(tournament: t.DbTournament, players_update: List[t.Tournament
                     player_id = cursor.lastrowid
                 else:
                     player_id = player[0]
-                cursor.execute('INSERT INTO players_tournaments VALUES(?,?)', (player_id, tournament.id))
+                cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id) VALUES(?,?)',
+                               (player_id, tournament.id))
                 participants.append(player_id)
             if tournament_players_ids:
                 for i in tournament_players_ids:
-                    cursor.execute('INSERT INTO players_tournaments VALUES(?,?)', (i, tournament.id))
+                    cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id) VALUES(?,?)',
+                                   (i, tournament.id))
                     participants.append(i)
             # re-create players_matches using the corresponding randomisation schema
             cursor.execute('SELECT id FROM matches WHERE tournaments_id = ? ORDER BY round', (tournament.id,))
@@ -535,9 +537,9 @@ def count():
 
 def view_points(tournament: t.DbTournament):
     id = tournament.id
-    date_now = datetime.utcnow()
+    date_now = (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     if tournament.start_date is not None and date_now < tournament.start_date:
-        date = tournament.start_date
+        date = (tournament.start_date + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
         matches_played = '0 AS matches_played'
     else:
         date = date_now
@@ -555,30 +557,31 @@ def view_points(tournament: t.DbTournament):
                                     (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS wins
                                     FROM players_matches pm, players p
                                     WHERE p.id = pm.player_id AND pm.points = 2
-                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
                                     GROUP BY pm.player_id) AS w ON pm.player_id = w.player_id
                                 LEFT JOIN
                                     (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS draws
                                     FROM players_matches pm, players p
                                     WHERE p.id = pm.player_id AND pm.points = 1
-                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
                                     GROUP BY pm.player_id) AS d ON pm.player_id = d.player_id
                                 LEFT JOIN
                                     (SELECT pm.player_id, p.full_name, COUNT(pm.player_id) AS losses
                                     FROM players_matches pm, players_matches pm1, players p
                                     WHERE p.id = pm.player_id AND pm.points = 0 
                                       AND pm.match_id = pm1.match_id AND pm1.points = 2
-                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
                                     GROUP BY pm.player_id) AS l ON pm.player_id = l.player_id
                                 LEFT JOIN
                                     (SELECT pm.player_id, p.full_name, SUM(pm1.score) AS score_concede
                                     FROM players_matches pm, players_matches pm1, players p
                                     WHERE p.id = pm.player_id AND pm.match_id = pm1.match_id 
                                        AND pm.player_id != pm1.player_id
-                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
+                                      AND pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
                                     GROUP BY pm.player_id) AS sc ON pm.player_id = sc.player_id
-                             WHERE pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date <= ?)
-                             GROUP BY pm.player_id ORDER BY points DESC, score_diff''',
+                             WHERE pm.match_id IN (SELECT id FROM matches WHERE tournaments_id = ? AND date < ?)
+                             GROUP BY pm.player_id 
+                             ORDER BY points DESC, score_diff DESC''',
                       (id, date, id, date, id, date, id, date, id, date))
 
     return t.TournamentPointsResponse.from_query_result(id, data)

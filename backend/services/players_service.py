@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
+
 from database.database import insert_query, read_query, update_query
-from models.players import PlayerCreate, PlayerRequest, PlayerProfile, PlayerProfileImg
+from models.players import PlayerCreate, PlayerRequest, PlayerProfile, PlayerProfileImg, PlayerAchievements
 from models.enums import Request
 from models.users import User
 from common.exceptions import NotFound
@@ -252,6 +254,21 @@ def handle_profile_image(profile_image):
     return profile_image_path
 
 
-# def get_achievements(id: int):
-#     data = read_query('SELECT * FROM players WHERE id = ?', (id,))
-#     return next((PlayerProfileImg.from_query_result(*row) for row in data), None)
+def get_achievements(id: int):
+    date = (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    data = read_query('''SELECT id,
+                                    (SELECT COUNT(pt.player_id) FROM players_tournaments pt, tournaments t
+                                        WHERE pt.player_id = ? 
+                                        AND pt.tournament_id = t.id AND t.start_date < ?) AS tournaments_played,
+                                    (SELECT COALESCE(SUM(pt.won), 0) FROM players_tournaments pt, tournaments t
+                                        WHERE pt.player_id = ? 
+                                        AND pt.tournament_id = t.id AND t.start_date < ?) AS tournaments_won,
+                                    (SELECT COUNT(pm.player_id) FROM players_matches pm, matches m
+                                        WHERE pm.player_id = ? 
+                                        AND pm.match_id = m.id AND m.date < ?) AS matches_played,
+                                    (SELECT COUNT(pm.player_id) FROM players_matches pm, matches m
+                                        WHERE pm.player_id = ? 
+                                        AND pm.match_id = m.id AND pm.points = 2 AND m.date < ?) AS matches_won
+                             FROM players WHERE id = ?''',
+                      (id, date, id, date, id, date, id, date, id))
+    return next((PlayerAchievements.from_query_result(*row) for row in data), None)
