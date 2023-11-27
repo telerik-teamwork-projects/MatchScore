@@ -19,7 +19,7 @@ export const StartDateModal = ({ tournamentId, token, onClose }) => {
             await startKnockoutTournament(tournamentId, token, {
                 date: formattedStartDate,
             });
-            onClose();
+            window.location.reload();
         } catch (error) {
             console.error(error);
         }

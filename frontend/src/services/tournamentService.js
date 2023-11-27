@@ -105,7 +105,7 @@ export const getLeagueStandings = async (tournamentId) => {
 export const updateStartDate = async (tournamentId, token, startDate) => {
     try {
         const response = await axios.put(
-            `${BASE_PATH}/tournaments${tournamentId}/date`,
+            `${BASE_PATH}/tournaments/${tournamentId}/date`,
             startDate,
             {
                 headers: {

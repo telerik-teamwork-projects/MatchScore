@@ -19,7 +19,7 @@ export const EditStartDate = ({ tournamentId, token, onClose }) => {
             await updateStartDate(tournamentId, token, {
                 date: formattedStartDate,
             });
-            onClose();
+            window.location.reload();
         } catch (error) {
             console.error(error);
         }
