@@ -118,7 +118,7 @@ export const RequestJoinTournament = ({ tournamentId, token, onClose }) => {
                             Close
                         </button>
                     </div>
-                    <h3>I already have a player profile</h3>
+                    <h3>Already have a player profile ?</h3>
                     <button
                         className="submitExistingPlayer"
                         type="button"

@@ -44,3 +44,14 @@ export const playerUpdate = async (playerId, token, formData) => {
         throw error;
     }
 };
+
+export const getAchievements = async (playerId) => {
+    try {
+        const response = await axios.get(
+            `${BASE_PATH}/players/${playerId}/achievements`
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
