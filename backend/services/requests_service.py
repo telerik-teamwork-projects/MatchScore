@@ -5,7 +5,8 @@ from common.exceptions import NotFound, BadRequest
 
 from services import players_service
 from services.users_service import get_user_by_id
-from emails.send_emails import send_director_accept_email_async
+from emails.send_emails import send_director_accept_email_async, send_player_accept_email_async
+
 
 def send_director_request(current_user: users.User):
     sql = """
@@ -17,7 +18,7 @@ def send_director_request(current_user: users.User):
 
 
 def get_director_requests():
-    sql = "Select * FROM director_requests"
+    sql = "Select * FROM director_requests ORDER BY created_at DESC"
     sql_params = ()
 
     result = read_query(sql, sql_params)
@@ -28,7 +29,7 @@ def get_director_requests():
             email=row[2],
             status=row[3],
             created_at=row[4]
-        ) 
+        )
         for row in result
     ]
     return director_requests
@@ -41,7 +42,7 @@ async def accept_director_request(request_id: int):
 
     update_director_request_status(request_id, "accepted")
     update_user_to_player(director_request.user_id, "director")
-    
+
     user_data = get_user_by_id(director_request.user_id)
 
     subject = "Director Acceptance Notification"
@@ -73,7 +74,7 @@ def send_link_to_player_request(current_user: users.User, full_name: str):
 
 
 def get_link_requests():
-    sql = "SELECT * FROM link_player_requests"
+    sql = "SELECT * FROM link_player_requests ORDER BY created_at DESC"
     sql_params = ()
 
     result = read_query(sql, sql_params)
@@ -92,13 +93,13 @@ def get_link_requests():
     return link_player_requests
 
 
-def accept_link_player_request(request_id: int, current_user: users.User):
+async def accept_link_player_request(request_id: int, current_user: users.User):
     link_player_request = get_link_player_request_by_id(request_id)
     if not link_player_request:
         raise NotFound("Link player request not found")
 
     if players_service.get_player_by_user_id(current_user.id):
-        raise BadRequest("User is already linked to a player") 
+        raise BadRequest("User is already linked to a player")
 
     player = get_player_by_full_name(link_player_request.requested_full_name)
     if not player:
@@ -106,7 +107,18 @@ def accept_link_player_request(request_id: int, current_user: users.User):
 
     update_link_player_request_status(request_id, "accepted")
     link_user_to_player(player, link_player_request.user_id)
-    
+
+    user = get_user_by_id(link_player_request.user_id)
+
+    subject = "Player Acceptance Notification"
+    email_to = user.email
+    body = {
+        "title": "Congratulations! You're now a player.",
+        "name": player.full_name,
+        "ctaLink": f"http://localhost:3000/tournaments/"
+    }
+    await send_player_accept_email_async(subject, email_to, body)
+
 
 def reject_link_player_request(request_id: int):
     link_player_request = get_link_player_request_by_id(request_id)
@@ -120,7 +132,7 @@ def get_director_request_by_id(request_id: int):
     sql = """
         SELECT id, user_id, email, status, created_at
         FROM director_requests
-        WHERE id = ?;
+        WHERE id = ? ORDER BY created_at DESC;
     """
     sql_params = (request_id,)
     result = read_query(sql, sql_params)
@@ -133,12 +145,13 @@ def get_director_request_by_id(request_id: int):
             status=result[3],
             created_at=result[4]
         )
-    
+
+
 def get_link_player_request_by_id(request_id: int):
     sql = """
         SELECT id, user_id, username, requested_full_name, status, created_at
         FROM link_player_requests
-        WHERE id = ?;
+        WHERE id = ? ORDER BY created_at DESC;
     """
     sql_params = (request_id,)
     result = read_query(sql, sql_params)
@@ -174,7 +187,7 @@ def update_link_player_request_status(request_id, status):
     insert_query(sql, sql_params)
 
 
-def update_user_to_player(user_id:int, role: str):
+def update_user_to_player(user_id: int, role: str):
     sql = """
         UPDATE users
         SET role = ?
@@ -183,16 +196,18 @@ def update_user_to_player(user_id:int, role: str):
     sql_params = (role, user_id)
     insert_query(sql, sql_params)
 
+
 def link_user_to_player(player: players.PlayerProfile, user_id: int):
     sql = """
         UPDATE players
         SET user_id = ?
         WHERE full_name = ?
     """
-    sql_params = (user_id ,player.full_name)
+    sql_params = (user_id, player.full_name)
     insert_query(sql, sql_params)
 
-def get_player_by_full_name(full_name:str):
+
+def get_player_by_full_name(full_name: str):
     sql = """
         SELECT id, full_name, country, sports_club, user_id
         FROM players

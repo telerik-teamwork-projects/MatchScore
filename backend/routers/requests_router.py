@@ -76,14 +76,14 @@ def get_link_requests(
 
 
 @router.post("/link-player-requests/accept/{request_id}/")
-def accept_link_player_request(
+async def accept_link_player_request(
     request_id: int,
     current_user: users.User = Depends(authorization.get_current_user)
 ):
     if current_user.role.value != "admin":
         raise exceptions.Unauthorized("You are not authorized")
     
-    requests_service.accept_link_player_request(request_id, current_user)
+    await requests_service.accept_link_player_request(request_id, current_user)
     return responses.RequestOK("Link player request accepted")
 
 

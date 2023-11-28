@@ -13,73 +13,8 @@ from models.users import User
 import models.tournaments as t
 from mariadb import Error, Cursor
 from services.users_service import get_user_by_id
-from emails.send_emails import send_tournament_accept_email_async
-
-
-def _manage_knockout_matches(cursor: Cursor, id: int, start_date: datetime, match_format: str, third_place: bool,
-                             participants: list[int], rounds: int):
-    rand.shuffle(participants)
-    # table of participants
-    t = [i for i in participants]
-    matches = []
-    # matches per round
-    m_count = int(len(participants) / 2)
-    # generate matches along with the rounds they belong to, link the participants for the first round
-    date = start_date
-    for r in range(rounds):
-        matches.append([])
-        for m in range(m_count):
-            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
-                           (date, match_format, id, r + 1))
-            match_id = cursor.lastrowid
-            matches[r].append(match_id)
-            if r == 0:
-                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                               (t.pop(), match_id))
-                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                               (t.pop(), match_id))
-        m_count = int(m_count / 2)
-        if m_count < 1 and third_place:
-            m_count = 1
-        date = date + timedelta(days=1)
-    # update matches with link to their next match
-    m_next = rounds
-    if third_place:
-        m_next -= 1
-    for r in range(m_next - 1):
-        i = 0
-        for m in range(len(matches[r])):
-            if m == 0 or m % 2 == 0:
-                cursor.execute('UPDATE matches SET next_match = ? WHERE id = ?',
-                               (matches[r + 1][i], matches[r][m]))
-                i += 1
-            else:
-                cursor.execute('UPDATE matches SET next_match = ? WHERE id = ?',
-                               (matches[r + 1][i - 1], matches[r][m]))
-
-
-def _manage_league_matches(cursor: Cursor, id: int, data: t.TournamentLeagueCreate,
-                           participants: list[int], rounds: int):
-    rand.shuffle(participants)
-    # matches per round
-    mpr = (rounds + 1) // 2
-    # table of participants
-    t = [i + 1 for i in range(len(participants))]
-    # generate matches along with their participants and rounds they belong to
-    date = data.start_date
-    for r in range(rounds):
-        for m in range(mpr):
-            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
-                           (date, data.match_format.value, id, r + 1))
-            match_id = cursor.lastrowid
-            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                           (participants[t[m] - 1], match_id))
-            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
-                           (participants[t[-1 - m] - 1], match_id))
-
-        t.remove(rounds - r + 1)
-        t.insert(1, rounds - r + 1)
-        date = date + timedelta(days=1)
+from emails.send_emails import send_tournament_accept_email_async, send_player_tournament_email_async, \
+    send_player_match_email_async
 
 
 def get_all(params: Tuple):
@@ -199,7 +134,7 @@ async def accept_player_to_tournament(request_id: int):
         email_to = user_data.email
         body = {
             "title": "Congratulations! You've been accepted to the tournament.",
-            "name": user_data.username,
+            "name": tournament_request.full_name,
             "ctaLink": f"http://localhost:3000/tournaments/{tournament_id}"
         }
         await send_tournament_accept_email_async(subject, email_to, body)
@@ -267,7 +202,7 @@ def is_user_accepted(tournament_id: int, user_id: int):
     return len(read_query(sql, sql_params)) > 0
 
 
-def create_league(data: t.TournamentLeagueCreate, user: User):
+async def create_league(data: t.TournamentLeagueCreate, user: User):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -297,6 +232,7 @@ def create_league(data: t.TournamentLeagueCreate, user: User):
 
             _manage_league_matches(cursor, tournament_id, data, participants, rounds)
             conn.commit()
+            await _send_tournament_emails(cursor, tournament_id, tuple(participants))
             return t.TournamentLeagueResponse.from_query_result(tournament_id, TournamentFormat.LEAGUE.value,
                                                                 data.title,
                                                                 data.description, data.match_format.value, rounds,
@@ -307,7 +243,7 @@ def create_league(data: t.TournamentLeagueCreate, user: User):
             raise InternalServerError("Something went wrong")
 
 
-def create_knockout(data: t.TournamentKnockoutCreate, user: User):
+async def create_knockout(data: t.TournamentKnockoutCreate, user: User):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -344,9 +280,10 @@ def create_knockout(data: t.TournamentKnockoutCreate, user: User):
                                (player_id, tournament_id))
                 participants.append(player_id)
 
+            await _send_tournament_emails(cursor, tournament_id, tuple(participants))
             if data.status == TournamentStatus.CLOSED:
-                _manage_knockout_matches(cursor, tournament_id, data.start_date, data.match_format.value,
-                                         data.third_place, participants, rounds)
+                await _manage_knockout_matches(cursor, tournament_id, data.start_date, data.match_format.value,
+                                               data.third_place, participants, rounds)
             conn.commit()
             return t.TournamentKnockoutResponse.from_query_result(tournament_id, TournamentFormat.KNOCKOUT.value,
                                                                   data.title, data.description, data.match_format.value,
@@ -467,7 +404,7 @@ def check_participants(id: int, players: List[t.TournamentPlayerUpdate], prev=Fa
         return participants
 
 
-def update_players(tournament: t.DbTournament, players_update: List[t.TournamentPlayerUpdate]):
+async def update_players(tournament: t.DbTournament, players_update: List[t.TournamentPlayerUpdate]):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -488,6 +425,7 @@ def update_players(tournament: t.DbTournament, players_update: List[t.Tournament
                 cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id) VALUES(?,?)',
                                (player_id, tournament.id))
                 participants.append(player_id)
+            send_mails_to = tuple(participants)
             if tournament_players_ids:
                 for i in tournament_players_ids:
                     cursor.execute('INSERT INTO players_tournaments(player_id, tournament_id) VALUES(?,?)',
@@ -497,6 +435,7 @@ def update_players(tournament: t.DbTournament, players_update: List[t.Tournament
             cursor.execute('SELECT id FROM matches WHERE tournaments_id = ? ORDER BY round', (tournament.id,))
             tournament_matches_ids = [i[0] for i in list(cursor)]
             cursor.execute(f'DELETE FROM players_matches WHERE match_id in {tuple(tournament_matches_ids)}')
+            await _send_tournament_emails(cursor, tournament.id, send_mails_to)
             rand.shuffle(participants)
             rounds = tournament.rounds
             mpr = (rounds + 1) // 2
@@ -522,6 +461,7 @@ def update_players(tournament: t.DbTournament, players_update: List[t.Tournament
                                    (t.pop(), tournament_matches_ids[m]))
                     cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
                                    (t.pop(), tournament_matches_ids[m]))
+                await _send_knockout_matches_emails(cursor, tournament.id, tuple(participants))
             conn.commit()
             return view_tournament(tournament)
         except Error as err:
@@ -538,7 +478,7 @@ def count():
 def view_points(tournament: t.DbTournament):
     id = tournament.id
     date_now = (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-    if tournament.start_date is not None and date_now < tournament.start_date:
+    if tournament.start_date is not None and date_now <= tournament.start_date:
         date = (tournament.start_date + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
         matches_played = '0 AS matches_played'
     else:
@@ -592,7 +532,7 @@ def find_participants(id: int):
     return [i[0] for i in data]
 
 
-def start_knockout(tournament: t.DbTournament, participants: list[int], user: User):
+async def start_knockout(tournament: t.DbTournament, participants: list[int], user: User):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -604,8 +544,8 @@ def start_knockout(tournament: t.DbTournament, participants: list[int], user: Us
                            (tournament.start_date, end_date, tournament.status, rounds, tournament.id))
             cursor.execute('SELECT id, username, profile_img FROM users WHERE id = ?', (user.id,))
             owner = cursor.fetchone()
-            _manage_knockout_matches(cursor, tournament.id, tournament.start_date, tournament.match_format,
-                                     tournament.third_place, participants, rounds)
+            await _manage_knockout_matches(cursor, tournament.id, tournament.start_date, tournament.match_format,
+                                           tournament.third_place, participants, rounds)
             conn.commit()
             return t.TournamentKnockoutResponse.from_query_result(tournament.id, tournament.format, tournament.title,
                                                                   tournament.description, tournament.match_format,
@@ -637,3 +577,101 @@ def view_matches(id: int):
                 matches.append([*el[:2], []])
 
     return t.TournamentMatches.from_query_result(id, matches)
+
+
+async def _manage_knockout_matches(cursor: Cursor, id: int, start_date: datetime, match_format: str, third_place: bool,
+                                   participants: list[int], rounds: int):
+    rand.shuffle(participants)
+    # table of participants
+    t = [i for i in participants]
+    matches = []
+    # matches per round
+    m_count = int(len(participants) / 2)
+    # generate matches along with the rounds they belong to, link the participants for the first round
+    date = start_date
+    for r in range(rounds):
+        matches.append([])
+        for m in range(m_count):
+            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
+                           (date, match_format, id, r + 1))
+            match_id = cursor.lastrowid
+            matches[r].append(match_id)
+            if r == 0:
+                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                               (t.pop(), match_id))
+                cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                               (t.pop(), match_id))
+        m_count = int(m_count / 2)
+        if m_count < 1 and third_place:
+            m_count = 1
+        date = date + timedelta(days=1)
+    # update matches with link to their next match
+    m_next = rounds
+    if third_place:
+        m_next -= 1
+    for r in range(m_next - 1):
+        i = 0
+        for m in range(len(matches[r])):
+            if m == 0 or m % 2 == 0:
+                cursor.execute('UPDATE matches SET next_match = ? WHERE id = ?',
+                               (matches[r + 1][i], matches[r][m]))
+                i += 1
+            else:
+                cursor.execute('UPDATE matches SET next_match = ? WHERE id = ?',
+                               (matches[r + 1][i - 1], matches[r][m]))
+    # send mails
+    await _send_knockout_matches_emails(cursor, id, tuple(participants))
+
+
+def _manage_league_matches(cursor: Cursor, id: int, data: t.TournamentLeagueCreate,
+                           participants: list[int], rounds: int):
+    rand.shuffle(participants)
+    # matches per round
+    mpr = (rounds + 1) // 2
+    # table of participants
+    t = [i + 1 for i in range(len(participants))]
+    # generate matches along with their participants and rounds they belong to
+    date = data.start_date
+    for r in range(rounds):
+        for m in range(mpr):
+            cursor.execute('INSERT INTO matches(date, format, tournaments_id, round) VALUES(?,?,?,?)',
+                           (date, data.match_format.value, id, r + 1))
+            match_id = cursor.lastrowid
+            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                           (participants[t[m] - 1], match_id))
+            cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
+                           (participants[t[-1 - m] - 1], match_id))
+
+        t.remove(rounds - r + 1)
+        t.insert(1, rounds - r + 1)
+        date = date + timedelta(days=1)
+
+
+async def _send_tournament_emails(cursor: Cursor, id: int, participants: tuple[int]):
+    subject = "Tournament Notification"
+    cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
+                            WHERE p.id IN {participants} AND p.user_id = u.id''')
+    data = list(cursor)
+    for full_name, email in data:
+        email_to = email
+        body = {
+            "title": "Congratulations! You've been selected to participate in tournament.",
+            "name": full_name,
+            "ctaLink": f"http://localhost:3000/tournaments/{id}"
+        }
+        await send_player_tournament_email_async(subject, email_to, body)
+
+
+async def _send_knockout_matches_emails(cursor: Cursor, id: int, participants: tuple[int]):
+    subject = "Match Notification"
+    cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
+                            WHERE p.id IN {participants} AND p.user_id = u.id''')
+    data = list(cursor)
+    for full_name, email in data:
+        email_to = email
+        body = {
+            "title": "Congratulations! You've qualified to participate in the next phase of our tournament.",
+            "name": full_name,
+            "ctaLink": f"http://localhost:3000/tournaments/{id}"
+        }
+        await send_player_match_email_async(subject, email_to, body)
