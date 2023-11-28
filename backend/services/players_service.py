@@ -72,7 +72,7 @@ async def accept_player_request(request_id: int):
     email_to = user_data.email
     body = {
         "title": "Congratulations! You're now a player.",
-        "name": user_data.username,
+        "name": player_request.full_name,
         "ctaLink": f"http://localhost:3000/tournaments/"
     }
     await send_player_accept_email_async(subject, email_to, body)

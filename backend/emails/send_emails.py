@@ -11,6 +11,7 @@ load_dotenv()
 template_folder = "../templates"
 jinja_env = Environment(loader=FileSystemLoader(template_folder))
 
+
 class Envs:
     MAIL_USERNAME = os.environ['MAIL_USERNAME']
     MAIL_PASSWORD = os.environ['MAIL_PASSWORD']
@@ -119,4 +120,42 @@ def send_email_background(background_tasks: BackgroundTasks, subject: str, email
 
     fm = FastMail(conf)
     background_tasks.add_task(
-       fm.send_message, message, template_name='email.html')
+        fm.send_message, message, template_name='email.html')
+
+
+async def send_player_tournament_email_async(subject: str, email_to: str, body: dict):
+    title = str(body.get("title", ""))
+    name = str(body.get("name", ""))
+    cta_link = str(body.get("ctaLink", ""))
+
+    template = jinja_env.get_template('player-tournament.html')
+    rendered_body = template.render(title=title, name=name, cta_link=cta_link, body=body)
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[email_to],
+        body=rendered_body,
+        subtype='html',
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+
+async def send_player_match_email_async(subject: str, email_to: str, body: dict):
+    title = str(body.get("title", ""))
+    name = str(body.get("name", ""))
+    cta_link = str(body.get("ctaLink", ""))
+
+    template = jinja_env.get_template('player-match.html')
+    rendered_body = template.render(title=title, name=name, cta_link=cta_link, body=body)
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[email_to],
+        body=rendered_body,
+        subtype='html',
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)

@@ -40,7 +40,8 @@ def get_tournament(tournament_id):
 
 
 @router.post('/league', response_model=t.TournamentLeagueResponse, status_code=201)
-def create_league_tournament(tournament: t.TournamentLeagueCreate, current_user: User = Depends(get_current_user)):
+async def create_league_tournament(tournament: t.TournamentLeagueCreate,
+                                   current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("User has insufficient privileges")
     p_count = len({p.full_name for p in tournament.participants})
@@ -53,11 +54,12 @@ def create_league_tournament(tournament: t.TournamentLeagueCreate, current_user:
     if tournament.start_date <= datetime.utcnow():
         raise BadRequest("Tournament start date should be in the future!")
 
-    return tournaments_service.create_league(tournament, current_user)
+    return await tournaments_service.create_league(tournament, current_user)
 
 
 @router.post('/knockout', response_model=t.TournamentKnockoutResponse, status_code=201)
-def create_knockout_tournament(tournament: t.TournamentKnockoutCreate, current_user: User = Depends(get_current_user)):
+async def create_knockout_tournament(tournament: t.TournamentKnockoutCreate,
+                                     current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("User has insufficient privileges")
     p_count = len({p.full_name for p in tournament.participants})
@@ -67,7 +69,7 @@ def create_knockout_tournament(tournament: t.TournamentKnockoutCreate, current_u
         raise BadRequest("Tournament start date should be in the future!")
     # create tournament open for player join requests
     if tournament.status == TournamentStatus.OPEN and len(tournament.participants) < MAX_PARTICIPANTS:
-        return tournaments_service.create_knockout(tournament, current_user)
+        return await tournaments_service.create_knockout(tournament, current_user)
 
     if p_count > MAX_PARTICIPANTS or p_count < MIN_PARTICIPANTS:
         raise BadRequest(f'Participants must be between {MIN_PARTICIPANTS} and {MAX_PARTICIPANTS}!')
@@ -75,7 +77,7 @@ def create_knockout_tournament(tournament: t.TournamentKnockoutCreate, current_u
         raise BadRequest("Number of participants for knockout tournament is not correct!")
 
     tournament.status = TournamentStatus.CLOSED
-    return tournaments_service.create_knockout(tournament, current_user)
+    return await tournaments_service.create_knockout(tournament, current_user)
 
 
 @router.get('/{id}/rounds', response_model=t.TournamentRoundResponse)
@@ -127,7 +129,7 @@ def update_date(id: int, tournament_date: t.TournamentDateUpdate, current_user: 
 
 
 @router.put('/{id}/players', response_model=t.TournamentRoundResponse)
-def update_players(id: int, players: List[t.TournamentPlayerUpdate], current_user: User = Depends(get_current_user)):
+async def update_players(id: int, players: List[t.TournamentPlayerUpdate], current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized('User has insufficient privileges')
     tournament = tournaments_service.find(id)
@@ -148,11 +150,11 @@ def update_players(id: int, players: List[t.TournamentPlayerUpdate], current_use
     if tournament.status == TournamentStatus.OPEN.value:
         raise BadRequest(f'Tournament status should be {str(TournamentStatus.CLOSED)}')
 
-    return tournaments_service.update_players(tournament, participants_prev)
+    return await tournaments_service.update_players(tournament, participants_prev)
 
 
 @router.put('/{id}/knockout_start', response_model=t.TournamentKnockoutResponse)
-def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUpdate, user: User = Depends(get_current_user)):
+async def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUpdate, user: User = Depends(get_current_user)):
     if not is_admin(user) and not is_director(user):
         raise Unauthorized("User has insufficient privileges")
     tournament = tournaments_service.find(id)
@@ -171,7 +173,7 @@ def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUpdate, 
 
     tournament.status = TournamentStatus.CLOSED.value
     tournament.start_date = tournament_date.date
-    return tournaments_service.start_knockout(tournament, participants, user)
+    return await tournaments_service.start_knockout(tournament, participants, user)
 
 
 @router.get('/{id}/players', response_model=List[PlayerProfile])
@@ -181,7 +183,7 @@ def get_players_by_tournament_id(
 ):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("User has insufficient privileges")
-    
+
     try:
         return tournaments_service.get_players_by_tournament_id(id)
     except Exception:

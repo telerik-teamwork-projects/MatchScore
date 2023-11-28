@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 from common.exceptions import InternalServerError, BadRequest
+from emails.send_emails import send_player_match_email_async
 from models.enums import TournamentFormat
 from models.matches import Match, MatchResponse, MatchBase, MatchScoreUpdate, MatchDateUpdate, MatchPlayerUpdate, \
     MatchTournamentResponse
@@ -73,7 +74,7 @@ def find_participants(id: int, match_update: List[MatchPlayerUpdate] | List[Matc
         return participants
 
 
-def update_score(match: MatchBase, scores: List[MatchScoreUpdate], tournament=None):
+async def update_score(match: MatchBase, scores: List[MatchScoreUpdate], tournament=None):
     with get_connection() as conn:
         cursor = conn.cursor()
         try:
@@ -119,7 +120,7 @@ def update_score(match: MatchBase, scores: List[MatchScoreUpdate], tournament=No
             conn.commit()
             if tournament is not None:
                 if tournament.format == TournamentFormat.KNOCKOUT.value:
-                    _manage_knockout_match(match, s_updated, tournament, cursor)
+                    await _manage_knockout_match(match, s_updated, tournament, cursor)
                 _manage_winner(match, s_updated, tournament, cursor)
             conn.commit()
             return MatchResponse.from_query_result(match.id, match.date, match.format, p_updated, s_updated)
@@ -258,7 +259,8 @@ def get_by_tournament(params: tuple, tournament_id: int):
             for row in data)
 
 
-def _manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournament: DbTournament, cursor: Cursor):
+async def _manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournament: DbTournament,
+                                 cursor: Cursor):
     winner_id = score_updated[0][0]
     loser_id = score_updated[1][0]
     next_match_id = match.next_match
@@ -268,6 +270,7 @@ def _manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournam
         # insert winner as participant in the next tournament match
         cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
                        (winner_id, next_match_id))
+        await _send_knockout_match_email(cursor, tournament.id, winner_id)
     # manage third place match
     if tournament.third_place and match.round == tournament.rounds - 2:
         cursor.execute('SELECT id FROM matches WHERE tournaments_id = ? AND round = ?',
@@ -278,6 +281,7 @@ def _manage_knockout_match(match: MatchBase, score_updated: list[tuple], tournam
         # insert loser as participant in the third-place match
         cursor.execute('INSERT INTO players_matches(player_id, match_id) VALUES(?,?)',
                        (loser_id, match_third_place_id))
+        await _send_knockout_match_email(cursor, tournament.id, loser_id)
 
 
 def _manage_previous_update(match_id: int, w_id: int, l_id: int, cursor: Cursor):
@@ -320,3 +324,19 @@ def _manage_winner(match: MatchBase, score_updated: list[tuple], tournament: DbT
                                                 WHERE tournament_id = ? AND player_id in {tuple(winners)}''', (id,))
                 cursor.execute(f'''UPDATE players_tournaments SET won = 0
                                                 WHERE tournament_id = ? AND player_id not in {tuple(winners)}''', (id,))
+
+
+async def _send_knockout_match_email(cursor: Cursor, id: int, participant: int):
+    subject = "Match Notification"
+    cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
+                            WHERE p.id = ? AND p.user_id = u.id''', (participant,))
+    player = cursor.fetchone()
+    if player:
+        full_name, email = player
+        email_to = email
+        body = {
+            "title": "Congratulations! You've qualified to participate in the next phase of our tournament.",
+            "name": full_name,
+            "ctaLink": f"http://localhost:3000/tournaments/{id}"
+        }
+        await send_player_match_email_async(subject, email_to, body)

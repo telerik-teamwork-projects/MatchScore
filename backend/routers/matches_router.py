@@ -31,7 +31,7 @@ def create_match(match: Match, current_user: User = Depends(get_current_user)):
 
 
 @router.put('/{id}/score', response_model=MatchResponse)
-def update_score(id: int, match_score: List[MatchScoreUpdate], current_user: User = Depends(get_current_user)):
+async def update_score(id: int, match_score: List[MatchScoreUpdate], current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized('User has insufficient privileges')
     match = matches_service.find(id)
@@ -52,9 +52,9 @@ def update_score(id: int, match_score: List[MatchScoreUpdate], current_user: Use
         if tournament.format == TournamentFormat.KNOCKOUT.value:
             if match_score[0].score == match_score[1].score:
                 raise BadRequest('There are no draws in knockout tournaments!')
-        return matches_service.update_score(match, participants, tournament)
+        return await matches_service.update_score(match, participants, tournament)
 
-    return matches_service.update_score(match, participants)
+    return await matches_service.update_score(match, participants)
 
 
 @router.put('/{id}/date', response_model=MatchBase)

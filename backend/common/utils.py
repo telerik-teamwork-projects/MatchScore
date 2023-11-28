@@ -12,6 +12,7 @@ LIMIT = 10
 LIMIT_MATCH = 40
 LIMIT_MATCH_TOURNAMENT = 20
 
+
 def is_admin(user: User):
     if user.role == Role.ADMIN:
         return True
