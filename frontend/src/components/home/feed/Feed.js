@@ -4,6 +4,7 @@ import { Match } from "../../match/Match";
 import { useEffect, useState } from "react";
 import { getMatches } from "../../../services/matchesService";
 import { Pagination } from "../../pagination/Pagination";
+import { FadeLoader } from "react-spinners";
 
 export const Feed = () => {
     const [matchesData, setMatchesData] = useState({
@@ -13,13 +14,14 @@ export const Feed = () => {
             items_per_page: 10,
             total_pages: 1,
         },
+        loading: true,
     });
 
     const fetchData = async (page) => {
         try {
             const currentDate = new Date().toISOString();
             const matchesData = await getMatches(page, currentDate);
-            setMatchesData(matchesData);
+            setMatchesData({ ...matchesData, loading: false });
         } catch (error) {
             console.error(error);
         }
@@ -38,9 +40,18 @@ export const Feed = () => {
         <div className="feed">
             <div className="feedWrapper">
                 <div className="match">
-                    {matchesData?.matches.map((match) => (
-                        <Match match={match} key={match.id} />
-                    ))}
+                    {matchesData.loading ? (
+                        <div className="spinner-container">
+                            <FadeLoader
+                                color="darkgray"
+                                loading={true}
+                            />
+                        </div>
+                    ) : (
+                        matchesData?.matches.map((match) => (
+                            <Match match={match} key={match.id} />
+                        ))
+                    )}
                 </div>
                 {matchesData?.matches.length > 0 && (
                     <Pagination

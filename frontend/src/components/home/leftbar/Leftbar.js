@@ -4,6 +4,7 @@ import { TOURNAMENTS } from "../../../routes/routes";
 import { useEffect, useState } from "react";
 import { getAll } from "../../../services/tournamentService";
 import { Pagination } from "../../pagination/Pagination";
+import { FadeLoader } from "react-spinners";
 
 export const Leftbar = () => {
     const [tournamentsData, setTournamentsData] = useState({
@@ -13,12 +14,13 @@ export const Leftbar = () => {
             items_per_page: 10,
             total_pages: 1,
         },
+        loading: true,
     });
 
     const fetchData = async (page) => {
         try {
             const tournamentsResponse = await getAll(page);
-            setTournamentsData(tournamentsResponse);
+            setTournamentsData({ ...tournamentsResponse, loading: false });
         } catch (error) {
             console.error(error);
         }
@@ -39,16 +41,22 @@ export const Leftbar = () => {
                     Tournaments
                 </Link>
                 <ul className="leftbarList">
-                    {tournamentsData?.tournaments.map((tournament) => (
-                        <li key={tournament.id} className="leftbarListItem">
-                            <Link
-                                to={`${TOURNAMENTS}/${tournament.id}`}
-                                className="link"
-                            >
-                                <span>{tournament.title}</span>
-                            </Link>
-                        </li>
-                    ))}
+                    {tournamentsData.loading ? (
+                        <div className="spinner-container">
+                            <FadeLoader color="darkgray" loading={true} />
+                        </div>
+                    ) : (
+                        tournamentsData.tournaments.map((tournament) => (
+                            <li key={tournament.id} className="leftbarListItem">
+                                <Link
+                                    to={`${TOURNAMENTS}/${tournament.id}`}
+                                    className="link"
+                                >
+                                    <span>{tournament.title}</span>
+                                </Link>
+                            </li>
+                        ))
+                    )}
                 </ul>
             </div>
             <Pagination

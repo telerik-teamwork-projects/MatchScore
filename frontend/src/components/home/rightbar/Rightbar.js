@@ -4,6 +4,7 @@ import { PLAYERS } from "../../../routes/routes";
 import { useEffect, useState } from "react";
 import { getAll } from "../../../services/playerService";
 import { Pagination } from "../../pagination/Pagination";
+import { FadeLoader } from "react-spinners";
 
 export const Rightbar = () => {
     const [playersData, setPlayersData] = useState({
@@ -13,12 +14,13 @@ export const Rightbar = () => {
             items_per_page: 10,
             total_pages: 1,
         },
+        loading: true,
     });
 
     const fetchData = async (page) => {
         try {
             const playersResponse = await getAll(page);
-            setPlayersData(playersResponse);
+            setPlayersData({ ...playersResponse, loading: false });
         } catch (error) {
             console.error(error);
         }
@@ -26,7 +28,7 @@ export const Rightbar = () => {
 
     useEffect(() => {
         fetchData(playersData.pagination.page);
-    }, []);
+    }, [playersData.pagination.page]);
 
     const handlePageChange = (pageNumber) => {
         fetchData(pageNumber);
@@ -37,16 +39,22 @@ export const Rightbar = () => {
             <div className="rightbarWrapper">
                 <p className="rightbarTitle">Players</p>
                 <ul className="rightbarList">
-                    {playersData?.players.map((player) => (
-                        <li key={player.id} className="rightbarListItem">
-                            <Link
-                                to={`${PLAYERS}/${player.id}`}
-                                className="link"
-                            >
-                                <span>{player.full_name}</span>
-                            </Link>
-                        </li>
-                    ))}
+                    {playersData.loading ? (
+                        <div className="spinner-container">
+                            <FadeLoader color="darkgray" loading={true} />
+                        </div>
+                    ) : (
+                        playersData?.players.map((player) => (
+                            <li key={player.id} className="rightbarListItem">
+                                <Link
+                                    to={`${PLAYERS}/${player.id}`}
+                                    className="link"
+                                >
+                                    <span>{player.full_name}</span>
+                                </Link>
+                            </li>
+                        ))
+                    )}
                 </ul>
                 <Pagination
                     handlePageChange={handlePageChange}

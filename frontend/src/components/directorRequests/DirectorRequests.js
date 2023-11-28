@@ -1,5 +1,5 @@
 import "./directorRequests.scss";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PROFILE } from "../../routes/routes";
 import {
@@ -8,10 +8,18 @@ import {
 } from "../../services/requestService";
 import { ErrorMessage } from "../responseMessages/errorMessages/ErrorMessages";
 import { SuccessMessage } from "../responseMessages/successMessages/SuccessMessages";
+import { FadeLoader } from "react-spinners";
 
 export const DirectorRequests = ({ requests, setRequests, onClose, token }) => {
     const [success, setSuccess] = useState(null);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setTimeout(() => {
+            setLoading(false);
+        }, 500);
+    }, []);
 
     const onAccept = async (requestId) => {
         try {
@@ -48,48 +56,54 @@ export const DirectorRequests = ({ requests, setRequests, onClose, token }) => {
         <div className="directorRequests">
             <div className="directorRequestsWrapper">
                 <h2>Director Requests</h2>
-                <ul>
-                    {requests?.map((request) => (
-                        <li key={request.id}>
-                            <div>
-                                <strong>Email:</strong>{" "}
-                                <Link
-                                    className="link"
-                                    onClick={onClose}
-                                    to={`${PROFILE}/${request.user_id}`}
-                                >
-                                    {request.email}
-                                </Link>
-                            </div>
-                            <div>
-                                <strong>Status:</strong> {request.status}
-                            </div>
-                            {request.status === "pending" && (
-                                <>
-                                    <hr />
-                                    <div className="requestBtns">
-                                        <button
-                                            className="requestAccept"
-                                            onClick={() => {
-                                                onAccept(request.id);
-                                            }}
-                                        >
-                                            Accept
-                                        </button>
-                                        <button
-                                            className="requestReject"
-                                            onClick={() => {
-                                                onReject(request.id);
-                                            }}
-                                        >
-                                            Reject
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </li>
-                    ))}
-                </ul>
+                {loading ? (
+                    <div className="spinner-container">
+                        <FadeLoader color="darkgray" loading={true} />
+                    </div>
+                ) : (
+                    <ul>
+                        {requests?.map((request) => (
+                            <li key={request.id}>
+                                <div>
+                                    <strong>Email:</strong>{" "}
+                                    <Link
+                                        className="link"
+                                        onClick={onClose}
+                                        to={`${PROFILE}/${request.user_id}`}
+                                    >
+                                        {request.email}
+                                    </Link>
+                                </div>
+                                <div>
+                                    <strong>Status:</strong> {request.status}
+                                </div>
+                                {request.status === "pending" && (
+                                    <>
+                                        <hr />
+                                        <div className="requestBtns">
+                                            <button
+                                                className="requestAccept"
+                                                onClick={() => {
+                                                    onAccept(request.id);
+                                                }}
+                                            >
+                                                Accept
+                                            </button>
+                                            <button
+                                                className="requestReject"
+                                                onClick={() => {
+                                                    onReject(request.id);
+                                                }}
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                )}
                 {error ? (
                     <ErrorMessage message={error} />
                 ) : (
