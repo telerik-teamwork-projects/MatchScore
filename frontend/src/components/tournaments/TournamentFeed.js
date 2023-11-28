@@ -29,7 +29,7 @@ export const TournamentFeed = () => {
 
     useEffect(() => {
         fetchData(tournamentsData.pagination.page);
-    }, []);
+    }, [tournamentsData.pagination.page]);
 
     const handlePageChange = (pageNumber) => {
         fetchData(pageNumber);

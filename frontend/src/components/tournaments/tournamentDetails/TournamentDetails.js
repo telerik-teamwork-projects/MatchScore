@@ -2,10 +2,7 @@ import "./tournamentDetails.scss";
 
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-    getOne,
-    startKnockoutTournament,
-} from "../../../services/tournamentService";
+import { getOne, getWeather } from "../../../services/tournamentService";
 import { TournamentKnockoutTree } from "../tournamentKnockoutTree/TournamentKnockoutTree";
 import { TournamentLeagueTree } from "../tournamentLeagueTree/TournamentLeagueTree";
 import { PROFILE } from "../../../routes/routes";
@@ -13,6 +10,8 @@ import { TournamentRequest } from "../tournamentRequests/TournamentRequest";
 import { AuthContext } from "../../../contexts/authContext";
 import { getTournamentRequests } from "../../../services/requestService";
 import { StartDateModal } from "../../startDateModal/StartDateModal";
+import { EditStartDate } from "../../editStartDate/EditStartDate";
+import { EditTournamentPlayers } from "../../editTournamentPlayers/EditTournamentPlayers";
 
 export const TournamentDetails = () => {
     const { tournamentId } = useParams();
@@ -23,6 +22,11 @@ export const TournamentDetails = () => {
     const [requestsResult, setRequestsResult] = useState(null);
 
     const [startModalOpen, setStartModalOpen] = useState(false);
+
+    const [editPlayersOpen, setEditPlayersOpen] = useState(false);
+    const [editDateOpen, setEditDateOpen] = useState(false);
+
+    const [weather, setWeather] = useState(null);
 
     const closeRequestModal = () => {
         setRequestModalOpen(false);
@@ -43,8 +47,16 @@ export const TournamentDetails = () => {
         }
     };
 
+    const openEditPlayersModal = () => {
+        setEditPlayersOpen(true);
+    };
+
     const openStartModal = () => {
         setStartModalOpen(true);
+    };
+
+    const openEditDate = () => {
+        setEditDateOpen(true);
     };
 
     useEffect(() => {
@@ -52,6 +64,12 @@ export const TournamentDetails = () => {
             const fetchData = async () => {
                 const tournamentData = await getOne(tournamentId);
                 setTournament(tournamentData);
+                if (tournamentData && tournamentData.location) {
+                    const weatherData = await getWeather(
+                        tournamentData.location
+                    );
+                    setWeather(weatherData);
+                }
             };
             fetchData();
         } catch (error) {
@@ -68,68 +86,105 @@ export const TournamentDetails = () => {
                     : "No description"}
             </p>
             <div className="tournamentData">
-                <div className="tournamentOwner">
-                    <p>Owner:</p>
-                    <Link
-                        className="link"
-                        to={`${PROFILE}/${tournament?.owner.id}`}
-                    >
-                        {tournament?.owner.username}
-                    </Link>
-                </div>
-                <div className="tournamentStatus">
-                    <p>Status:</p>
-                    <span>{tournament?.status}</span>
-                </div>
-                <div className="tournamentFormat">
-                    <p>Type of Tournament:</p>
-                    <span>{tournament?.format}</span>
-                </div>
-                <div className="tournamentMatchFormat">
-                    <p>Match Format:</p>
-                    <span>{tournament?.match_format}</span>
-                </div>
-                <div className="tournamentRounds">
-                    <p>Rounds:</p>
-                    <span>{tournament?.rounds}</span>
-                </div>
-                <div className="tournamentThirdPlace">
-                    <p>Third Place Award:</p>
-                    <span>{tournament?.third_place ? "Yes" : "No"}</span>
-                </div>
+                <div className="tournamentDataLeft">
+                    <div className="tournamentOwner">
+                        <p>Owner:</p>
+                        <Link
+                            className="link"
+                            to={`${PROFILE}/${tournament?.owner.id}`}
+                        >
+                            {tournament?.owner.username}
+                        </Link>
+                    </div>
+                    <div className="tournamentStatus">
+                        <p>Status:</p>
+                        <span>{tournament?.status}</span>
+                    </div>
+                    <div className="tournamentFormat">
+                        <p>Type of Tournament:</p>
+                        <span>{tournament?.format}</span>
+                    </div>
+                    <div className="tournamentMatchFormat">
+                        <p>Match Format:</p>
+                        <span>{tournament?.match_format}</span>
+                    </div>
+                    <div className="tournamentRounds">
+                        <p>Rounds:</p>
+                        <span>{tournament?.rounds}</span>
+                    </div>
+                    <div className="tournamentThirdPlace">
+                        <p>Third Place Award:</p>
+                        <span>{tournament?.third_place ? "Yes" : "No"}</span>
+                    </div>
 
-                <div className="tournamentLocation">
-                    <p>Location:</p>
-                    <span>{tournament?.location}</span>
+                    <div className="tournamentLocation">
+                        <p>Location:</p>
+                        <span>{tournament?.location}</span>
+                    </div>
+                    <div className="tournamentDates">
+                        <p>Date:</p>
+                        <span>
+                            {tournament?.start_date.slice(0, 10)} -{" "}
+                            {tournament?.end_date &&
+                                tournament?.end_date.slice(0, 10)}
+                        </span>
+                    </div>
                 </div>
-                <div className="tournamentDates">
-                    <p>Date:</p>
-                    <span>
-                        {tournament?.start_date.slice(0, 10)} -{" "}
-                        {tournament?.end_date &&
-                            tournament?.end_date.slice(0, 10)}
-                    </span>
-                </div>
-                {(user?.id === tournament?.owner.id ||
-                    user?.role === "admin") && (
-                    <div className="requestsBtns">
-                        <button
-                            className="openRequestsBtn"
-                            type="button"
-                            onClick={(e) => onRequests(e)}
-                        >
-                            Show Requests
-                        </button>
-                        <button
-                            onClick={openStartModal}
-                            className="startTournamentBtn"
-                            type="button"
-                        >
-                            Start Tournament
-                        </button>
+                {weather && (
+                    <div className="tournamentDataRight">
+                        <div className="weatherDetails">
+                            <p>Weather:</p>
+                            <span>{weather.description}</span>
+                            <div className="weatherIcons">
+                                <span role="img" aria-label="weather-symbol">
+                                    {weather.symbol}
+                                </span>
+                            </div>
+                            <div className="temperatureDetails">
+                                <p>Temperature:</p>
+                                <span>{weather.temperature}</span>
+                            </div>
+                            <div className="feelsLikeDetails">
+                                <p>Feels Like:</p>
+                                <span>{weather.feels_like}</span>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
+            {(user?.id === tournament?.owner.id || user?.role === "admin") && (
+                <div className="requestsBtns">
+                    <button
+                        className="openRequestsBtn"
+                        type="button"
+                        onClick={(e) => onRequests(e)}
+                    >
+                        Show Requests
+                    </button>
+                    <button
+                        onClick={openStartModal}
+                        className="startTournamentBtn"
+                        type="button"
+                    >
+                        Start Tournament
+                    </button>
+                    <button
+                        className="editPlayersBtn"
+                        type="button"
+                        onClick={openEditPlayersModal}
+                    >
+                        Edit Players
+                    </button>
+                    <button
+                        className="editDateBtn"
+                        type="button"
+                        onClick={openEditDate}
+                    >
+                        Edit Start Date
+                    </button>
+                </div>
+            )}
+            <hr />
 
             {tournament?.format === "knockout" && (
                 <div>
@@ -162,6 +217,22 @@ export const TournamentDetails = () => {
                     tournamentId={tournamentId}
                     token={token}
                     onClose={() => setStartModalOpen(false)}
+                />
+            )}
+
+            {editDateOpen && (
+                <EditStartDate
+                    tournamentId={tournamentId}
+                    token={token}
+                    onClose={() => setEditDateOpen(false)}
+                />
+            )}
+
+            {editPlayersOpen && (
+                <EditTournamentPlayers
+                    tournamentId={tournamentId}
+                    token={token}
+                    onClose={() => setEditPlayersOpen(false)}
                 />
             )}
         </div>

@@ -3,7 +3,7 @@ import "./playerProfile.scss";
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Leftbar } from "../../components/home/leftbar/Leftbar";
-import { getOne } from "../../services/playerService";
+import { getOne, getAchievements } from "../../services/playerService";
 import { BASE_PATH } from "../../routes/paths";
 import { Rightbar } from "../home/rightbar/Rightbar";
 import { AuthContext } from "../../contexts/authContext";
@@ -13,12 +13,15 @@ export const PlayerProfile = () => {
     const { playerId } = useParams();
     const { user } = useContext(AuthContext);
     const [playerProfile, setPlayerProfile] = useState(null);
+    const [playerAchievements, setPlayerAchievements] = useState(null);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 const userData = await getOne(playerId);
                 setPlayerProfile(userData);
+                const achievementsData = await getAchievements(playerId);
+                setPlayerAchievements(achievementsData);
             } catch (error) {
                 console.error(error);
             }
@@ -54,7 +57,9 @@ export const PlayerProfile = () => {
                             )}
                         </div>
                         {(playerProfile?.user_id === user?.id ||
-                            user?.role === "admin" || (!playerProfile?.user_id && user?.role === "director")) && (
+                            user?.role === "admin" ||
+                            (!playerProfile?.user_id &&
+                                user?.role === "director")) && (
                             <div className="playerProfileBtns">
                                 <Link
                                     to={`${PLAYERS}/${playerId}/update`}
@@ -62,12 +67,12 @@ export const PlayerProfile = () => {
                                 >
                                     Edit
                                 </Link>
-                                <Link
+                                {/* <Link
                                     className="playerProfileDeleteBtn"
                                     // onClick={onDelete}
                                 >
                                     Delete
-                                </Link>
+                                </Link> */}
                             </div>
                         )}
                         {playerProfile?.user_id && (
@@ -90,6 +95,7 @@ export const PlayerProfile = () => {
                     <div className="playerProfileBottom">
                         <div className="playerProfileBottomLeft">
                             <div className="playerProfileWrapper">
+                                <h3>Player Info</h3>
                                 <div className="playerMain">
                                     <div className="playerMainFullName">
                                         <p>Full Name:</p>
@@ -114,7 +120,39 @@ export const PlayerProfile = () => {
                             </div>
                         </div>
                         <div className="playerProfileBottomRight">
-                            <h2>Achievements</h2>
+                            <div className="playerAchievementsWrapper">
+                                <h3>Player Achievements</h3>
+
+                                <div className="playerTournaments">
+                                    <p>Tournaments Played</p>
+                                    <span>
+                                        {playerAchievements?.tournaments_played ||
+                                            "N/A"}
+                                    </span>
+                                </div>
+
+                                <div className="playerTournaments">
+                                    <p>Tournaments Won</p>
+                                    <span>
+                                        {playerAchievements?.tournaemnts_won ||
+                                            "N/A"}
+                                    </span>
+                                </div>
+                                <div className="playerTournaments">
+                                    <p>Matches Played</p>
+                                    <span>
+                                        {playerAchievements?.matches_played ||
+                                            "N/A"}
+                                    </span>
+                                </div>
+                                <div className="playerMatches">
+                                    <p>Matches Won</p>
+                                    <span>
+                                        {playerAchievements?.matches_won ||
+                                            "N/A"}
+                                    </span>{" "}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

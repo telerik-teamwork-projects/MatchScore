@@ -93,6 +93,7 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                                         {user?.role === "admin" ||
                                         user?.role === "director" ? (
                                             <input
+                                                name="score"
                                                 type="number"
                                                 value={
                                                     match.participants[0]
@@ -122,6 +123,7 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
                                         {user?.role === "admin" ||
                                         user?.role === "director" ? (
                                             <input
+                                                name="score"
                                                 type="number"
                                                 value={
                                                     match.participants[1]

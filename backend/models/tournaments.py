@@ -290,9 +290,9 @@ class TournamentDateUpdate(BaseModel):
 
 
 class TournamentPlayerUpdate(BaseModel):
-    player_id: int | None = None
     player: str
     player_prev: str
+    player_id: int | None = None
 
 
 class TournamentPagination(BaseModel):

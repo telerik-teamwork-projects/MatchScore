@@ -101,3 +101,66 @@ export const getLeagueStandings = async (tournamentId) => {
         throw error;
     }
 };
+
+export const updateStartDate = async (tournamentId, token, startDate) => {
+    try {
+        const response = await axios.put(
+            `${BASE_PATH}/tournaments/${tournamentId}/date`,
+            startDate,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updatePlayers = async (tournamentId, token, players) => {
+    try {
+        const response = await axios.put(
+            `${BASE_PATH}/tournaments/${tournamentId}/players`,
+            players,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getPlayersByTournamentId = async (tournamentId, token) => {
+    try {
+        const response = await axios.get(
+            `${BASE_PATH}/tournaments/${tournamentId}/players`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getWeather = async (location) => {
+    const city = location?.split(", ")[0].trim();
+
+    try {
+        const response = await axios.get(`${BASE_PATH}/weather/`, {
+            params: { location: city },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

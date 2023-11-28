@@ -66,7 +66,7 @@ export const CreateKnockoutModal = ({ user, token, onClose }) => {
             };
 
             await createKnockout(formDataWithUserId, token);
-            onClose();
+            window.location.reload();
         } catch (error) {
             setError(error);
         }

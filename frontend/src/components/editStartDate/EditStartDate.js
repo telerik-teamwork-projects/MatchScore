@@ -1,8 +1,8 @@
-import "./startDateModal.scss";
+import "./editStartDate.scss";
 import { useState } from "react";
-import { startKnockoutTournament } from "../../services/tournamentService";
+import { updateStartDate } from "../../services/tournamentService";
 
-export const StartDateModal = ({ tournamentId, token, onClose }) => {
+export const EditStartDate = ({ tournamentId, token, onClose }) => {
     const [formData, setFormData] = useState({
         start_date: "",
     });
@@ -16,7 +16,7 @@ export const StartDateModal = ({ tournamentId, token, onClose }) => {
         const formattedStartDate = `${formData.start_date}T00:00:00`;
 
         try {
-            await startKnockoutTournament(tournamentId, token, {
+            await updateStartDate(tournamentId, token, {
                 date: formattedStartDate,
             });
             window.location.reload();
@@ -31,7 +31,7 @@ export const StartDateModal = ({ tournamentId, token, onClose }) => {
                 className="startDateContainer"
                 onSubmit={(e) => onTournamentStart(e)}
             >
-                <h3>Select Date</h3>
+                <h3>Change Date</h3>
                 <input
                     placeholder="Start Date"
                     className="startDateInput"
@@ -43,7 +43,7 @@ export const StartDateModal = ({ tournamentId, token, onClose }) => {
                 />
                 <div className="startDateBtns">
                     <button className="submitBtn" type="submit">
-                        Start Tournament
+                        Edit Start Date
                     </button>
                     <button
                         className="closeBtn"

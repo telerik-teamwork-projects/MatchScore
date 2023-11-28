@@ -17,7 +17,6 @@ def get_users(username):
     for row in result:
         user_data.append(User.from_query_result(*row))
 
-    print(user_data)
     return user_data
 
 

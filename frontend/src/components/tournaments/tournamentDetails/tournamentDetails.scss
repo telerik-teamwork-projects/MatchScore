@@ -1,5 +1,5 @@
 .tournamentDetails {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #fff;
@@ -18,130 +18,154 @@
 
     .tournamentData {
         display: flex;
-        flex-direction: column;
         gap: 5px;
+        justify-content: space-between;
+        padding: 5px 30px;
         margin-bottom: 30px;
 
-        p {
-            margin: 3px;
-        }
-
-        .tournamentOwner {
+        .tournamentDataLeft {
+            flex: 1;
             display: flex;
-            align-items: center;
-            gap: 5px;
-
-            .link {
-                font-size: 1.5rem;
-                font-weight: 700;
+            flex-direction: column;
+            gap: 10px;
+            p {
+                margin: 3px;
             }
 
-            .link:hover {
-                color: #555;
-            }
-        }
+            .tournamentOwner {
+                display: flex;
+                align-items: center;
+                gap: 5px;
 
-        .tournamentStatus {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+                .link {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                }
 
-            span {
-                font-weight: 700;
-            }
-        }
-
-        .tournamentFormat {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-
-            span {
-                font-weight: 700;
-            }
-        }
-
-        .tournamentMatchFormat {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-
-            span {
-                font-weight: 700;
-            }
-        }
-
-        .tournamentRounds {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-
-            span {
-                font-weight: 700;
-            }
-        }
-
-        .tournamentThirdPlace {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-
-            span {
-                font-weight: 700;
-            }
-        }
-        .tournamentLocation {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-
-            span {
-                font-weight: 700;
-            }
-        }
-        .tournamentDates {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-
-            span {
-                font-weight: 700;
-            }
-        }
-
-        .requestsBtns {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            .openRequestsBtn {
-                background: #007bff;
-                color: #fff;
-                border: none;
-                border-radius: 5px;
-                padding: 6px 12px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-
-                &:hover {
-                    background: #0056b3;
+                .link:hover {
+                    color: #555;
                 }
             }
-            .startTournamentBtn {
-                background: #007bff;
-                color: #fff;
-                border: none;
-                border-radius: 5px;
-                padding: 6px 12px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: background-color 0.3s;
 
-                &:hover {
-                    background: #0056b3;
+            .tournamentStatus {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
                 }
+            }
+
+            .tournamentFormat {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
+                }
+            }
+
+            .tournamentMatchFormat {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
+                }
+            }
+
+            .tournamentRounds {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
+                }
+            }
+
+            .tournamentThirdPlace {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
+                }
+            }
+            .tournamentLocation {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
+                }
+            }
+            .tournamentDates {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                span {
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .tournamentDataRight {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+
+            .weatherDetails {
+                background-color: #f0f0f0;
+                padding: 30px;
+                border-radius: 8px;
+
+                p {
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                }
+
+                span {
+                    margin-bottom: 5px;
+                }
+
+                .weatherIcons {
+                    font-size: 24px;
+                    margin-bottom: 10px;
+                }
+            }
+        }
+    }
+    .requestsBtns {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        .openRequestsBtn,
+        .startTournamentBtn,
+        .editPlayersBtn,
+        .editDateBtn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+
+            &:hover {
+                background: #0056b3;
             }
         }
     }
@@ -171,5 +195,8 @@
             background-color: #297fb8;
             border-color: #297fb8;
         }
+    }
+    hr {
+        margin-bottom: 20px;
     }
 }

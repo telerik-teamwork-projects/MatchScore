@@ -168,43 +168,37 @@ export const Profile = () => {
                     </div>
                     {profile?.player && (
                         <div className="profileFeedBottom">
-                            <div className="profileFeedBottomLeft">
-                                <div className="playerProfileWrapper">
-                                    <div className="playerTop">
-                                        <h2>Player Profile</h2>
+                            <div className="playerProfileWrapper">
+                                <div className="playerTop">
+                                    <h2>Player Profile</h2>
+                                </div>
+                                <div className="playerMain">
+                                    <div className="playerMainFullName">
+                                        <p>Full Name:</p>
+                                        <Link
+                                            className="playerMainFullNameLink"
+                                            to={`${PLAYERS}/${profile.player.id}`}
+                                        >
+                                            <span>
+                                                {profile?.player.full_name ||
+                                                    "N/A"}
+                                            </span>
+                                        </Link>
                                     </div>
-                                    <div className="playerMain">
-                                        <div className="playerMainFullName">
-                                            <p>Full Name:</p>
-                                            <Link
-                                                className="playerMainFullNameLink"
-                                                to={`${PLAYERS}/${profile.player.id}`}
-                                            >
-                                                <span>
-                                                    {profile?.player
-                                                        .full_name || "N/A"}
-                                                </span>
-                                            </Link>
-                                        </div>
-                                        <div className="playerMainCountry">
-                                            <p>Country:</p>
-                                            <span>
-                                                {profile?.player.country ||
-                                                    "N/A"}
-                                            </span>
-                                        </div>
-                                        <div className="playerMainSportsClub">
-                                            <p>Sports Club:</p>
-                                            <span>
-                                                {profile?.player.sports_club ||
-                                                    "N/A"}
-                                            </span>
-                                        </div>
+                                    <div className="playerMainCountry">
+                                        <p>Country:</p>
+                                        <span>
+                                            {profile?.player.country || "N/A"}
+                                        </span>
+                                    </div>
+                                    <div className="playerMainSportsClub">
+                                        <p>Sports Club:</p>
+                                        <span>
+                                            {profile?.player.sports_club ||
+                                                "N/A"}
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="profileFeedBottomRight">
-                                <h2>Achievements</h2>
                             </div>
                         </div>
                     )}

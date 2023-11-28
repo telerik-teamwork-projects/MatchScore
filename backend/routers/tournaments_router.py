@@ -9,6 +9,7 @@ from models.enums import TournamentFormat, TournamentStatus
 import models.tournaments as t
 from models.pagination import Pagination
 from models.users import User
+from models.players import PlayerProfile
 from services import tournaments_service
 
 router = APIRouter()
@@ -173,3 +174,17 @@ async def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUp
     tournament.status = TournamentStatus.CLOSED.value
     tournament.start_date = tournament_date.date
     return await tournaments_service.start_knockout(tournament, participants, user)
+
+
+@router.get('/{id}/players', response_model=List[PlayerProfile])
+def get_players_by_tournament_id(
+    id:int,
+    current_user: User = Depends(get_current_user)
+):
+    if not is_admin(current_user) and not is_director(current_user):
+        raise Unauthorized("User has insufficient privileges")
+
+    try:
+        return tournaments_service.get_players_by_tournament_id(id)
+    except Exception:
+        raise InternalServerError("Retrieving players failed")
