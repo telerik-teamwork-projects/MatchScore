@@ -153,12 +153,17 @@ export const getPlayersByTournamentId = async (tournamentId, token) => {
 };
 
 export const getWeather = async (location) => {
-    const city = location?.split(", ")[0].trim();
+    const city = location?.split(",")[0].trim();
 
     try {
-        const response = await axios.get(`${BASE_PATH}/weather/`, {
-            params: { location: city },
-        });
+        const response = await axios.post(`${BASE_PATH}/weather/`,
+        {city: city},
+            {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
         return response.data;
     } catch (error) {
         throw error;

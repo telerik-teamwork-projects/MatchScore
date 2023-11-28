@@ -21,7 +21,7 @@ CLEAR = range(800, 801)
 CLOUDY = range(801, 900)
 
 
-@router.get('/', response_model=Weather)
+@router.post('/', response_model=Weather)
 def get_weather(request: Request, location: Geolocation | None = None):
     if location is not None:
         if location.city is not None:
