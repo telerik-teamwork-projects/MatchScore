@@ -129,7 +129,7 @@ async def update_score(match: MatchBase, scores: List[MatchScoreUpdate], tournam
             raise err
         except Error as err:
             conn.rollback()
-            logging.exception(err.msg)
+            logging.exception(err.args[0])
             raise InternalServerError("Something went wrong")
 
 
