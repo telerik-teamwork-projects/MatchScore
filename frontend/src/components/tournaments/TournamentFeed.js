@@ -16,12 +16,13 @@ export const TournamentFeed = () => {
             items_per_page: 10,
             total_pages: 1,
         },
+        loading: true,
     });
 
     const fetchData = async (page) => {
         try {
             const tournamentsResponse = await getAll(page);
-            setTournamentsData(tournamentsResponse);
+            setTournamentsData({ ...tournamentsResponse, loading: false });
         } catch (error) {
             console.error(error);
         }
@@ -86,6 +87,7 @@ export const TournamentFeed = () => {
                     token={token}
                     handlePageChange={handlePageChange}
                     tournamentsData={tournamentsData}
+                    loading={tournamentsData.loading}
                 />
                 {createKnockoutModalOpen && (
                     <CreateKnockoutModal
@@ -102,6 +104,7 @@ export const TournamentFeed = () => {
                         token={token}
                         setTournaments={setTournamentsData.tournaments}
                         onClose={closeLeagueCreateModal}
+                        loadn
                     />
                 )}
             </div>

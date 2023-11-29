@@ -3,17 +3,20 @@ import { getKnockoutRounds } from "../../../services/tournamentService";
 import "./tournamentKnockoutTree.scss";
 import { updateMatchScore } from "../../../services/matchesService";
 import { AuthContext } from "../../../contexts/authContext";
+import { FadeLoader } from "react-spinners";
 
 export const TournamentKnockoutTree = ({ tournamentId, token }) => {
     const { user } = useContext(AuthContext);
 
     const [tournamentData, setTournamentData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchTournamentData = async () => {
             try {
                 const response = await getKnockoutRounds(tournamentId);
                 setTournamentData(response.rounds || []);
+                setLoading(false);
             } catch (error) {
                 console.error("Error fetching tournament data:", error);
             }
@@ -77,94 +80,109 @@ export const TournamentKnockoutTree = ({ tournamentId, token }) => {
     };
     return (
         <div id="bracket">
-            {tournamentData.map((round, roundIndex) => (
-                <div key={roundIndex} className={`round round-${round.round}`}>
-                    <div className="round-details">
-                        {round.round}
-                        <br />
-                    </div>
-
-                    {round.matches.map((match, matchIndex) => (
-                        <ul key={match.match_id} className="matchup">
-                            <li className="team team-top">
-                                {match.participants[0] && (
-                                    <>
-                                        {match.participants[0].player}
-                                        {user?.role === "admin" ||
-                                        user?.role === "director" ? (
-                                            <input
-                                                name="score"
-                                                type="number"
-                                                value={
-                                                    match.participants[0]
-                                                        .score || 0
-                                                }
-                                                onChange={(e) =>
-                                                    handleScoreChange(
-                                                        e,
-                                                        roundIndex,
-                                                        matchIndex,
-                                                        0
-                                                    )
-                                                }
-                                            />
-                                        ) : (
-                                            <span>
-                                                {match.participants[0].score}
-                                            </span>
-                                        )}
-                                    </>
-                                )}
-                            </li>
-                            <li className="team team-bottom">
-                                {match.participants[1] && (
-                                    <>
-                                        {match.participants[1].player}
-                                        {user?.role === "admin" ||
-                                        user?.role === "director" ? (
-                                            <input
-                                                name="score"
-                                                type="number"
-                                                value={
-                                                    match.participants[1]
-                                                        .score || 0
-                                                }
-                                                onChange={(e) =>
-                                                    handleScoreChange(
-                                                        e,
-                                                        roundIndex,
-                                                        matchIndex,
-                                                        1
-                                                    )
-                                                }
-                                            />
-                                        ) : (
-                                            <span>
-                                                {match.participants[1].score}
-                                            </span>
-                                        )}
-                                    </>
-                                )}
-                            </li>
-                            {(user?.role === "admin" ||
-                                user?.role === "director") && (
-                                <button
-                                    onClick={() =>
-                                        handleUpdateScore(
-                                            roundIndex,
-                                            matchIndex,
-                                            match.participants[0],
-                                            match.participants[1]
-                                        )
-                                    }
-                                >
-                                    Update Score
-                                </button>
-                            )}
-                        </ul>
-                    ))}
+            {loading ? (
+                <div className="spinner-container">
+                    <FadeLoader color="darkgray" loading={true} />
                 </div>
-            ))}
+            ) : (
+                tournamentData.map((round, roundIndex) => (
+                    <div
+                        key={roundIndex}
+                        className={`round round-${round.round}`}
+                    >
+                        <div className="round-details">
+                            {round.round}
+                            <br />
+                        </div>
+
+                        {round.matches.map((match, matchIndex) => (
+                            <ul key={match.match_id} className="matchup">
+                                <li className="team team-top">
+                                    {match.participants[0] && (
+                                        <>
+                                            {match.participants[0].player}
+                                            {user?.role === "admin" ||
+                                            user?.role === "director" ? (
+                                                <input
+                                                    name="score"
+                                                    type="number"
+                                                    value={
+                                                        match.participants[0]
+                                                            .score || 0
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleScoreChange(
+                                                            e,
+                                                            roundIndex,
+                                                            matchIndex,
+                                                            0
+                                                        )
+                                                    }
+                                                />
+                                            ) : (
+                                                <span>
+                                                    {
+                                                        match.participants[0]
+                                                            .score
+                                                    }
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                                </li>
+                                <li className="team team-bottom">
+                                    {match.participants[1] && (
+                                        <>
+                                            {match.participants[1].player}
+                                            {user?.role === "admin" ||
+                                            user?.role === "director" ? (
+                                                <input
+                                                    name="score"
+                                                    type="number"
+                                                    value={
+                                                        match.participants[1]
+                                                            .score || 0
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleScoreChange(
+                                                            e,
+                                                            roundIndex,
+                                                            matchIndex,
+                                                            1
+                                                        )
+                                                    }
+                                                />
+                                            ) : (
+                                                <span>
+                                                    {
+                                                        match.participants[1]
+                                                            .score
+                                                    }
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                                </li>
+                                {(user?.role === "admin" ||
+                                    user?.role === "director") && (
+                                    <button
+                                        onClick={() =>
+                                            handleUpdateScore(
+                                                roundIndex,
+                                                matchIndex,
+                                                match.participants[0],
+                                                match.participants[1]
+                                            )
+                                        }
+                                    >
+                                        Update Score
+                                    </button>
+                                )}
+                            </ul>
+                        ))}
+                    </div>
+                ))
+            )}
         </div>
     );
 };

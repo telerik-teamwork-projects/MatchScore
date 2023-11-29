@@ -152,7 +152,7 @@ export const TournamentDetails = () => {
                     </div>
                 )}
             </div>
-            {(user?.id === tournament?.owner.id || user?.role === "admin") && (
+            {user && (user.role === "admin" || user.role === "director") && (
                 <div className="requestsBtns">
                     <button
                         className="openRequestsBtn"
@@ -184,6 +184,7 @@ export const TournamentDetails = () => {
                     </button>
                 </div>
             )}
+
             <hr />
 
             {tournament?.format === "knockout" && (
