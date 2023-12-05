@@ -23,7 +23,7 @@ active_sessions = {}
 
 def create_token(user: User) -> str:
     current_time = datetime.utcnow()
-    expiration_time = current_time + timedelta(minutes=60)
+    expiration_time = current_time + timedelta(days=30)
 
     payload = {
         "id": user.get("id"),
@@ -72,7 +72,7 @@ def refresh_token(old_token: str) -> str:
 
         # Update the expiration time (refresh the token)
         current_time = datetime.utcnow()
-        expiration_time = current_time + timedelta(minutes=60)
+        expiration_time = current_time + timedelta(days=30)
 
         new_payload = {
             "id": payload.get("id"),

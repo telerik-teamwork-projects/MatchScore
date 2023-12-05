@@ -134,7 +134,7 @@ export const PlayerProfile = () => {
                                 <div className="playerTournaments">
                                     <p>Tournaments Won</p>
                                     <span>
-                                        {playerAchievements?.tournaemnts_won ||
+                                        {playerAchievements?.tournaments_won ||
                                             "N/A"}
                                     </span>
                                 </div>

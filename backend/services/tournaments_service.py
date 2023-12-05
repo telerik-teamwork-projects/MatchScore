@@ -471,7 +471,7 @@ async def update_players(tournament: t.DbTournament, players_update: List[t.Tour
 
 
 def count():
-    data = read_query('SELECT COUNT(*) FROM players')
+    data = read_query('SELECT COUNT(*) FROM tournaments')
     return data[0][0]
 
 
