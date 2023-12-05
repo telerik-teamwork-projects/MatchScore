@@ -3,7 +3,6 @@ from unittest.mock import Mock, patch, mock_open
 import common.utils as utils
 from models.enums import Role
 
-
 class Utils_Should(unittest.TestCase):
 
     def test_isAdmin_returns_True_when_admin(self):
@@ -28,18 +27,18 @@ class Utils_Should(unittest.TestCase):
         self.assertFalse(utils.is_power_of_two(1))
 
     def test_managePages_returns_correctPageParameters_when_validInput(self):
-        result = utils.manage_pages(2, 20)
-        expected = ((10, 10), (2, 2))
+        result = utils.manage_pages(2, 40)
+        expected = ((20, 20), (2, 2))
         self.assertEqual(expected, result)
 
     def test_managePages_returns_correctPageParameters_when_invalidInput_pageGreaterThanTotal(self):
         result = utils.manage_pages(4, 5)
-        expected = ((0, 10), (1, 1))
+        expected = ((0, 20), (1, 1))
         self.assertEqual(expected, result)
 
     def test_managePages_returns_correctPageParameters_when_invalidInput_pageLessThanOne(self):
         result = utils.manage_pages(0, 5)
-        expected = ((0, 10), (1, 1))
+        expected = ((0, 20), (1, 1))
         self.assertEqual(expected, result)
 
     def test_managePages_returns_correctPageParameters_when_matchLimit(self):
