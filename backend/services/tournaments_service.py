@@ -662,8 +662,12 @@ def _manage_league_matches(cursor: Cursor, id: int, data: t.TournamentLeagueCrea
 
 async def _send_tournament_emails(cursor: Cursor, id: int, participants: tuple[int]):
     subject = "Tournament Notification"
-    cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
-                            WHERE p.id IN {participants} AND p.user_id = u.id''')
+    if len(participants) > 1:
+        cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
+                                WHERE p.id IN {participants} AND p.user_id = u.id''')
+    else:
+        cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
+                                        WHERE p.id =? AND p.user_id = u.id''', participants)
     data = list(cursor)
     for full_name, email in data:
         email_to = email
@@ -677,8 +681,12 @@ async def _send_tournament_emails(cursor: Cursor, id: int, participants: tuple[i
 
 async def _send_knockout_matches_emails(cursor: Cursor, id: int, participants: tuple[int]):
     subject = "Match Notification"
-    cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
-                            WHERE p.id IN {participants} AND p.user_id = u.id''')
+    if len(participants) > 1:
+        cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
+                                   WHERE p.id IN {participants} AND p.user_id = u.id''')
+    else:
+        cursor.execute(f'''SELECT p.full_name, u.email FROM players p, users u 
+                                WHERE p.id IN {participants} AND p.user_id = u.id''')
     data = list(cursor)
     for full_name, email in data:
         email_to = email

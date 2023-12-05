@@ -8,7 +8,7 @@ from models.enums import Role
 from models.users import User
 
 UPLOAD_DIR = "media"
-LIMIT = 10
+LIMIT = 20
 LIMIT_MATCH = 40
 LIMIT_MATCH_TOURNAMENT = 20
 
