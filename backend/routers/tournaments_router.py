@@ -129,7 +129,8 @@ def update_date(id: int, tournament_date: t.TournamentDateUpdate, current_user: 
 
 
 @router.put('/{id}/players', response_model=t.TournamentRoundResponse)
-async def update_players(id: int, players: List[t.TournamentPlayerUpdate], current_user: User = Depends(get_current_user)):
+async def update_players(id: int, players: List[t.TournamentPlayerUpdate],
+                         current_user: User = Depends(get_current_user)):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized('User has insufficient privileges')
     tournament = tournaments_service.find(id)
@@ -146,7 +147,7 @@ async def update_players(id: int, players: List[t.TournamentPlayerUpdate], curre
         raise BadRequest('The participants provided already play in this tournament!')
     participants_prev = tournaments_service.check_participants(id, players, prev=True)
     if participants_prev is None:
-        raise BadRequest('The participants to be updated do not play in this match!')
+        raise BadRequest('The participants to be updated do not play in this tournament!')
     if tournament.status == TournamentStatus.OPEN.value:
         raise BadRequest(f'Tournament status should be {str(TournamentStatus.CLOSED)}')
 
@@ -154,7 +155,8 @@ async def update_players(id: int, players: List[t.TournamentPlayerUpdate], curre
 
 
 @router.put('/{id}/knockout_start', response_model=t.TournamentKnockoutResponse)
-async def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUpdate, user: User = Depends(get_current_user)):
+async def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUpdate,
+                                    user: User = Depends(get_current_user)):
     if not is_admin(user) and not is_director(user):
         raise Unauthorized("User has insufficient privileges")
     tournament = tournaments_service.find(id)
@@ -178,8 +180,8 @@ async def start_knockout_tournament(id: int, tournament_date: t.TournamentDateUp
 
 @router.get('/{id}/players', response_model=List[PlayerProfile])
 def get_players_by_tournament_id(
-    id:int,
-    current_user: User = Depends(get_current_user)
+        id: int,
+        current_user: User = Depends(get_current_user)
 ):
     if not is_admin(current_user) and not is_director(current_user):
         raise Unauthorized("User has insufficient privileges")
