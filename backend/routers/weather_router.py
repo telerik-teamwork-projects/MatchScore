@@ -53,7 +53,7 @@ def get_weather(request: Request, location: Geolocation | None = None):
 
     else:
         if response.status_code == 404:
-            raise NotFound(f"Can't find weather data.")
+            raise NotFound("Can't find weather data.")
         elif response.status_code == 401:
             raise Unauthorized("Access denied. Check your API key.")
         else:
